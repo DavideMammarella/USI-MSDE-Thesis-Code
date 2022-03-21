@@ -21,4 +21,5 @@ dependencies:
     - eventlet==0.29.1
     - flask==1.1.2
     - h5py==2.10.0
+    - uncertainty-wizard
 prefix: /opt/anaconda3/envs/min-env
