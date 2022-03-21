@@ -113,10 +113,10 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
     val_generator = Generator(x_test, y_test, False, cfg)
 
     history = model.fit(train_generator,
-                        validation_data=val_generator,
-                        epochs=cfg.NUM_EPOCHS_SDC_MODEL,
-                        callbacks=[checkpoint, early_stop],
-                        verbose=1)
+                       validation_data=val_generator,
+                       epochs=cfg.NUM_EPOCHS_SDC_MODEL,
+                       callbacks=[checkpoint, early_stop],
+                       verbose=1)
 
     # summarize history for loss
     plt.plot(history.history['loss'])
@@ -129,7 +129,7 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
 
     if cfg.USE_PREDICTIVE_UNCERTAINTY:
         name = os.path.join(cfg.SDC_MODELS_DIR,
-                            cfg.TRACK + '-' + cfg.SDC_MODEL_NAME.replace('.h5', '') + '-mc-final.h5')
+                            cfg.TRACK + '-' + cfg.SDC_MODEL_NAME.replace('.h5', '') + '-mc-final')
     else:
         name = os.path.join(cfg.SDC_MODELS_DIR, cfg.TRACK + '-' + cfg.SDC_MODEL_NAME.replace('.h5', '') + '-final.h5')
 

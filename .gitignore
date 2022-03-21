@@ -2,6 +2,7 @@
 datasets/
 vao/
 models/
+config_my.py
 
 ### Linux ###
 *~
