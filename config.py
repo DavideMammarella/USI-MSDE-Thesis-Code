@@ -31,6 +31,7 @@ class Config:
         self.ANOMALY_DETECTOR_NAME = None
         self.SDC_MODELS_DIR = None
         self.SDC_MODEL_NAME = None
+        self.SDC_MODEL_TYPE = None
         self.TRACK = None
         self.LOSS_SAO_MODEL = None
 

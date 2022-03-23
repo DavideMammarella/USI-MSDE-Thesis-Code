@@ -123,7 +123,7 @@ def telemetry(sid, data):
             if cfg.USE_PREDICTIVE_UNCERTAINTY:
 
                 # save predictions from a sample pass
-                outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=15)
+                outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=20)
 
                 # average over all passes is the final steering angle
                 steering_angle = outputs[0][0]
@@ -226,18 +226,12 @@ if __name__ == "__main__":
 
     # load the self-driving car model
     model_path = os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)
-    if "chauffeur" in cfg.SDC_MODEL_NAME:
-        model = tensorflow.keras.models.load_model(
-            model_path, custom_objects={"rmse": rmse}
-        )
-    elif (
-        "dave2" in cfg.SDC_MODEL_NAME
-        or "epoch" in cfg.SDC_MODEL_NAME
-        or "commaai" in cfg.SDC_MODEL_NAME
-    ):
-        # model = tensorflow.keras.models.load_model(model_path)
-        model_path_2 = "models/track1-track1-dave2-061-mc-final"
+    if "uwiz" in cfg.SDC_MODEL_NAME:
         model = uwiz.models.load_model(model_path)
+    if "chauffeur" in cfg.SDC_MODEL_NAME:
+        model = tensorflow.keras.models.load_model(model_path, custom_objects={"rmse": rmse})
+    if ("dave2" in cfg.SDC_MODEL_NAME or "epoch" in cfg.SDC_MODEL_NAME or "commaai" in cfg.SDC_MODEL_NAME):
+        model = tensorflow.keras.models.load_model(model_path)
     else:
         print("cfg.SDC_MODEL_NAME option unknown. Exiting...")
         exit()

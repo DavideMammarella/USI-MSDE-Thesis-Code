@@ -18,7 +18,8 @@ def build_model(model_name, use_dropout=False):
     Retrieve the DAVE-2 NVIDIA model
     """
     model = None
-    if "dave2" in model_name:
+
+    if "uwiz" or "dave2" in model_name:
         model = create_model(use_dropout)
     else:
         print("Incorrect model name provided")
