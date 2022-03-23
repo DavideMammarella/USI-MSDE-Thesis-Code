@@ -12,6 +12,8 @@ from datetime import datetime
 from pathlib import Path
 
 import tensorflow
+#import uncertainty_wizard.models
+import uncertainty_wizard as uwiz
 from tensorflow import keras
 
 import utils
@@ -46,7 +48,7 @@ prev_image_array = None
 anomaly_detection = None
 autoenconder_model = None
 frame_id = 0
-batch_size = 128
+batch_size = 120
 uncertainty = -1
 
 
@@ -119,16 +121,17 @@ def telemetry(sid, data):
             if cfg.USE_PREDICTIVE_UNCERTAINTY:
 
                 # take batch of data_nominal
-                x = np.array([image for idx in range(batch_size)])
+                #x = np.array([image for idx in range(batch_size)])
 
                 # save predictions from a sample pass
-                outputs = model.predict_on_batch(x)
+                #outputs = model.predict_on_batch(x)
+                outputs, unc = model.predict_quantified(image, quantifier='std_dev', batch_size=128)
 
                 # average over all passes is the final steering angle
-                steering_angle = outputs.mean(axis=0)[0]
+                steering_angle = outputs[0][0]
 
                 # variance of predictions gives the uncertainty
-                uncertainty = outputs.var(axis=0)[0]
+                uncertainty = unc[0][0]
             else:
                 steering_angle = float(model.predict(image, batch_size=1))
 
@@ -204,9 +207,11 @@ if __name__ == '__main__':
     # load the self-driving car model
     model_path = Path(os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME))
     if "chauffeur" in cfg.SDC_MODEL_NAME:
-        model = load_model(model_path, custom_objects={"rmse": rmse})
+        model = tensorflow.keras.models.load_model(model_path, custom_objects={"rmse": rmse})
     elif "dave2" in cfg.SDC_MODEL_NAME or "epoch" in cfg.SDC_MODEL_NAME or "commaai" in cfg.SDC_MODEL_NAME:
-        model = load_model(model_path)
+        #model = tensorflow.keras.models.load_model(model_path)
+        model_path_2 = "models/track1-track1-dave2-061-mc-final"
+        model = uwiz.models.load_model(model_path_2)
     else:
         print("cfg.SDC_MODEL_NAME option unknown. Exiting...")
         exit()
