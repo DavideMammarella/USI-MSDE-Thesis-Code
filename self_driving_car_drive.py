@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 import tensorflow
-#import uncertainty_wizard.models
+
 import uncertainty_wizard as uwiz
 from tensorflow import keras
 
@@ -26,7 +26,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 from warnings import simplefilter
 
 # ignore all future warnings
-simplefilter(action='ignore', category=FutureWarning)
+simplefilter(action="ignore", category=FutureWarning)
 
 import numpy as np
 
@@ -46,13 +46,13 @@ model = None
 
 prev_image_array = None
 anomaly_detection = None
-autoenconder_model = None
+autoencoder_model = None
 frame_id = 0
 batch_size = 120
 uncertainty = -1
 
 
-@sio.on('telemetry')
+@sio.on("telemetry")
 def telemetry(sid, data):
     if data:
 
@@ -91,11 +91,13 @@ def telemetry(sid, data):
         image = Image.open(BytesIO(base64.b64decode(data["image"])))
 
         # save frame
-        image_path = ''
-        if cfg.TESTING_DATA_DIR != '':
-            timestamp = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
-            image_filename = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "IMG", timestamp)
-            image_path = '{}.jpg'.format(image_filename)
+        image_path = ""
+        if cfg.TESTING_DATA_DIR != "":
+            timestamp = datetime.utcnow().strftime("%Y_%m_%d_%H_%M_%S_%f")[:-3]
+            image_filename = os.path.join(
+                cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "IMG", timestamp
+            )
+            image_path = "{}.jpg".format(image_filename)
             image.save(image_path)
 
         try:
@@ -120,12 +122,8 @@ def telemetry(sid, data):
 
             if cfg.USE_PREDICTIVE_UNCERTAINTY:
 
-                # take batch of data_nominal
-                #x = np.array([image for idx in range(batch_size)])
-
                 # save predictions from a sample pass
-                #outputs = model.predict_on_batch(x)
-                outputs, unc = model.predict_quantified(image, quantifier='std_dev', batch_size=128)
+                outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=15)
 
                 # average over all passes is the final steering angle
                 steering_angle = outputs[0][0]
@@ -152,21 +150,42 @@ def telemetry(sid, data):
             else:
                 confidence = 1
 
-            throttle = 1.0 - steering_angle ** 2 - (speed / speed_limit) ** 2
+            throttle = 1.0 - steering_angle**2 - (speed / speed_limit) ** 2
 
             global frame_id
 
-            send_control(steering_angle, throttle, confidence, loss, cfg.MAX_LAPS, uncertainty)
+            send_control(
+                steering_angle, throttle, confidence, loss, cfg.MAX_LAPS, uncertainty
+            )
 
             if cfg.TESTING_DATA_DIR:
                 csv_path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME)
-                utils.write_csv_line(csv_path,
-                                     [frame_id, cfg.SDC_MODEL_NAME, cfg.ANOMALY_DETECTOR_NAME, cfg.SAO_THRESHOLD,
-                                      cfg.SIMULATION_NAME, lapNumber, wayPoint, loss,
-                                      uncertainty,  # new metrics
-                                      cte, steering_angle, throttle, speed, brake, isCrash,
-                                      distance, sim_time, ang_diff,  # new metrics
-                                      image_path, number_obe, number_crashes])
+                utils.write_csv_line(
+                    csv_path,
+                    [
+                        frame_id,
+                        cfg.SDC_MODEL_NAME,
+                        cfg.ANOMALY_DETECTOR_NAME,
+                        cfg.SAO_THRESHOLD,
+                        cfg.SIMULATION_NAME,
+                        lapNumber,
+                        wayPoint,
+                        loss,
+                        uncertainty,  # new metrics
+                        cte,
+                        steering_angle,
+                        throttle,
+                        speed,
+                        brake,
+                        isCrash,
+                        distance,
+                        sim_time,
+                        ang_diff,  # new metrics
+                        image_path,
+                        number_obe,
+                        number_crashes,
+                    ],
+                )
 
                 frame_id = frame_id + 1
 
@@ -174,30 +193,31 @@ def telemetry(sid, data):
             print(e)
 
     else:
-        sio.emit('manual', data={}, skip_sid=True)  # DO NOT CHANGE THIS
+        sio.emit("manual", data={}, skip_sid=True)  # DO NOT CHANGE THIS
 
-
-@sio.on('connect')  # DO NOT CHANGE THIS
+# DO NOT CHANGE THIS
+@sio.on("connect")
 def connect(sid, environ):
     print("connect ", sid)
     send_control(0, 0, 1, 0, 1, 1)
 
-
-def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertainty):  # DO NOT CHANGE THIS
+# DO NOT CHANGE THIS
+def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertainty):
     sio.emit(
         "steer",
         data={
-            'steering_angle': steering_angle.__str__(),
-            'throttle': throttle.__str__(),
-            'confidence': confidence.__str__(),
-            'loss': loss.__str__(),
-            'max_laps': max_laps.__str__(),
-            'uncertainty': uncertainty.__str__(),
+            "steering_angle": steering_angle.__str__(),
+            "throttle": throttle.__str__(),
+            "confidence": confidence.__str__(),
+            "loss": loss.__str__(),
+            "max_laps": max_laps.__str__(),
+            "uncertainty": uncertainty.__str__(),
         },
-        skip_sid=True)
+        skip_sid=True,
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     cfg = Config()
     cfg.from_pyfile("config_my.py")
@@ -205,32 +225,44 @@ if __name__ == '__main__':
     speed_limit = cfg.MAX_SPEED
 
     # load the self-driving car model
-    model_path = Path(os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME))
+    model_path = os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)
     if "chauffeur" in cfg.SDC_MODEL_NAME:
-        model = tensorflow.keras.models.load_model(model_path, custom_objects={"rmse": rmse})
-    elif "dave2" in cfg.SDC_MODEL_NAME or "epoch" in cfg.SDC_MODEL_NAME or "commaai" in cfg.SDC_MODEL_NAME:
-        #model = tensorflow.keras.models.load_model(model_path)
+        model = tensorflow.keras.models.load_model(
+            model_path, custom_objects={"rmse": rmse}
+        )
+    elif (
+        "dave2" in cfg.SDC_MODEL_NAME
+        or "epoch" in cfg.SDC_MODEL_NAME
+        or "commaai" in cfg.SDC_MODEL_NAME
+    ):
+        # model = tensorflow.keras.models.load_model(model_path)
         model_path_2 = "models/track1-track1-dave2-061-mc-final"
-        model = uwiz.models.load_model(model_path_2)
+        model = uwiz.models.load_model(model_path)
     else:
         print("cfg.SDC_MODEL_NAME option unknown. Exiting...")
         exit()
 
     # load the self-assessment oracle model
     encoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR + os.path.sep + 'encoder-' + cfg.ANOMALY_DETECTOR_NAME)
+        cfg.SAO_MODELS_DIR + os.path.sep + "encoder-" + cfg.ANOMALY_DETECTOR_NAME
+    )
     decoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR + os.path.sep + 'decoder-' + cfg.ANOMALY_DETECTOR_NAME)
+        cfg.SAO_MODELS_DIR + os.path.sep + "decoder-" + cfg.ANOMALY_DETECTOR_NAME
+    )
 
-    anomaly_detection = VAE(model_name=cfg.ANOMALY_DETECTOR_NAME,
-                            loss=cfg.LOSS_SAO_MODEL,
-                            latent_dim=cfg.SAO_LATENT_DIM,
-                            encoder=encoder,
-                            decoder=decoder)
-    anomaly_detection.compile(optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE))
+    anomaly_detection = VAE(
+        model_name=cfg.ANOMALY_DETECTOR_NAME,
+        loss=cfg.LOSS_SAO_MODEL,
+        latent_dim=cfg.SAO_LATENT_DIM,
+        encoder=encoder,
+        decoder=decoder,
+    )
+    anomaly_detection.compile(
+        optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE)
+    )
 
     # create the output dir
-    if cfg.TESTING_DATA_DIR != '':
+    if cfg.TESTING_DATA_DIR != "":
         utils.create_output_dir(cfg, utils.csv_fieldnames_improved_simulator)
         print("RECORDING THIS RUN ...")
     else:
@@ -240,4 +272,4 @@ if __name__ == '__main__':
     app = socketio.Middleware(sio, app)
 
     # deploy as an eventlet WSGI server
-    eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
+    eventlet.wsgi.server(eventlet.listen(("", 4567)), app)

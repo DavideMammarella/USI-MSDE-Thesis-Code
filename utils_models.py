@@ -29,6 +29,7 @@ def build_model(model_name, use_dropout=False):
 
     return model
 
+
 def create_model(use_dropout):
     if use_dropout:
         """
@@ -36,22 +37,22 @@ def create_model(use_dropout):
         """
         model = uwiz.models.StochasticSequential()
         model.add(Lambda(lambda x: x / 127.5 - 1.0, input_shape=INPUT_SHAPE, name="lambda_layer"))
-        model.add(Conv2D(24, (5, 5), activation='relu', strides=(2, 2), kernel_regularizer=l2(1.0e-6)))
+        model.add(Conv2D(24, (5, 5), activation="relu", strides=(2, 2), kernel_regularizer=l2(1.0e-6), ))
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(36, (5, 5), activation='relu', strides=(2, 2), kernel_regularizer=l2(1.0e-6)))
+        model.add(Conv2D(36, (5, 5), activation="relu", strides=(2, 2), kernel_regularizer=l2(1.0e-6), ))
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(48, (5, 5), activation='relu', strides=(2, 2), kernel_regularizer=l2(1.0e-6)))
+        model.add(Conv2D(48, (5, 5), activation="relu", strides=(2, 2), kernel_regularizer=l2(1.0e-6), ))
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(64, (3, 3), activation='relu', kernel_regularizer=l2(1.0e-6)))
+        model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(64, (3, 3), activation='relu', kernel_regularizer=l2(1.0e-6)))
+        model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
         model.add(Dropout(rate=0.05))
         model.add(Flatten())
-        model.add(Dense(100, activation='relu', kernel_regularizer=l2(1.0e-6)))
+        model.add(Dense(100, activation="relu", kernel_regularizer=l2(1.0e-6)))
         model.add(Dropout(rate=0.05))
-        model.add(Dense(50, activation='relu', kernel_regularizer=l2(1.0e-6)))
+        model.add(Dense(50, activation="relu", kernel_regularizer=l2(1.0e-6)))
         model.add(Dropout(rate=0.05))
-        model.add(Dense(10, activation='relu', kernel_regularizer=l2(1.0e-6)))
+        model.add(Dense(10, activation="relu", kernel_regularizer=l2(1.0e-6)))
         model.add(Dropout(rate=0.05))
         model.add(Dense(1))
     else:
@@ -60,16 +61,16 @@ def create_model(use_dropout):
         """
         model = Sequential()
         model.add(Lambda(lambda x: x / 127.5 - 1.0, input_shape=INPUT_SHAPE))
-        model.add(Conv2D(24, (5, 5), activation='elu', strides=(2, 2)))
-        model.add(Conv2D(36, (5, 5), activation='elu', strides=(2, 2)))
-        model.add(Conv2D(48, (5, 5), activation='elu', strides=(2, 2)))
-        model.add(Conv2D(64, (3, 3), activation='elu'))
-        model.add(Conv2D(64, (3, 3), activation='elu'))
+        model.add(Conv2D(24, (5, 5), activation="elu", strides=(2, 2)))
+        model.add(Conv2D(36, (5, 5), activation="elu", strides=(2, 2)))
+        model.add(Conv2D(48, (5, 5), activation="elu", strides=(2, 2)))
+        model.add(Conv2D(64, (3, 3), activation="elu"))
+        model.add(Conv2D(64, (3, 3), activation="elu"))
         model.add(Dropout(rate=0.05))
         model.add(Flatten())
-        model.add(Dense(100, activation='elu'))
-        model.add(Dense(50, activation='elu'))
-        model.add(Dense(10, activation='elu'))
+        model.add(Dense(100, activation="elu"))
+        model.add(Dense(50, activation="elu"))
+        model.add(Dense(10, activation="elu"))
         model.add(Dense(1))
 
     return model
