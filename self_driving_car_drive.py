@@ -229,10 +229,10 @@ if __name__ == "__main__":
 
     if cfg.SDC_MODEL_TYPE == "uwiz":
         model = uwiz.models.load_model(model_path)
-    if cfg.SDC_MODEL_TYPE == "chauffeur":
-         model = tensorflow.keras.models.load_model(model_path, custom_objects={"rmse": rmse})
-    if cfg.SDC_MODEL_TYPE == "dave2" or cfg.SDC_MODEL_TYPE == "epoch" or cfg.SDC_MODEL_TYPE == "commaai":
-         model = tensorflow.keras.models.load_model(model_path)
+    elif cfg.SDC_MODEL_TYPE == "chauffeur":
+        model = tensorflow.keras.models.load_model(model_path, custom_objects={"rmse": rmse})
+    elif cfg.SDC_MODEL_TYPE == "dave2" or cfg.SDC_MODEL_TYPE == "epoch" or cfg.SDC_MODEL_TYPE == "commaai":
+        model = tensorflow.keras.models.load_model(model_path)
     else:
          print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
          exit()
