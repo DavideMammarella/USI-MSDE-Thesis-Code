@@ -226,15 +226,16 @@ if __name__ == "__main__":
 
     # load the self-driving car model
     model_path = os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)
-    if "uwiz" in cfg.SDC_MODEL_NAME:
+
+    if cfg.SDC_MODEL_TYPE == "uwiz":
         model = uwiz.models.load_model(model_path)
-    if "chauffeur" in cfg.SDC_MODEL_NAME:
-        model = tensorflow.keras.models.load_model(model_path, custom_objects={"rmse": rmse})
-    if ("dave2" in cfg.SDC_MODEL_NAME or "epoch" in cfg.SDC_MODEL_NAME or "commaai" in cfg.SDC_MODEL_NAME):
-        model = tensorflow.keras.models.load_model(model_path)
+    if cfg.SDC_MODEL_TYPE == "chauffeur":
+         model = tensorflow.keras.models.load_model(model_path, custom_objects={"rmse": rmse})
+    if cfg.SDC_MODEL_TYPE == "dave2" or cfg.SDC_MODEL_TYPE == "epoch" or cfg.SDC_MODEL_TYPE == "commaai":
+         model = tensorflow.keras.models.load_model(model_path)
     else:
-        print("cfg.SDC_MODEL_NAME option unknown. Exiting...")
-        exit()
+         print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
+         exit()
 
     # load the self-assessment oracle model
     encoder = tensorflow.keras.models.load_model(
