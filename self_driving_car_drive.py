@@ -125,6 +125,8 @@ def telemetry(sid, data):
                 # save predictions from a sample pass
                 outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=20)
 
+                # TODO: utilizzando le immagini di track1, vario i sample_size in un range da 1 a 2
+
                 # average over all passes is the final steering angle
                 steering_angle = outputs[0][0]
 
