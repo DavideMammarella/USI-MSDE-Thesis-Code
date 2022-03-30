@@ -2,7 +2,8 @@
 datasets/
 sao/
 models/
-config_my.py
+imgs/
+simulations/
 
 ### Linux ###
 *~
