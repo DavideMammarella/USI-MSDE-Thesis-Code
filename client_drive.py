@@ -9,11 +9,14 @@ import base64
 import logging
 import os
 import sched, time
+import signal
 from datetime import datetime
 from pathlib import Path
+import sys
 
 import threading
 
+import requests
 import tensorflow
 
 import uncertainty_wizard as uwiz
@@ -35,24 +38,33 @@ import numpy as np
 
 import socketio
 import eventlet.wsgi
+eventlet.patcher.monkey_patch(all=False, socket=True, time=True,
+                          select=True, thread=True, os=True)
 from PIL import Image
 from flask import Flask
+from flask import request
 from io import BytesIO
 
 from tensorflow.keras.models import load_model
 from utils import rmse, crop, resize
 from selforacle.vae import VAE, normalize_and_reshape
+from sys import exit
 
-sio = socketio.Server(logger=True)
+import run
+
+# None chose the best option (Threading, Eventlet, Gevent) based on installed packages
+async_mode = None
+sio = socketio.Server(async_mode=async_mode, logger=True)
 app = Flask(__name__)
-model = None
 
+model = None
 prev_image_array = None
 anomaly_detection = None
 autoencoder_model = None
 frame_id = 0
 batch_size = 120
 uncertainty = -1
+
 
 def quantify_uncertainty_thread(image):
     threading.Timer(10, quantify_uncertainty_thread, args=image).start()
@@ -62,10 +74,16 @@ def quantify_uncertainty_thread(image):
     return outputs, unc
 
 
-@sio.on("telemetry")
+@sio.on('telemetry')
 def telemetry(sid, data):
-
     if data:
+
+        if int(data["lapNumber"]) > cfg.MAX_LAPS:
+            # kill(proc.pid)
+            sio.emit('shutdown', data={}, skip_sid=True)  # DO NOT CHANGE THIS
+
+            # os.kill(proc.pid, signal.SIGKILL)
+            # exit(0)
 
         # The current speed of the car
         speed = float(data["speed"])
@@ -74,7 +92,7 @@ def telemetry(sid, data):
         wayPoint = int(data["currentWayPoint"])
         lapNumber = int(data["lapNumber"])
 
-        # Cross-Track Error
+        # Cross-Track Error: distance from the center of the lane
         cte = float(data["cte"])
 
         # brake
@@ -145,11 +163,11 @@ def telemetry(sid, data):
                 #     uncertainty = outputs[0][0]
                 # else:
 
-                    # save predictions from a sample pass
-                    outputs = model.predict(image)
+                # save predictions from a sample pass
+                outputs = model.predict(image)
 
-                    # average over all passes is the final steering angle
-                    steering_angle = outputs[0][0]
+                # average over all passes is the final steering angle
+                steering_angle = outputs[0][0]
 
             else:
                 steering_angle = float(model.predict(image, batch_size=1))
@@ -171,7 +189,7 @@ def telemetry(sid, data):
             else:
                 confidence = 1
 
-            throttle = 1.0 - steering_angle**2 - (speed / speed_limit) ** 2
+            throttle = 1.0 - steering_angle ** 2 - (speed / speed_limit) ** 2
 
             global frame_id
 
@@ -216,11 +234,18 @@ def telemetry(sid, data):
     else:
         sio.emit("manual", data={}, skip_sid=True)  # DO NOT CHANGE THIS
 
-# DO NOT CHANGE THIS
-@sio.on("connect")
+
+@sio.on('connect')  # DO NOT CHANGE THIS
 def connect(sid, environ):
     print("connect ", sid)
     send_control(0, 0, 1, 0, 1, 1)
+
+@sio.on('disconnect')
+def disconnect(sid):
+    print("disconnect ", sid)
+    sio.disconnect(sid)
+    run.close_threads()
+    os.kill(os.getpid(), signal.SIGTERM)
 
 # DO NOT CHANGE THIS
 def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertainty):
@@ -238,7 +263,7 @@ def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertain
     )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     cfg = Config()
     cfg.from_pyfile("config_my.py")
@@ -255,8 +280,8 @@ if __name__ == "__main__":
     elif cfg.SDC_MODEL_TYPE == "dave2" or cfg.SDC_MODEL_TYPE == "epoch" or cfg.SDC_MODEL_TYPE == "commaai":
         model = tensorflow.keras.models.load_model(model_path)
     else:
-         print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
-         exit()
+        print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
+        exit()
 
     # load the self-assessment oracle model
     encoder = tensorflow.keras.models.load_model(
@@ -288,4 +313,6 @@ if __name__ == "__main__":
     app = socketio.Middleware(sio, app)
 
     # deploy as an eventlet WSGI server
-    eventlet.wsgi.server(eventlet.listen(("", 4567)), app)
+    server = eventlet.wsgi.server(eventlet.listen(("", 4567)), app)
+
+    #app.do_teardown_appcontext()
