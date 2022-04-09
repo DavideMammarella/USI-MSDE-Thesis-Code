@@ -34,6 +34,9 @@ class Config:
         self.SDC_MODEL_TYPE = None
         self.TRACK = None
         self.LOSS_SAO_MODEL = None
+        self.SIMULATOR_NAME = None
+        self.CLIENTS_NAME = None
+        self.USE_UWIZ = None
 
     def from_pyfile(self, filename, silent=False):
         # filename = os.path.join(self.root_path, filename)

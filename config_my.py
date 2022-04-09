@@ -10,6 +10,8 @@ TRAINING_DATA_DIR = "datasets"  # root folder for all driving training sets
 TRAINING_SET_DIR = "dataset5"  # the driving training set to use
 SAO_MODELS_DIR = "sao"  # trained autoencoder-based self-assessment oracle models
 TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
+SIMULATOR_NAME = "udacity-sim-mac-2.app"  # name of the simulator to use
+USE_UWIZ = False
 
 # simulations settings
 TRACK = "track1"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
@@ -36,7 +38,7 @@ USE_PREDICTIVE_UNCERTAINTY = True  # use MC-Dropout model
 ANOMALY_DETECTOR_NAME = "track1-MSEloss-latent2"
 SIMULATION_NAME = "track1-sunny"
 TESTING_DATA_DIR = ""  # Udacity simulations logs
-MAX_SPEED = 25  # car's max speed, capped at 35 mph (default)
+MAX_SPEED = 35  # car's max speed, capped at 35 mph (default)
 MIN_SPEED = 10  # car's min speed, capped at 10 mph (default)
 SAO_THRESHOLD = 180  # the SAO threshold
 MAX_LAPS = 1  # max laps before sim stops
