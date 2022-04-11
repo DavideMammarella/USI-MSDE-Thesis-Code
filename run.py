@@ -53,13 +53,12 @@ sio = socketio.Server(async_mode=None, logger=True)
 app = Flask(__name__)
 
 # Model setup ----------------------------------------------------------------------------------------------------------
-PREDICT_UNC_FLAG = False
 model = None
 prev_image_array = None
 anomaly_detection = None
 autoencoder_model = None
 frame_id = 0
-batch_size = 120
+batch_size = 128
 uncertainty = -1
 
 
@@ -137,16 +136,15 @@ def telemetry(sid, data):
             # Predict steering angle and uncertainty -------------------------------------------------------------------
             if cfg.USE_PREDICTIVE_UNCERTAINTY:
 
-                if PREDICT_UNC_FLAG:
-                    outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=15)
+                if cfg.SDC_MODEL_TYPE == "uwiz" and PREDICT_UNC_FLAG:
+                    PREDICT_UNC_FLAG = False
+                    outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=20)
+                    print("Unc quantified!")
                     steering_angle = outputs[0][0]
                     uncertainty = unc[0][0]
-                    print("Unc quantified!")
-                    PREDICT_UNC_FLAG = False
                 else:
-                    outputs = model.predict(image)  # save predictions from every image
-                    steering_angle = outputs[0][0]  # get steering angle from prediction
-
+                    outputs = model.predict(image)
+                    steering_angle = outputs[0][0]
             else:
                 steering_angle = float(model.predict(image, batch_size=1))
 
