@@ -38,16 +38,22 @@ import uncertainty_wizard as uwiz
 import socketio
 from flask import Flask
 import eventlet.wsgi
+
 eventlet.patcher.monkey_patch()
 
-# Multithreading library import ----------------------------------------------------------------------------------------
-import threading
+# Multiprocessing library import ---------------------------------------------------------------------------------------
 import subprocess
+
+# Timer class import --------------------------------------------------------------------------------------------------
+from threading import Timer
+import time
 
 # Server setup ---------------------------------------------------------------------------------------------------------
 sio = socketio.Server(async_mode=None, logger=True)
 app = Flask(__name__)
 
+# Model setup ----------------------------------------------------------------------------------------------------------
+PREDICT_UNC_FLAG = False
 model = None
 prev_image_array = None
 anomaly_detection = None
@@ -109,6 +115,7 @@ def telemetry(sid, data):
             image.save(image_path)
 
         try:
+            global PREDICT_UNC_FLAG
             global steering_angle
             global uncertainty
             global batch_size
@@ -130,8 +137,12 @@ def telemetry(sid, data):
             # Predict steering angle and uncertainty -------------------------------------------------------------------
             if cfg.USE_PREDICTIVE_UNCERTAINTY:
 
-                if cfg.USE_UWIZ:
-                    quantify_uncertainty(image)  # TODO: must be done every 1s
+                if PREDICT_UNC_FLAG:
+                    outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=15)
+                    steering_angle = outputs[0][0]
+                    uncertainty = unc[0][0]
+                    print("Unc quantified!")
+                    PREDICT_UNC_FLAG = False
                 else:
                     outputs = model.predict(image)  # save predictions from every image
                     steering_angle = outputs[0][0]  # get steering angle from prediction
@@ -216,22 +227,18 @@ def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertain
     )
 
 
-def quantify_uncertainty(image):
-    outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=15)
-    steering_angle = outputs[0][0]
-    uncertainty = unc[0][0]
-    print("Unc quantified!")
-    return steering_angle, uncertainty
+def newTimer():
+    global PREDICT_UNC_FLAG
+    Timer(1.0, newTimer).start()  # predict uncertainty every second
+    PREDICT_UNC_FLAG = True
 
 
 if __name__ == '__main__':
-
     cfg = Config()
     cfg.from_pyfile("config_my.py")
+    speed_limit = cfg.MAX_SPEED
 
     start_simulator()
-
-    speed_limit = cfg.MAX_SPEED
 
     # Load the self-driving car model ----------------------------------------------------------------------------------
     model_path = os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)
@@ -273,5 +280,6 @@ if __name__ == '__main__':
         print("NOT RECORDING THIS RUN ...")
 
     # Deploy server ----------------------------------------------------------------------------------------------------
-    app = socketio.Middleware(sio, app) # wrap Flask application with engineio's middleware
-    eventlet.wsgi.server(eventlet.listen(("", 4567)), app) # deploy as an eventlet WSGI server
+    newTimer()
+    app = socketio.Middleware(sio, app)  # wrap Flask application with engineio's middleware
+    eventlet.wsgi.server(eventlet.listen(("", 4567)), app)  # deploy as an eventlet WSGI server
