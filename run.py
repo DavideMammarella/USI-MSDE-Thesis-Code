@@ -143,6 +143,12 @@ def telemetry(sid, data):
                     steering_angle = outputs[0][0]
                     uncertainty = unc[0][0]
                 else:
+                    # ORIGINAL PREDICTION
+                    #x = np.array([image for idx in range(batch_size)]) # take batch of data_nominal
+                    #outputs = model.predict_on_batch(x) # save predictions from a sample pass
+                    #steering_angle = outputs.mean(axis=0)[0] # average over all passes is the final steering angle
+                    #uncertainty = outputs.var(axis=0)[0] # variance of predictions gives the uncertainty
+
                     outputs = model.predict(image)
                     steering_angle = outputs[0][0]
             else:
