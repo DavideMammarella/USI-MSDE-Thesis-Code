@@ -49,7 +49,7 @@ from threading import Timer
 import time
 
 # Server setup ---------------------------------------------------------------------------------------------------------
-sio = socketio.Server(async_mode=None, logger=True)
+sio = socketio.Server(async_mode=None, logger=False)
 app = Flask(__name__)
 
 # Model setup ----------------------------------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ prev_image_array = None
 anomaly_detection = None
 autoencoder_model = None
 frame_id = 0
-batch_size = 128
+batch_size = 1
 uncertainty = -1
 
 
@@ -138,19 +138,19 @@ def telemetry(sid, data):
 
                 if cfg.SDC_MODEL_TYPE == "uwiz" and PREDICT_UNC_FLAG:
                     PREDICT_UNC_FLAG = False
-                    outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=20)
+                    outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=20, batch_size=20)
                     print("Unc quantified!")
                     steering_angle = outputs[0][0]
                     uncertainty = unc[0][0]
                 else:
                     # ORIGINAL PREDICTION
-                    #x = np.array([image for idx in range(batch_size)]) # take batch of data_nominal
-                    #outputs = model.predict_on_batch(x) # save predictions from a sample pass
-                    #steering_angle = outputs.mean(axis=0)[0] # average over all passes is the final steering angle
-                    #uncertainty = outputs.var(axis=0)[0] # variance of predictions gives the uncertainty
+                    x = np.concatenate([image for idx in range(batch_size)]) # take batch of data_nominal
+                    outputs = model.predict_on_batch(x) # save predictions from a sample pass
+                    steering_angle = outputs.mean(axis=0)[0] # average over all passes is the final steering angle
+                    uncertainty = outputs.var(axis=0)[0] # variance of predictions gives the uncertainty
 
-                    outputs = model.predict(image)
-                    steering_angle = outputs[0][0]
+                    #outputs = model.predict(image, batch_size = 1)
+                    #steering_angle = outputs[0][0]
             else:
                 steering_angle = float(model.predict(image, batch_size=1))
 
@@ -231,10 +231,10 @@ def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertain
     )
 
 
-def newTimer():
-    global PREDICT_UNC_FLAG
-    Timer(1.0, newTimer).start()  # predict uncertainty every second
-    PREDICT_UNC_FLAG = True
+# def newTimer():
+#     global PREDICT_UNC_FLAG
+#     Timer(1.0, newTimer).start()  # predict uncertainty every second
+#     PREDICT_UNC_FLAG = True
 
 
 if __name__ == '__main__':
@@ -284,6 +284,6 @@ if __name__ == '__main__':
         print("NOT RECORDING THIS RUN ...")
 
     # Deploy server ----------------------------------------------------------------------------------------------------
-    newTimer()
+    #newTimer()
     app = socketio.Middleware(sio, app)  # wrap Flask application with engineio's middleware
     eventlet.wsgi.server(eventlet.listen(("", 4567)), app)  # deploy as an eventlet WSGI server

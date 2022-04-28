@@ -23,10 +23,10 @@ TRACK3_IMG_PER_LAP = 1375
 
 # self-driving car model settings
 SDC_MODELS_DIR = "models"  # self-driving car models
-# SDC_MODEL_TYPE = "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
-# SDC_MODEL_NAME = "track1-uwiz-mc-final"
-SDC_MODEL_TYPE = "dave2"
-SDC_MODEL_NAME = "dave2-mc-053.h5"
+SDC_MODEL_TYPE = "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
+SDC_MODEL_NAME = "track1-uwiz-mc-final"
+#SDC_MODEL_TYPE = "dave2"
+#SDC_MODEL_NAME = "dave2-mc-053.h5"
 NUM_EPOCHS_SDC_MODEL = 500  # training epochs for the self-driving car model
 # SAMPLES_PER_EPOCH = 100  # number of samples to process before going to the next epoch
 BATCH_SIZE = 128  # number of samples per gradient update
