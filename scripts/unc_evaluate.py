@@ -32,6 +32,7 @@ frame_id = 0
 batch_size = 1
 uncertainty = -1
 
+
 def uwiz_prediction(image):
     """
     Predict steering angle and uncertainty of an image using the uncertainty wizard.
@@ -53,6 +54,7 @@ def uwiz_prediction(image):
 
     return steering_angle, uncertainty
 
+
 def predict_on_IMG(images_path):
     """
     Use IMG previously extracted and make predictions.
@@ -61,12 +63,13 @@ def predict_on_IMG(images_path):
     :return: dictionary with uncertainty, steering angle and IMG path
     """
     print("Predicting on IMG...")
-    intermediate_output = [] # list of dictionaries with IMG path, steering angle and uncertainty
+    intermediate_output = []  # list of dictionaries with IMG path, steering angle and uncertainty
     for image in images_path:
         image_to__process = Image.open(str(image))
-        image_path_normalize = "/".join(str(image).rsplit('/', 5)[2:]) # normalize path
+        image_path_normalize = "/".join(str(image).rsplit('/', 5)[2:])  # normalize path
         steering_angle, uncertainty = uwiz_prediction(image_to__process)
-        intermediate_output.append({'uncertainty': uncertainty, 'steering_angle': steering_angle, 'center': image_path_normalize})
+        intermediate_output.append(
+            {'uncertainty': uncertainty, 'steering_angle': steering_angle, 'center': image_path_normalize})
     print(">> Predictions done:", len(intermediate_output))
     return intermediate_output
 
@@ -81,12 +84,12 @@ def visit_simulation(sim_path):
 
     with open(csv_file) as f:
         driving_log = [{k: v for k, v in row.items()}
-             for row in csv.DictReader(f, skipinitialspace=True)]
+                       for row in csv.DictReader(f, skipinitialspace=True)]
     print("\nReading simulation:\t", driving_log[0]["sim_name"])
     print(">> Row read:\t", len(driving_log))
 
     # Extract and normalize images paths -------------------------------------------------------------------------------
-    images_path = [Path(sim_path, "IMG", d["center"].rsplit("\\",1)[1]) for d in driving_log]
+    images_path = [Path(sim_path, "IMG", d["center"].rsplit("\\", 1)[1]) for d in driving_log]
     print(">> Images processed:\t", len(images_path))
     return driving_log, images_path
 
@@ -117,7 +120,7 @@ def collect_simulations(curr_project_path):
     sims = [d for d in dirs if d not in exclude]
     print(">> Simulations to evaluate:\t", len(sims))
 
-    return sims[0] #TODO: only one for testing, remove [0]
+    return sims
 
 
 def write_csv(sim_path, driving_log, intermediate_output):
@@ -154,13 +157,16 @@ def write_csv(sim_path, driving_log, intermediate_output):
     folder.mkdir(parents=True, exist_ok=True)
     csv_path = folder / "driving_log.csv"
 
-    with csv_path.open(mode = "w") as csv_file:
-        headers = ["frameId","model","anomaly_detector","threshold","sim_name","lap","waypoint","loss","uncertainty","cte","steering_angle","throttle","brake","crashed","distance","time","ang_diff","center","tot_OBEs","tot_crashes"]
+    with csv_path.open(mode="w") as csv_file:
+        headers = ["frameId", "model", "anomaly_detector", "threshold", "sim_name", "lap", "waypoint", "loss",
+                   "uncertainty", "cte", "steering_angle", "throttle", "brake", "crashed", "distance", "time",
+                   "ang_diff", "center", "tot_OBEs", "tot_crashes"]
         writer = csv.DictWriter(csv_file, fieldnames=headers)
         writer.writeheader()
         for data in final_output:
             writer.writerow(data)
     print(">> CSV file (", len(final_output), "rows) written to:\t", folder)
+
 
 def main():
     global model
@@ -200,14 +206,14 @@ def main():
     extracted_data = []
     driving_log = []
 
-
     sims = collect_simulations(curr_project_path)
-    sim = sims # TODO: transform to a for loop
-    sim_path = Path(curr_project_path, "simulations", sim) # TODO: transform to a for loop
-    driving_log, images_path = visit_simulation(sim_path) # TODO: transform to a for loop (remember to reset those 2 after every analysis)
-    intermediate_output = predict_on_IMG(images_path) # TODO: transform to a for loop
-    write_csv(sim_path, driving_log, intermediate_output) # TODO: transform to a for loop
-
+    for sim in sims:
+        sim_path = Path(curr_project_path, "simulations", sim)
+        driving_log, images_path = visit_simulation(sim_path)  # TODO: transform to a for loop (remember to reset those 2 after every analysis)
+        intermediate_output = predict_on_IMG(images_path)
+        write_csv(sim_path, driving_log, intermediate_output)
+        driving_log = []
+        images_path = []
 
 
 if __name__ == "__main__":
