@@ -32,6 +32,11 @@ frame_id = 0
 batch_size = 1
 uncertainty = -1
 
+# TODO: tqdm
+
+# eliminare autoencoder ed utilizzare l'incertezza, non dobbiamo utilizzare tutti gli approcci che sono stati implementati
+# deeproad (Cancellabile), gestione del database (clean database di partenza)
+
 
 def uwiz_prediction(image):
     """
@@ -140,14 +145,15 @@ def write_csv(sim_path, driving_log, intermediate_output):
                      'waypoint': d["waypoint"],
                      'loss': d["loss"],
                      'uncertainty': d_out["uncertainty"],
-                     'cte': d["cte"],
+                     #'cte': d["cte"],
                      'steering_angle': d_out["steering_angle"],
                      'throttle': d["throttle"],
-                     'brake': d["brake"],
+                     'speed': d["speed"],
+                     #'brake': d["brake"],
                      'crashed': d["crashed"],
-                     'distance': d["distance"],
-                     'time': d["time"],
-                     'ang_diff': d["ang_diff"],
+                     #'distance': d["distance"],
+                     #'time': d["time"],
+                     #'ang_diff': d["ang_diff"],
                      'center': d_out["center"],
                      'tot_OBEs': d["tot_OBEs"],
                      'tot_crashes': d["tot_crashes"]
@@ -159,7 +165,7 @@ def write_csv(sim_path, driving_log, intermediate_output):
 
     with csv_path.open(mode="w") as csv_file:
         headers = ["frameId", "model", "anomaly_detector", "threshold", "sim_name", "lap", "waypoint", "loss",
-                   "uncertainty", "cte", "steering_angle", "throttle", "brake", "crashed", "distance", "time",
+                   "uncertainty", "cte", "steering_angle", "throttle", "speed", "brake", "crashed", "distance", "time",
                    "ang_diff", "center", "tot_OBEs", "tot_crashes"]
         writer = csv.DictWriter(csv_file, fieldnames=headers)
         writer.writeheader()
@@ -181,35 +187,14 @@ def main():
     model_path = os.path.join(curr_project_path, cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)
     model = uwiz.models.load_model(model_path)
 
-    # Load self-assessment oracle model --------------------------------------------------------------------------------
-    sao_path = curr_project_path / cfg.SAO_MODELS_DIR
-    encoder_name = "encoder-" + cfg.ANOMALY_DETECTOR_NAME
-    encoder_path = sao_path / encoder_name
-    encoder = tensorflow.keras.models.load_model(encoder_path)
-
-    decoder_name = "decoder-" + cfg.ANOMALY_DETECTOR_NAME
-    decoder_path = sao_path / decoder_name
-    decoder = tensorflow.keras.models.load_model(decoder_path)
-
-    anomaly_detection = VAE(
-        model_name=cfg.ANOMALY_DETECTOR_NAME,
-        loss=cfg.LOSS_SAO_MODEL,
-        latent_dim=cfg.SAO_LATENT_DIM,
-        encoder=encoder,
-        decoder=decoder,
-    )
-    anomaly_detection.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE)
-    )
-
     # Analyse all simulations ------------------------------------------------------------------------------------------
     extracted_data = []
     driving_log = []
 
     sims = collect_simulations(curr_project_path)
-    for sim in sims:
+    for sim in sims: #todo: tqdm(sims):
         sim_path = Path(curr_project_path, "simulations", sim)
-        driving_log, images_path = visit_simulation(sim_path)  # TODO: transform to a for loop (remember to reset those 2 after every analysis)
+        driving_log, images_path = visit_simulation(sim_path)
         intermediate_output = predict_on_IMG(images_path)
         write_csv(sim_path, driving_log, intermediate_output)
         driving_log = []
