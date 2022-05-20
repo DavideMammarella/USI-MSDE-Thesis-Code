@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 import abc
 import logging
 
@@ -7,15 +10,10 @@ from matplotlib.pylab import plt
 import utils_logging
 from eval_db import eval_window
 from eval_db.database import Database
-from eval_scripts import a_set_true_labels, b_precision_recall_auroc, db_path
+from eval_scripts import a_set_true_labels, b_precision_recall_auroc
 
 AD_NAMES = {
-    "vae": "vae",
-    "dae": "dae",
-    "sae": "sae",
-    "cae": "cae",
-    "deeproad": "deeproad",
-    "lstm": "lstm"
+    "uwiz": "uwiz"
 }
 
 logger = logging.Logger("Plotters")
@@ -40,7 +38,7 @@ class AbstractThresholdIndependentPlotter(abc.ABC):
         logger.error("Must be implemented in child class")
         assert False
 
-    def compute_and_plot(self):
+    def compute_and_plot(self, db_name):
         # COMPUTE
         auroc_results = {}
         auc_prec_recall_results = {}
@@ -49,7 +47,7 @@ class AbstractThresholdIndependentPlotter(abc.ABC):
             logger.info("Treating plot value for measure point " + str(i))
             self._set_variable_values(i)
             # Run A-Script
-            a_set_true_labels.set_true_labels()
+            a_set_true_labels.set_true_labels(db_name)
             for ad in AD_NAMES.keys():
                 if not ad in auroc_results:
                     auroc_results[ad] = []
@@ -82,7 +80,7 @@ class ReactionTimePlotter(AbstractThresholdIndependentPlotter):
 
     def __init__(self, db: Database):
         x_axis = numpy.arange(- self.start, -self.stop, self.step)
-        x_axis_label = "../../number of images before misbehavior"
+        x_axis_label = "../number of images before misbehavior"
         file_name = "reaction-time.pdf"
         super().__init__(x_axis, x_axis_label, file_name, db)
 
@@ -97,7 +95,7 @@ class KSizePlotter(AbstractThresholdIndependentPlotter):
     def __init__(self, db: Database):
         x_axis = numpy.arange(self.start, self.stop, self.step)
         x_axis_label = "number of images considered in calculation of time aware loss-score"
-        file_name = "../../plots/k-analysis.pdf"
+        file_name = "../plots/k-analysis.pdf"
         super().__init__(x_axis, x_axis_label, file_name, db)
 
     def _set_variable_values(self, data_point: int) -> None:

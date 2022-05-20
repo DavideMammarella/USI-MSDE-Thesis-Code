@@ -25,8 +25,7 @@ class Database:
 
         if delete_existing:
             self.create_table_settings()
-            self.create_table_single_img_distances()
-            self.create_table_seq_based_distances()
+            self.create_table_single_img_uncertainties()
             self.create_table_prec_recall()
             self.create_table_windows()
         self.commit()
@@ -46,44 +45,22 @@ class Database:
                     time text NOT NULL,
                     weather text NOT NULL)''')
 
-    def create_table_single_img_distances(self):
-        self.cursor.execute('''create table single_image_based_distances
+    def create_table_single_img_uncertainties(self):
+        self.cursor.execute('''create table single_image_based_uncertainties
                                 (
                                     setting_id INTEGER not null,
                                     row_id INTEGER not null,
                                     is_crash INTEGER not null,
-                                    vae_loss NUMERIC,
-                                    cae_loss NUMERIC,
-                                    dae_loss NUMERIC,
-                                    sae_loss NUMERIC,
-                                    deeproad_loss NUMERIC,
+                                    uncertainty NUMERIC,
                                     true_label TEXT,
                                     count_to_crash int,
-                                    constraint single_image_based_distances_pk
+                                    constraint single_image_based_uncertainties_pk
                                         primary key (setting_id, row_id)
                                 );
 		''')
         self.cursor.execute('''
-                                create index single_image_based_distances__index_row_id
-                                    on single_image_based_distances (row_id desc);
-                                    ''')
-
-    def create_table_seq_based_distances(self):
-        self.cursor.execute('''create table sequence_based_distances
-                                (
-                                    setting_id integer
-		                                references settings,
-                                    row_id integer,
-                                    is_crash integer,
-                                    lstm_loss numeric,
-                                    true_label text,
-                                    count_to_crash int,
-                                    constraint sequence_based_distances_pk
-                                        primary key (setting_id, row_id)
-                                );
-		''')
-        self.cursor.execute('''create index sequence_based_distances__index_row_id
-                                    on sequence_based_distances (row_id desc);
+                                create index single_image_based_uncertainties__index_row_id
+                                    on single_image_based_uncertainties (row_id desc);
                                     ''')
 
     def create_table_prec_recall(self):
@@ -118,7 +95,7 @@ class Database:
 		            references settings,
                 window_id int,
                 ad_name TEXT,
-                loss_score NUMERIC,
+                uncertainty_score NUMERIC,
                 type TEXT,
                 start_frame int,
                 end_frame int,

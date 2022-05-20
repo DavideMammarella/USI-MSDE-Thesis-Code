@@ -1,6 +1,11 @@
 # !!! Simulations must be in the project folder under: simulations/<name_of_simulation>
 # !!! <name_of_simulation> folder must contain: IMG folder (with .jpg) and driving_log.csv
 
+# This script must be used only with UWIZ models
+
+import sys
+sys.path.append("..")
+
 # Standard library import ----------------------------------------------------------------------------------------------
 import os
 import pathlib

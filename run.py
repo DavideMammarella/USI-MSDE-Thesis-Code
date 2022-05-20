@@ -1,4 +1,4 @@
-# Copyright 2021 Testing Automated @ Università della Svizzera italiana (USI)
+# Copyright 2022 Testing Automated @ Università della Svizzera italiana (USI)
 # Code adapted from https://github.com/naokishibuya/car-behavioral-cloning
 # All rights reserved.
 # This file is part of the project SelfOracle, a misbehaviour predictor for autonomous vehicles,
@@ -229,12 +229,6 @@ def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertain
         },
         skip_sid=True,
     )
-
-
-# def newTimer():
-#     global PREDICT_UNC_FLAG
-#     Timer(1.0, newTimer).start()  # predict uncertainty every second
-#     PREDICT_UNC_FLAG = True
 
 
 if __name__ == '__main__':

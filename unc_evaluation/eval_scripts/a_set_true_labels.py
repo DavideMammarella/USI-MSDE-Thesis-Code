@@ -1,10 +1,12 @@
+import sys
+sys.path.append("..")
+
 import logging
 from typing import List
 
 import utils_logging
-from eval_db import eval_setting, eval_single_img_distances, eval_seq_img_distances, eval_window
+from eval_db import eval_setting, eval_single_img_uncertainty, eval_window
 from eval_db.database import Database
-from eval_scripts import db_path
 
 NORMAL_LABEL = "normal"
 
@@ -31,8 +33,8 @@ logger = logging.Logger("set_truelabels")
 utils_logging.log_info(logger)
 
 
-def set_true_labels():
-    db = Database(name=db_path.DB_PATH, delete_existing=False)
+def set_true_labels(db_path):
+    db = Database(name=db_path, delete_existing=False)
 
     eval_window.remove_all_stored_records(db=db)
     settings = eval_setting.get_all_settings(db)
@@ -42,17 +44,11 @@ def set_true_labels():
         current_window_count = 0
 
         current_ad_type = "single-img"
-        single_img_entries = eval_single_img_distances.load_all_for_setting(db, setting_id=setting.id)
+        single_img_entries = eval_single_img_uncertainty.load_all_for_setting(db, setting_id=setting.id)
         current_window_count = _set_true_labels(entries=single_img_entries, current_setting_id=setting.id,
                                                 current_ad_type=current_ad_type,
                                                 current_window_count=current_window_count, db=db)
-        eval_single_img_distances.update_true_label_on_db(db=db, records=single_img_entries)
-
-        current_ad_type = "seq"
-        single_img_entries = eval_seq_img_distances.load_all_for_setting(db, setting_id=setting.id)
-        _set_true_labels(entries=single_img_entries, current_setting_id=setting.id, current_ad_type=current_ad_type,
-                         current_window_count=current_window_count, db=db)
-        eval_seq_img_distances.update_true_label_on_db(db=db, records=single_img_entries)
+        eval_single_img_uncertainty.update_true_label_on_db(db=db, records=single_img_entries)
 
     db.commit()
 
@@ -354,4 +350,5 @@ def _detect_next_misbehavior(entries, start_index_inc) -> int:
 
 
 if __name__ == '__main__':
-    set_true_labels()
+    db_path = None
+    set_true_labels(db_path)
