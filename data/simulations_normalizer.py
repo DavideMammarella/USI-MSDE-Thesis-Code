@@ -44,7 +44,7 @@ def check_driving_log(sim_path):
     for d in tqdm(driving_log, position=0, leave=False):
         for d_to_check in driving_log_to_check:
             if d.get("frameid") == d_to_check.get("frame_id"):
-                assert normalize_img_path(str(d.get("center")), sim_path) == d_to_check.get("center")
+                assert normalize_img_path(str(d.get("center"))) == d_to_check.get("center")
     print(">> Normalized CSV is OK!")
     f.close()
     f_normalized.close()
@@ -65,11 +65,10 @@ def write_driving_log(dict, sim_path):
     f_normalized.close()
 
 
-def normalize_img_path(img_path, sim_path):
+def normalize_img_path(img_path):
     normalize_path = img_path.replace("\\", "/")
     img_name = normalize_path.rsplit("/", 1)[-1]
-    sim_relative_path = "/".join(str(sim_path).rsplit("/", 3)[-2:])
-    return sim_relative_path + "/IMG/" + img_name
+    return "IMG/" + img_name
 
 
 def normalize_simulation(sim_path):
@@ -101,7 +100,7 @@ def normalize_simulation(sim_path):
              'distance': d.get("distance", ""),
              'time': d.get("time", ""),
              'ang_diff': d.get("ang_diff", ""),
-             'center': normalize_img_path(str(d.get("center")), sim_path),
+             'center': normalize_img_path(str(d.get("center"))),
              'tot_OBEs': d.get("tot_obes", ""),
              'tot_crashes': d.get("tot_crashes", "")
              })
@@ -139,7 +138,7 @@ def main():
             print(">> Normalized CSV file already exists, deleting it..")
         dict_to_print = normalize_simulation(sim_path)
         write_driving_log(dict_to_print, sim_path)
-        check_driving_log(sim_path)
+        #check_driving_log(sim_path)
 
     print(">> Simulations normalized: ", i)
 

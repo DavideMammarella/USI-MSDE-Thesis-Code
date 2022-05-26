@@ -8,7 +8,7 @@
 │   ├── eval_db
 │   ├── eval_scripts
 │   └── ... (scripts)
-├── models
+├── models                  <- serialized models
 │   ├── sao (autoencoder)
 │   └── ... (SDC models)
 ├── scripts

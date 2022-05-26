@@ -3,11 +3,13 @@
 
 # This script must be used only with UWIZ models
 
+# Standard library import ----------------------------------------------------------------------------------------------
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow warnings
+
 import sys
 sys.path.append("..")
 
-# Standard library import ----------------------------------------------------------------------------------------------
-import os
 import pathlib
 from pathlib import Path
 import numpy as np
@@ -15,6 +17,7 @@ import csv
 from PIL import Image
 import base64
 from io import BytesIO
+from tqdm import tqdm
 
 # Local libraries import -----------------------------------------------------------------------------------------------
 from config import Config
@@ -37,7 +40,6 @@ frame_id = 0
 batch_size = 1
 uncertainty = -1
 
-# TODO: add tqdm
 
 def uwiz_prediction(image):
     """
@@ -68,45 +70,27 @@ def predict_on_IMG(images_path):
     :param images_path: list of IMGs title
     :return: dictionary with uncertainty, steering angle and IMG path
     """
-    print("Predicting on IMG...")
     intermediate_output = []  # list of dictionaries with IMG path, steering angle and uncertainty
-    for image in images_path:
+    for image in tqdm(images_path, position=0, leave=False):
         image_to__process = Image.open(str(image))
-        image_path_normalize = "/".join(str(image).rsplit('/', 5)[2:])  # normalize path
         steering_angle, uncertainty = uwiz_prediction(image_to__process)
         intermediate_output.append(
-            {'uncertainty': uncertainty, 'steering_angle': steering_angle, 'center': image_path_normalize})
-    print(">> Predictions done:", len(intermediate_output))
+            {'uncertainty': uncertainty, 'steering_angle': steering_angle, 'center': image})
     return intermediate_output
 
 
 def visit_simulation(sim_path):
-    """
-    Visit driving_log of a given simulation and extract steering angle and images.
-    :param sim_path:
-    :return:
-    """
-    csv_file = sim_path / "driving_log.csv"
-
+    csv_file = sim_path / "driving_log_normalized.csv"
+    print("\nReading simulation:\t", str(sim_path))
     with open(csv_file) as f:
-        driving_log = [{k: v for k, v in row.items()}
-                       for row in csv.DictReader(f, skipinitialspace=True)]
-    print("\nReading simulation:\t", driving_log[0]["Self Driving Model"])
-    print(">> Row read:\t", len(driving_log))
+        driving_log_normalized = [{k: v for k, v in row.items()}
+                                  for row in csv.DictReader(f, skipinitialspace=True)]
+    images_path = [Path(sim_path, d.get("center")) for d in driving_log_normalized]
 
-    # Extract and normalize images paths -------------------------------------------------------------------------------
-    images_path = [Path(sim_path, "IMG", d["center"].rsplit("\\", 1)[1]) for d in driving_log]
-    print(">> Images processed:\t", len(images_path))
-    return driving_log, images_path
+    return driving_log_normalized, images_path
 
 
-def collect_simulations(curr_project_path):
-    """
-    Visit all simulation folders and collect only the names of simulations not previously analysed ("-uncertainty-evaluated").
-    :return: list of simulations
-    """
-    sims_path = Path(curr_project_path, "simulations")
-
+def collect_simulations(sims_path):
     # First Iteration: collect all simulations -------------------------------------------------------------------------
     _, dirs, _ = next(os.walk(sims_path))  # list all folders in simulations_path (only top level)
 
@@ -118,7 +102,6 @@ def collect_simulations(curr_project_path):
             exclude.append(d[:-len("-uncertainty-evaluated")])
 
     sims_evaluated = int(len(exclude) / 2)
-    print("Summary...")
     print(">> Total simulations:\t", len(dirs) - sims_evaluated)
     print(">> Simulations already evaluated:\t", sims_evaluated)
 
@@ -132,74 +115,71 @@ def collect_simulations(curr_project_path):
 def write_csv(sim_path, driving_log, intermediate_output):
     final_output = []
 
-    print("Writing CSV...")
     for d in driving_log:
         for d_out in intermediate_output:
-            if d["center"].rsplit("\\", 1)[1] == d_out["center"].rsplit("/", 1)[1]:  # making csv robust to missing data
+            if d.get("center") == d_out.get("center"):  # making csv robust to missing data
                 final_output.append(
-                    {'frameId': d["FrameId"],
-                     'model': d["Self Driving Model"],
-                     'anomaly_detector': d["Anomaly Detector"],
-                     'threshold': d["Threshold"],
-                     'sim_name': d["Track Name"],
-                     'lap': d["Lap Number"],
-                     'waypoint': d["Check Point"],
-                     'loss': d["Loss"],
-                     'uncertainty': d_out["uncertainty"],
-                     #'cte': d["cte"],
-                     'steering_angle': d_out["steering_angle"],
-                     'throttle': d["Throttle"],
-                     'speed': d["Speed"],
-                     #'brake': d["brake"],
-                     'crashed': d["Crashed"],
-                     #'distance': d["distance"],
-                     #'time': d["time"],
-                     #'ang_diff': d["ang_diff"],
-                     'center': d_out["center"],
-                     'tot_OBEs': d["Tot OBEs"],
-                     'tot_crashes': d["Tot Crashes"]
+                    {'frame_id': d.get("frame_id"),
+                     'model': d.get("model"),
+                     'anomaly_detector': d.get("anomaly_detector"),
+                     'threshold': d.get("threshold"),
+                     'sim_name': d.get("sim_name"),
+                     'lap': d.get("lap"),
+                     'waypoint': d.get("waypoint"),
+                     'loss': d.get("loss"),
+                     'uncertainty': d_out.get("uncertainty"),
+                     'cte': d.get("cte"),
+                     'steering_angle': d_out.get("steering_angle"),
+                     'throttle': d.get("throttle"),
+                     'speed': d.get("speed"),
+                     'brake': d.get("brake"),
+                     'crashed': d.get("crashed"),
+                     'distance': d.get("distance"),
+                     'time': d.get("time"),
+                     'ang_diff': d.get("ang_diff"),
+                     'center': d_out.get("center"),
+                     'tot_OBEs': d.get("tot_obes"),
+                     'tot_crashes': d.get("tot_crashes")
                      })
 
     folder = Path(str(sim_path) + "-uncertainty-evaluated")
     folder.mkdir(parents=True, exist_ok=True)
-    csv_path = folder / "driving_log.csv"
+    csv_path = folder / "driving_log_normalized.csv"
 
     with csv_path.open(mode="w") as csv_file:
-        headers = ["frameId", "model", "anomaly_detector", "threshold", "sim_name", "lap", "waypoint", "loss",
+        headers = ["frame_id", "model", "anomaly_detector", "threshold", "sim_name", "lap", "waypoint", "loss",
                    "uncertainty", "cte", "steering_angle", "throttle", "speed", "brake", "crashed", "distance", "time",
                    "ang_diff", "center", "tot_OBEs", "tot_crashes"]
         writer = csv.DictWriter(csv_file, fieldnames=headers)
         writer.writeheader()
         for data in final_output:
             writer.writerow(data)
-    print(">> CSV file (", len(final_output), "rows) written to:\t", folder)
 
 
 def main():
-    global model
-
     curr_project_path = Path(os.path.normpath(os.getcwd() + os.sep + os.pardir))  # overcome OS issues
-
     cfg = Config()
     cfg_pyfile_path = curr_project_path / "config_my.py"
     cfg.from_pyfile(cfg_pyfile_path)
 
     # Load the self-driving car model ----------------------------------------------------------------------------------
+    global model
     model_path = os.path.join(curr_project_path, cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)
     model = uwiz.models.load_model(model_path)
 
     # Analyse all simulations ------------------------------------------------------------------------------------------
-    extracted_data = []
-    driving_log = []
+    sims_path = Path(curr_project_path, cfg.SIMULATIONS_DIR)
+    simulations = collect_simulations(sims_path)
 
-    sims = collect_simulations(curr_project_path)
-    for sim in sims:
-        sim_path = Path(curr_project_path, "simulations", sim)
+    for sim in simulations:
+        sim_path = Path(curr_project_path, cfg.SIMULATIONS_DIR, sim)
         driving_log, images_path = visit_simulation(sim_path)
-        intermediate_output = predict_on_IMG(images_path)
-        write_csv(sim_path, driving_log, intermediate_output)
-        driving_log = []
-        images_path = []
+        print("Calculating uncertainties using UWIZ on IMGs...")
+        predictions = predict_on_IMG(images_path)
+        print(">> Predictions done:", len(predictions))
+        print("Writing CSV...")
+        write_csv(sim_path, driving_log, predictions)
+        print(">> CSV written to:\t" + str(sim_path) + "-uncertainty-evaluated")
 
 
 if __name__ == "__main__":
