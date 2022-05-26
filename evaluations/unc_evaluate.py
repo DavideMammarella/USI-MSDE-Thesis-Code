@@ -1,5 +1,6 @@
 # !!! Simulations must be in the project folder under: simulations/<name_of_simulation>
 # !!! <name_of_simulation> folder must contain: IMG folder (with .jpg) and driving_log.csv
+# ALL SIMULATIONS MUST BE NORMALIZED using simulations_normalizer.py
 
 # This script must be used only with UWIZ models
 
@@ -23,6 +24,7 @@ from tqdm import tqdm
 from config import Config
 import utils
 from utils import resize
+from data.simulations_normalizer import write_driving_log, check_driving_log, normalize_img_path
 
 # Tensorflow library import --------------------------------------------------------------------------------------------
 import tensorflow
@@ -63,31 +65,36 @@ def uwiz_prediction(image):
     return steering_angle, uncertainty
 
 
-def predict_on_IMG(images_path):
+def predict_on_IMG(images_dict):
     """
     Use IMG previously extracted and make predictions.
     :param sim_path: Path of simulations folder inside the project
     :param images_path: list of IMGs title
     :return: dictionary with uncertainty, steering angle and IMG path
     """
-    intermediate_output = []  # list of dictionaries with IMG path, steering angle and uncertainty
-    for image in tqdm(images_path, position=0, leave=False):
-        image_to__process = Image.open(str(image))
+    predictions_dict = []  # list of dictionaries with IMG path, steering angle and uncertainty
+    for d in tqdm(images_dict, position=0, leave=False):
+        image_to__process = Image.open(str(d.get("center")))
         steering_angle, uncertainty = uwiz_prediction(image_to__process)
-        intermediate_output.append(
-            {'uncertainty': uncertainty, 'steering_angle': steering_angle, 'center': image})
-    return intermediate_output
+        predictions_dict.append(
+            {'frame_id': d.get("frame_id"), 'uncertainty': uncertainty, 'steering_angle': steering_angle, 'center': normalize_img_path(str(d.get("center")))})
+    return predictions_dict
 
 
 def visit_simulation(sim_path):
     csv_file = sim_path / "driving_log_normalized.csv"
     print("\nReading simulation:\t", str(sim_path))
+    images_dict = []
     with open(csv_file) as f:
         driving_log_normalized = [{k: v for k, v in row.items()}
                                   for row in csv.DictReader(f, skipinitialspace=True)]
-    images_path = [Path(sim_path, d.get("center")) for d in driving_log_normalized]
+    for d in driving_log_normalized:
+        images_dict.append(
+                    {'frame_id': d.get("frame_id"),
+                     'center': Path(sim_path, d.get("center"))})
+    f.close()
 
-    return driving_log_normalized, images_path
+    return driving_log_normalized, images_dict
 
 
 def collect_simulations(sims_path):
@@ -112,12 +119,12 @@ def collect_simulations(sims_path):
     return sims
 
 
-def write_csv(sim_path, driving_log, intermediate_output):
+def create_driving_log(sim_path, driving_log, predictions_dict):
     final_output = []
 
     for d in driving_log:
-        for d_out in intermediate_output:
-            if d.get("center") == d_out.get("center"):  # making csv robust to missing data
+        for prediction in predictions_dict:
+            if d.get("frame_id") == prediction.get("frame_id") and d.get("center") == prediction.get("center"):
                 final_output.append(
                     {'frame_id': d.get("frame_id"),
                      'model': d.get("model"),
@@ -127,9 +134,9 @@ def write_csv(sim_path, driving_log, intermediate_output):
                      'lap': d.get("lap"),
                      'waypoint': d.get("waypoint"),
                      'loss': d.get("loss"),
-                     'uncertainty': d_out.get("uncertainty"),
+                     'uncertainty': prediction.get("uncertainty"),
                      'cte': d.get("cte"),
-                     'steering_angle': d_out.get("steering_angle"),
+                     'steering_angle': prediction.get("steering_angle"),
                      'throttle': d.get("throttle"),
                      'speed': d.get("speed"),
                      'brake': d.get("brake"),
@@ -137,24 +144,15 @@ def write_csv(sim_path, driving_log, intermediate_output):
                      'distance': d.get("distance"),
                      'time': d.get("time"),
                      'ang_diff': d.get("ang_diff"),
-                     'center': d_out.get("center"),
+                     'center': prediction.get("center"),
                      'tot_OBEs': d.get("tot_obes"),
                      'tot_crashes': d.get("tot_crashes")
                      })
 
     folder = Path(str(sim_path) + "-uncertainty-evaluated")
     folder.mkdir(parents=True, exist_ok=True)
-    csv_path = folder / "driving_log_normalized.csv"
 
-    with csv_path.open(mode="w") as csv_file:
-        headers = ["frame_id", "model", "anomaly_detector", "threshold", "sim_name", "lap", "waypoint", "loss",
-                   "uncertainty", "cte", "steering_angle", "throttle", "speed", "brake", "crashed", "distance", "time",
-                   "ang_diff", "center", "tot_OBEs", "tot_crashes"]
-        writer = csv.DictWriter(csv_file, fieldnames=headers)
-        writer.writeheader()
-        for data in final_output:
-            writer.writerow(data)
-
+    write_driving_log(final_output, folder)
 
 def main():
     curr_project_path = Path(os.path.normpath(os.getcwd() + os.sep + os.pardir))  # overcome OS issues
@@ -173,13 +171,15 @@ def main():
 
     for sim in simulations:
         sim_path = Path(curr_project_path, cfg.SIMULATIONS_DIR, sim)
-        driving_log, images_path = visit_simulation(sim_path)
+        driving_log, images_dict = visit_simulation(sim_path)
         print("Calculating uncertainties using UWIZ on IMGs...")
-        predictions = predict_on_IMG(images_path)
-        print(">> Predictions done:", len(predictions))
+        predictions_dict = predict_on_IMG(images_dict)
+        print(">> Predictions done:", len(predictions_dict))
         print("Writing CSV...")
-        write_csv(sim_path, driving_log, predictions)
+        create_driving_log(sim_path, driving_log, predictions_dict)
         print(">> CSV written to:\t" + str(sim_path) + "-uncertainty-evaluated")
+        print("Check CSV integrity (Original Normalized vs Predicted)...")
+        check_driving_log(Path(sim_path / "driving_log_normalized.csv"), Path(str(sim_path) + "-uncertainty-evaluated/driving_log_normalized.csv"))
 
 
 if __name__ == "__main__":

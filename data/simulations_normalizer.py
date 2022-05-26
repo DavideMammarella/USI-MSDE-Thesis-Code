@@ -30,17 +30,13 @@ class MyDictReader(csv.DictReader):
         return fields
 
 
-def check_driving_log(sim_path):
-    csv_file = sim_path / "driving_log.csv"
-    csv_file_normalized = sim_path / "driving_log_normalized.csv"
-
+def check_driving_log(csv_file, csv_file_normalized):
     with open(csv_file) as f:
         driving_log = [{k: v for k, v in row.items()}
                        for row in MyDictReader(f, skipinitialspace=True)]
     with open(csv_file_normalized) as f_normalized:
         driving_log_to_check = [{k: v for k, v in row.items()}
                                 for row in MyDictReader(f_normalized, skipinitialspace=True)]
-    print("Check CSV integrity (Original vs Normalized)...")
     for d in tqdm(driving_log, position=0, leave=False):
         for d_to_check in driving_log_to_check:
             if d.get("frameid") == d_to_check.get("frame_id"):
@@ -138,7 +134,8 @@ def main():
             print(">> Normalized CSV file already exists, deleting it..")
         dict_to_print = normalize_simulation(sim_path)
         write_driving_log(dict_to_print, sim_path)
-        #check_driving_log(sim_path)
+        #print("Check CSV integrity (Original vs Normalized)...")
+        #check_driving_log(Path(sim_path / "driving_log.csv"), Path(sim_path / "driving_log_normalized.csv"))
 
     print(">> Simulations normalized: ", i)
 
