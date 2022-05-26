@@ -41,14 +41,12 @@ def check_driving_log(csv_file, csv_file_normalized):
         for d_to_check in driving_log_to_check:
             if d.get("frameid") == d_to_check.get("frame_id"):
                 assert normalize_img_path(str(d.get("center"))) == d_to_check.get("center")
-    print(">> Normalized CSV is OK!")
     f.close()
     f_normalized.close()
 
 def write_driving_log(dict, sim_path):
     csv_file_normalized = sim_path / "driving_log_normalized.csv"
 
-    print("Writing CSV for simulation: " + str(sim_path))
     with csv_file_normalized.open(mode="w") as f_normalized:
         headers = ["frame_id", "model", "anomaly_detector", "threshold", "sim_name", "lap", "waypoint", "loss",
                    "uncertainty", "cte", "steering_angle", "throttle", "speed", "brake", "crashed", "distance", "time",
@@ -57,7 +55,7 @@ def write_driving_log(dict, sim_path):
         writer.writeheader()
         for data in dict:
             writer.writerow(data)
-    print(">> CSV written!")
+
     f_normalized.close()
 
 
@@ -75,7 +73,6 @@ def normalize_simulation(sim_path):
                        for row in MyDictReader(f, skipinitialspace=True)]
 
     final_output = []
-    print("Normalizing CSV for simulation: " + str(sim_path))
     for d in driving_log:
         final_output.append(
             {'frame_id': d.get("frameid"),
@@ -100,7 +97,6 @@ def normalize_simulation(sim_path):
              'tot_OBEs': d.get("tot_obes", ""),
              'tot_crashes': d.get("tot_crashes", "")
              })
-    print(">> CSV Normalized!")
     f.close()
 
     return final_output
@@ -132,10 +128,15 @@ def main():
         if os.path.exists(csv_file_normalized) and os.path.isfile(csv_file_normalized):
             os.remove(csv_file_normalized)
             print(">> Normalized CSV file already exists, deleting it..")
+        print("Normalizing CSV for simulation: " + str(sim_path))
         dict_to_print = normalize_simulation(sim_path)
+        print(">> CSV Normalized!")
+        print("Writing CSV for simulation: " + str(sim_path))
         write_driving_log(dict_to_print, sim_path)
+        print(">> CSV written!")
         #print("Check CSV integrity (Original vs Normalized)...")
         #check_driving_log(Path(sim_path / "driving_log.csv"), Path(sim_path / "driving_log_normalized.csv"))
+        #print(">> Normalized CSV is OK!")
 
     print(">> Simulations normalized: ", i)
 

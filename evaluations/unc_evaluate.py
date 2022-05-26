@@ -180,6 +180,7 @@ def main():
         print(">> CSV written to:\t" + str(sim_path) + "-uncertainty-evaluated")
         print("Check CSV integrity (Original Normalized vs Predicted)...")
         check_driving_log(Path(sim_path / "driving_log_normalized.csv"), Path(str(sim_path) + "-uncertainty-evaluated/driving_log_normalized.csv"))
+        print(">> CSV is OK!")
 
 
 if __name__ == "__main__":
