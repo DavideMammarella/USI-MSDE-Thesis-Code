@@ -62,7 +62,11 @@ uncertainty = -1
 
 
 def start_simulator():  # DO NOT CHANGE THIS
-    cmd = "open " + cfg.SIMULATOR_NAME
+    for file in os.listdir(cfg.SIMULATOR_DIR):
+        if file.endswith(".app") or file.endswith(".exe"):
+            simulator_name=file
+
+    cmd = "open " + simulator_name
     subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT)  # subprocess as os.system py doc
 

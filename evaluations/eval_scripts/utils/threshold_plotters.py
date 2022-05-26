@@ -6,9 +6,9 @@ import logging
 import numpy
 from matplotlib.pylab import plt
 
-import unc_evaluation.utils_logging as utils_logging
-from unc_evaluation.eval_db.database import Database
-from unc_evaluation.eval_scripts import a_set_true_labels, b_precision_recall_auroc
+import evaluations.utils_logging as utils_logging
+from evaluations.eval_db.database import Database
+from evaluations.eval_scripts import a_set_true_labels, b_precision_recall_auroc
 
 AD_NAMES = {
     "uwiz": "uwiz"

@@ -5,7 +5,7 @@ import logging
 import os
 import sqlite3
 
-import unc_evaluation.utils_logging as utils_logging
+import evaluations.utils_logging as utils_logging
 
 logger = logging.Logger("Database")
 utils_logging.log_info(logger)

@@ -7,10 +7,10 @@ from typing import Tuple
 import numpy
 from sklearn.metrics import auc
 
-import unc_evaluation.utils_logging as utils_logging
-from unc_evaluation.eval_db import eval_prec_recall, eval_window
-from unc_evaluation.eval_db.database import Database
-from unc_evaluation.eval_db.eval_prec_recall import PrecisionRecallAnalysis
+import evaluations.utils_logging as utils_logging
+from evaluations.eval_db import eval_prec_recall, eval_window
+from evaluations.eval_db.database import Database
+from evaluations.eval_db.eval_prec_recall import PrecisionRecallAnalysis
 
 CALC_AUROC = True
 CALC_PREC_RECALL = False

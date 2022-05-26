@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-from unc_evaluation.eval_db.database import Database
+from evaluations.eval_db.database import Database
 
 INSERT_STRING = "INSERT INTO 'prec_recall' ('anomaly_detector', 'threshold_type', 'threshold', 'true_positives', " \
                 "'false_positives', 'true_negatives', 'false_negatives', 'prec', 'recall', 'f1', 'num_anomalies'," \

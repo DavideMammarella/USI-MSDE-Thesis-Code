@@ -5,12 +5,12 @@
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
 
-# project settings
+# folder path
 TRAINING_DATA_DIR = "datasets"  # root folder for all driving training sets
 TRAINING_SET_DIR = "dataset5"  # the driving training set to use
-SAO_MODELS_DIR = "sao"  # trained autoencoder-based self-assessment oracle models
-TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
-SIMULATOR_NAME = "udacity-sim-mac-2.app"  # name of the simulator to use
+SDC_MODELS_DIR = "models"  # self-driving car models
+SAO_MODELS_DIR = "models/sao"  # trained autoencoder-based self-assessment oracle models
+SIMULATOR_DIR = "simulator"  # name of the simulator to use
 
 # simulations settings
 TRACK = "track1"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
@@ -22,7 +22,7 @@ TRACK2_IMG_PER_LAP = 1870
 TRACK3_IMG_PER_LAP = 1375
 
 # self-driving car model settings
-SDC_MODELS_DIR = "models"  # self-driving car models
+TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
 SDC_MODEL_TYPE = "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
 SDC_MODEL_NAME = "track1-uwiz-mc-final"
 #SDC_MODEL_TYPE = "dave2"

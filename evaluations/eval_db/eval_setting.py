@@ -2,7 +2,7 @@ import sys
 sys.path.append("..")
 from typing import List
 
-from unc_evaluation.eval_db.database import Database
+from evaluations.eval_db.database import Database
 
 INSERT_STATEMENT = "INSERT INTO settings ('id', 'agent', 'track', 'time', 'weather') values (?,?,?,?,?);"
 

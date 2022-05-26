@@ -16,7 +16,7 @@ from PIL import Image
 import base64
 from io import BytesIO
 import utils_logging
-from unc_evaluation.utils_threshold import calc_and_store_thresholds
+from evaluations.utils_threshold import calc_and_store_thresholds
 
 import logging
 logger = logging.Logger("utils_thresholds")
