@@ -7,20 +7,19 @@ from typing import Tuple
 import numpy
 from sklearn.metrics import auc
 
-import utils_logging
-from eval_db import eval_prec_recall, eval_window
-from eval_db.database import Database
-from eval_db.eval_prec_recall import PrecisionRecallAnalysis
+import unc_evaluation.utils_logging as utils_logging
+from unc_evaluation.eval_db import eval_prec_recall, eval_window
+from unc_evaluation.eval_db.database import Database
+from unc_evaluation.eval_db.eval_prec_recall import PrecisionRecallAnalysis
 
 CALC_AUROC = True
 CALC_PREC_RECALL = False
 
-AUROC_CALC_SAMPLING_FACTOR = 20  # 1 = No Sampling, n = 1/n of the losses are considered
+AUROC_CALC_SAMPLING_FACTOR = 20  # 1 = No Sampling, n = 1/n of the uncertainties are considered
 
 # TODO: edit this based on my experiments
 THRESHOLDS = {
-    "uwiz": {"0.68": 29.361018856328876, "0.9": 40.45529729327319, "0.95": 46.16822971023903, "0.99": 58.20754461663782,
-            "0.999": 73.82588456863898, "0.9999": 88.42246606777259, "0.99999": 102.40142769284085}
+    "uwiz": {"0.68": 0.019550654827368934, "0.9": 0.025478897836450878, "0.95": 0.028461474724232334, "0.99": 0.034637953675622744, "0.999": 0.042491945711924425, "0.9999": 0.04971825554061939, "0.99999": 0.05656305084282661}
 }
 
 logger = logging.Logger("Calc_Precision_Recall")
@@ -77,27 +76,27 @@ def _calc_auc_roc(false_positive_rates, true_positive_rates):
 
 
 def calc_auroc_and_auc_prec_recall(db: Database, ad_name: str) -> Tuple[float, float]:
-    labels_ignore_this, losses_list = eval_window.get_all_uncertainties_and_true_labels_for_ad(db=db, ad_name=ad_name)
+    labels_ignore_this, uncertainties_list = eval_window.get_all_uncertainties_and_true_labels_for_ad(db=db, ad_name=ad_name)
     false_positive_rates = []
     true_positive_rates = []
     precisions = []
     f1s = []
     logger.info("Calc auc-roc for " + ad_name + " based on " + str(
-        len(losses_list) / AUROC_CALC_SAMPLING_FACTOR) + " thresholds. Sampling factor: " + str(
+        len(uncertainties_list) / AUROC_CALC_SAMPLING_FACTOR) + " thresholds. Sampling factor: " + str(
         AUROC_CALC_SAMPLING_FACTOR))
     i = 0
-    losses_list.sort()
-    losses_list = losses_list[::AUROC_CALC_SAMPLING_FACTOR]
-    for loss in losses_list:
+    uncertainties_list.sort()
+    uncertainties_list = uncertainties_list[::AUROC_CALC_SAMPLING_FACTOR]
+    for uncertainty in uncertainties_list:
         i = i + 1
         if i % 100 == 0:
-            logger.info("---> " + str(i) + " out of " + str(len(losses_list)))
+            logger.info("---> " + str(i) + " out of " + str(len(uncertainties_list)))
         # Temporary, non persisted precision_recall_analysis to calculate TPR and FPR
         precision_recall_analysis = create_precision_recall_analysis(ad_name=ad_name,
                                                                      auroc=None,
                                                                      auc_prec_recall=None,
                                                                      db=db,
-                                                                     threshold=loss,
+                                                                     threshold=uncertainty,
                                                                      threshold_type=None)
 
         fpr = precision_recall_analysis.false_positive_rate

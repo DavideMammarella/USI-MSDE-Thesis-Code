@@ -1,8 +1,11 @@
+import sys
+sys.path.append("..")
+
 import logging
 import os
 import sqlite3
 
-import utils_logging
+import unc_evaluation.utils_logging as utils_logging
 
 logger = logging.Logger("Database")
 utils_logging.log_info(logger)

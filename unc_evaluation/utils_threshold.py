@@ -22,7 +22,6 @@ def calc_and_store_thresholds(uncertainties: numpy.array, thresholds_location) -
     logger.info("Fitting reconstruction error distribution of UWIZ using Gamma distribution params")
 
     shape, loc, scale = gamma.fit(uncertainties, floc=0)
-
     thresholds = {}
 
     conf_intervals = [0.68, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999]

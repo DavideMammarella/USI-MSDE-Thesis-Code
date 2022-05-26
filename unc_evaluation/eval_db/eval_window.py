@@ -1,7 +1,9 @@
+import sys
+sys.path.append("..")
 import logging
 
-import utils_logging
-from eval_db.database import Database
+import unc_evaluation.utils_logging as utils_logging
+from unc_evaluation.eval_db.database import Database
 
 SINGLE_IMAGE_BASED_ADS = ["uwiz"]
 

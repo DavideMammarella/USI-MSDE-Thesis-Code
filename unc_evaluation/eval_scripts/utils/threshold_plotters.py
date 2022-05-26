@@ -1,12 +1,14 @@
+import sys
+sys.path.append("..")
 import abc
 import logging
 
 import numpy
 from matplotlib.pylab import plt
 
-import utils_logging
-from eval_db.database import Database
-from eval_scripts import a_set_true_labels, b_precision_recall_auroc
+import unc_evaluation.utils_logging as utils_logging
+from unc_evaluation.eval_db.database import Database
+from unc_evaluation.eval_scripts import a_set_true_labels, b_precision_recall_auroc
 
 AD_NAMES = {
     "uwiz": "uwiz"
@@ -101,7 +103,7 @@ class ThresholdDependentReactionTimePlotter(AbstractThresholdDependentPlotter):
 
     def __init__(self, db: Database):
         x_axis = numpy.arange(- self.start, -self.stop, self.step)
-        x_axis_label = "..//number of images before misbehavior"
+        x_axis_label = "number of images before misbehavior"
         file_name = "reaction-time.pdf"
         super().__init__(x_axis=x_axis, x_axis_label=x_axis_label, file_name=file_name, threshold_type="0.99", db=db)
 

@@ -39,7 +39,6 @@ uncertainty = -1
 
 # TODO: add tqdm
 
-
 def uwiz_prediction(image):
     """
     Predict steering angle and uncertainty of an image using the uncertainty wizard.
@@ -92,7 +91,7 @@ def visit_simulation(sim_path):
     with open(csv_file) as f:
         driving_log = [{k: v for k, v in row.items()}
                        for row in csv.DictReader(f, skipinitialspace=True)]
-    print("\nReading simulation:\t", driving_log[0]["sim_name"])
+    print("\nReading simulation:\t", driving_log[0]["Self Driving Model"])
     print(">> Row read:\t", len(driving_log))
 
     # Extract and normalize images paths -------------------------------------------------------------------------------
@@ -138,27 +137,27 @@ def write_csv(sim_path, driving_log, intermediate_output):
         for d_out in intermediate_output:
             if d["center"].rsplit("\\", 1)[1] == d_out["center"].rsplit("/", 1)[1]:  # making csv robust to missing data
                 final_output.append(
-                    {'frameId': d["frameId"],
-                     'model': d["model"],
-                     'anomaly_detector': d["anomaly_detector"],
-                     'threshold': d["threshold"],
-                     'sim_name': d["sim_name"],
-                     'lap': d["lap"],
-                     'waypoint': d["waypoint"],
-                     'loss': d["loss"],
+                    {'frameId': d["FrameId"],
+                     'model': d["Self Driving Model"],
+                     'anomaly_detector': d["Anomaly Detector"],
+                     'threshold': d["Threshold"],
+                     'sim_name': d["Track Name"],
+                     'lap': d["Lap Number"],
+                     'waypoint': d["Check Point"],
+                     'loss': d["Loss"],
                      'uncertainty': d_out["uncertainty"],
                      #'cte': d["cte"],
                      'steering_angle': d_out["steering_angle"],
-                     'throttle': d["throttle"],
-                     'speed': d["speed"],
+                     'throttle': d["Throttle"],
+                     'speed': d["Speed"],
                      #'brake': d["brake"],
-                     'crashed': d["crashed"],
+                     'crashed': d["Crashed"],
                      #'distance': d["distance"],
                      #'time': d["time"],
                      #'ang_diff': d["ang_diff"],
                      'center': d_out["center"],
-                     'tot_OBEs': d["tot_OBEs"],
-                     'tot_crashes': d["tot_crashes"]
+                     'tot_OBEs': d["Tot OBEs"],
+                     'tot_crashes': d["Tot Crashes"]
                      })
 
     folder = Path(str(sim_path) + "-uncertainty-evaluated")

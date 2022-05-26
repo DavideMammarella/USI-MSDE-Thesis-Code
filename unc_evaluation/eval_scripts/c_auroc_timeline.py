@@ -3,10 +3,10 @@ sys.path.append("..")
 
 import logging
 
-import utils_logging
-from eval_db.database import Database
-from eval_scripts import b_precision_recall_auroc
-from eval_scripts.utils import threshold_independent_plotters
+import unc_evaluation.utils_logging as utils_logging
+from unc_evaluation.eval_db.database import Database
+from unc_evaluation.eval_scripts import b_precision_recall_auroc
+from unc_evaluation.eval_scripts.utils import threshold_independent_plotters
 
 logger = logging.Logger("c_timeline")
 utils_logging.log_info(logger)

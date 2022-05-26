@@ -12,12 +12,12 @@ import csv
 import numpy
 
 import utils_logging
-from eval_scripts.a_set_true_labels import set_true_labels
-from eval_scripts.b_precision_recall_auroc import calc_precision_recall
-from eval_scripts.c_auroc_timeline import print_auroc_timeline
-from eval_db.database import Database
-from eval_db.eval_setting import Setting
-from eval_db.eval_single_img_uncertainty import SingleImgUncertainty
+from unc_evaluation.eval_scripts.a_set_true_labels import set_true_labels
+from unc_evaluation.eval_scripts.b_precision_recall_auroc import calc_precision_recall
+from unc_evaluation.eval_scripts.c_auroc_timeline import print_auroc_timeline
+from unc_evaluation.eval_db.database import Database
+from unc_evaluation.eval_db.eval_setting import Setting
+from unc_evaluation.eval_db.eval_single_img_uncertainty import SingleImgUncertainty
 
 SINGLE_IMAGE_ADS = ["UWIZ"]
 

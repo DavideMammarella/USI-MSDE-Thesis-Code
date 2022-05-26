@@ -16,7 +16,7 @@ from PIL import Image
 import base64
 from io import BytesIO
 import utils_logging
-from utils_threshold import calc_and_store_thresholds
+from unc_evaluation.utils_threshold import calc_and_store_thresholds
 
 import logging
 logger = logging.Logger("utils_thresholds")
@@ -50,7 +50,14 @@ def visit_simulation(sim_path):
     Visit driving_log of a given simulation and extract uncertainties in a numpy array.
     """
     csv_file = sim_path / "driving_log.csv"
-    return np.genfromtxt(csv_file, dtype=float, usecols=["uncertainty"], delimiter=',', names=True)
+    uncertainties = []
+
+    with open(csv_file, mode='r') as f:
+        reader = csv.DictReader(f, skipinitialspace=True)
+        for row in reader:
+            uncertainties.append(float(row['uncertainty']))
+
+    return uncertainties
 
 
 def collect_simulations(curr_project_path):
@@ -88,7 +95,7 @@ def main():
             sim_path = Path(curr_project_path, "simulations", sim)
             uncertainties = visit_simulation(sim_path)
             print(uncertainties)
-            calc_and_store_thresholds(uncertainties,sim_path)
+            calc_and_store_thresholds(uncertainties, sim_path)
             driving_log = []
             images_path = []
 

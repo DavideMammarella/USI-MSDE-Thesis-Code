@@ -38,7 +38,6 @@ import uncertainty_wizard as uwiz
 import socketio
 from flask import Flask
 import eventlet.wsgi
-
 eventlet.patcher.monkey_patch()
 
 # Multiprocessing library import ---------------------------------------------------------------------------------------

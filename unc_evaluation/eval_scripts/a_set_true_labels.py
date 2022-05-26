@@ -4,9 +4,9 @@ sys.path.append("..")
 import logging
 from typing import List
 
-import utils_logging
-from eval_db import eval_setting, eval_single_img_uncertainty, eval_window
-from eval_db.database import Database
+import unc_evaluation.utils_logging as utils_logging
+from unc_evaluation.eval_db import eval_setting, eval_single_img_uncertainty, eval_window
+from unc_evaluation.eval_db.database import Database
 
 NORMAL_LABEL = "normal"
 

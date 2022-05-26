@@ -1,8 +1,10 @@
+import sys
+sys.path.append("..")
 import logging
 from typing import List
 
-import utils_logging
-from eval_db.database import Database
+import unc_evaluation.utils_logging as utils_logging
+from unc_evaluation.eval_db.database import Database
 
 INSERT_STATEMENT = "INSERT INTO single_image_based_uncertainties ('setting_id', 'row_id', 'is_crash', 'uncertainty') values (?,?,?,?);"
 logger = logging.Logger("SingleImgUncertainty")
