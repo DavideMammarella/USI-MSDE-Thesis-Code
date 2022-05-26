@@ -6,7 +6,8 @@
 # file that should have been included as part of this package.
 
 # folder path
-TRAINING_DATA_DIR = "datasets"  # root folder for all driving training sets
+SIMULATIONS_DIR = "data/simulations"  # folder where to store the simulations
+TRAINING_DATA_DIR = "data/datasets"  # root folder for all driving training sets
 TRAINING_SET_DIR = "dataset5"  # the driving training set to use
 SDC_MODELS_DIR = "models"  # self-driving car models
 SAO_MODELS_DIR = "models/sao"  # trained autoencoder-based self-assessment oracle models
