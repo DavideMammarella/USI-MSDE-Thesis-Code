@@ -40,11 +40,12 @@ def check_driving_log(sim_path):
     with open(csv_file_normalized) as f_normalized:
         driving_log_to_check = [{k: v for k, v in row.items()}
                                 for row in MyDictReader(f_normalized, skipinitialspace=True)]
-    print("Check CSV robustness...")
-    for d in tqdm(driving_log):
+    print("Check CSV integrity (Original vs Normalized)...")
+    for d in tqdm(driving_log, position=0, leave=False):
         for d_to_check in driving_log_to_check:
             if d.get("frameid") == d_to_check.get("frame_id"):
                 assert normalize_img_path(str(d.get("center")), sim_path) == d_to_check.get("center")
+    print(">> Normalized CSV is OK!")
     f.close()
     f_normalized.close()
 
@@ -58,9 +59,9 @@ def write_driving_log(dict, sim_path):
                    "ang_diff", "center", "tot_OBEs", "tot_crashes"]
         writer = csv.DictWriter(f_normalized, fieldnames=headers)
         writer.writeheader()
-        for data in tqdm(dict):
+        for data in dict:
             writer.writerow(data)
-
+    print(">> CSV written!")
     f_normalized.close()
 
 
@@ -68,7 +69,7 @@ def normalize_img_path(img_path, sim_path):
     normalize_path = img_path.replace("\\", "/")
     img_name = normalize_path.rsplit("/", 1)[-1]
     sim_relative_path = "/".join(str(sim_path).rsplit("/", 3)[-2:])
-    return sim_relative_path + "/" + img_name
+    return sim_relative_path + "/IMG/" + img_name
 
 
 def normalize_simulation(sim_path):
@@ -104,7 +105,7 @@ def normalize_simulation(sim_path):
              'tot_OBEs': d.get("tot_obes", ""),
              'tot_crashes': d.get("tot_crashes", "")
              })
-
+    print(">> CSV Normalized!")
     f.close()
 
     return final_output
@@ -113,7 +114,7 @@ def normalize_simulation(sim_path):
 def collect_simulations(sims_path):
     _, dirs, _ = next(os.walk(sims_path))  # list all folders in simulations_path (only top level)
     sims = [d for d in dirs]  # collect all simulations name
-    print("Summary..\n>> Simulations to evaluate:\t", len(sims))
+    print(">> Simulations to evaluate:\t", len(sims))
     return sims
 
 
@@ -129,18 +130,18 @@ def main():
     simulations = collect_simulations(sims_path)
 
     # Normalize all simulations ----------------------------------------------------------------------------------------
-    for i, sim in enumerate(simulations):
+    for i, sim in enumerate(simulations, start=0):
         sim_path = Path(curr_project_path, cfg.SIMULATIONS_DIR, sim)
         print("\nAnalyzing simulation: " + str(sim_path))
         csv_file_normalized = sim_path / "driving_log_normalized.csv"
         if os.path.exists(csv_file_normalized) and os.path.isfile(csv_file_normalized):
             os.remove(csv_file_normalized)
-            print("CSV normalized file already exists, deleting it..")
+            print(">> Normalized CSV file already exists, deleting it..")
         dict_to_print = normalize_simulation(sim_path)
         write_driving_log(dict_to_print, sim_path)
         check_driving_log(sim_path)
 
-    print(">> Simulations evaluated: ", i)
+    print(">> Simulations normalized: ", i)
 
 if __name__ == "__main__":
     main()
