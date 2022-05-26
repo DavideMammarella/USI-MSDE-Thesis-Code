@@ -7,8 +7,8 @@
 from config import Config
 from utils import *
 
-if __name__ == '__main__':
-    os.chdir(os.getcwd().replace('scripts', ''))
+if __name__ == "__main__":
+    os.chdir(os.getcwd().replace("scripts", ""))
     print(os.getcwd())
 
     cfg = Config()
@@ -18,9 +18,9 @@ if __name__ == '__main__':
 
     plt.figure(figsize=(30, 8))
 
-    path = os.path.join(cfg.TESTING_DATA_DIR,
-                        cfg.SIMULATION_NAME,
-                        'driving_log.csv')
+    path = os.path.join(
+        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
+    )
     data_df = pd.read_csv(path)
 
     # read CTE values
@@ -56,27 +56,42 @@ if __name__ == '__main__':
     # changes the frequency of the ticks on the X-axis to simulation's seconds
     plt.xticks(
         np.arange(0, len(cte_values) + 1, cfg.FPS),
-        labels=range(0, len(cte_values) // cfg.FPS + 1))
+        labels=range(0, len(cte_values) // cfg.FPS + 1),
+    )
 
-    plt.plot(x_threshold, y_threshold, color='red', alpha=0.2)
-    plt.plot(x_threshold, y_threshold_2, color='red', alpha=0.2)
-    plt.plot(x_losses, cte_values, '--', color='black', alpha=0.4, label="cte")
-    plt.plot(is_crash, 'x:r', markersize=4)
-    plt.plot(is_crash_2, 'x:r', markersize=4)
+    plt.plot(x_threshold, y_threshold, color="red", alpha=0.2)
+    plt.plot(x_threshold, y_threshold_2, color="red", alpha=0.2)
+    plt.plot(x_losses, cte_values, "--", color="black", alpha=0.4, label="cte")
+    plt.plot(is_crash, "x:r", markersize=4)
+    plt.plot(is_crash_2, "x:r", markersize=4)
 
-    plt.plot(x_losses, sma, '-.', color="blue", alpha=0.4,
-             label='cte' + ' (sma-w' + str(WINDOW) + ')')
-    plt.plot(x_losses, ewm, color="green", alpha=0.8,
-             label='cte' + ' (ewm-a' + str(ALPHA) + ')')
+    plt.plot(
+        x_losses,
+        sma,
+        "-.",
+        color="blue",
+        alpha=0.4,
+        label="cte" + " (sma-w" + str(WINDOW) + ")",
+    )
+    plt.plot(
+        x_losses,
+        ewm,
+        color="green",
+        alpha=0.8,
+        label="cte" + " (ewm-a" + str(ALPHA) + ")",
+    )
 
     plt.legend()
-    plt.ylabel('CTE')
-    plt.xlabel('Frames')
-    plt.title("CTE values for "
-              + cfg.SIMULATION_NAME +
-              "\n# misbehaviour: %d (%d right, %d left)" % (times, times_above, times_below),
-              fontsize=20)
+    plt.ylabel("CTE")
+    plt.xlabel("Frames")
+    plt.title(
+        "CTE values for "
+        + cfg.SIMULATION_NAME
+        + "\n# misbehaviour: %d (%d right, %d left)"
+        % (times, times_above, times_below),
+        fontsize=20,
+    )
 
-    plt.savefig('plots/cte.png')
+    plt.savefig("plots/cte.png")
 
     plt.show()

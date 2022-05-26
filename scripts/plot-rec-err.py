@@ -11,28 +11,26 @@ from scipy.stats import gamma
 from config import Config
 from utils import *
 
-if __name__ == '__main__':
-    os.chdir(os.getcwd().replace('scripts', ''))
+if __name__ == "__main__":
+    os.chdir(os.getcwd().replace("scripts", ""))
     print(os.getcwd())
 
     cfg = Config()
     cfg.from_pyfile("config_my.py")
 
-    cfg.SIMULATION_NAME = 'gauss-journal-track3-nominal'
+    cfg.SIMULATION_NAME = "gauss-journal-track3-nominal"
 
     plt.figure(figsize=(30, 8))
 
-    path = os.path.join(cfg.TESTING_DATA_DIR,
-                        cfg.SIMULATION_NAME,
-                        'IMG')
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "IMG")
 
     all_imgs = glob.glob(path + "/*.jpg")
 
-    path = os.path.join(cfg.TESTING_DATA_DIR,
-                        cfg.SIMULATION_NAME,
-                        'driving_log.csv')
+    path = os.path.join(
+        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
+    )
     data_df = pd.read_csv(path)
-    all_err = data_df['loss']
+    all_err = data_df["loss"]
 
     WINDOW = 15
     ALPHA = 0.2
@@ -56,27 +54,48 @@ if __name__ == '__main__':
     # changes the frequency of the ticks on the X-axis to simulation's seconds
     plt.xticks(
         np.arange(0, len(all_err) + 1, cfg.FPS),
-        labels=range(0, len(all_err) // cfg.FPS + 1))
+        labels=range(0, len(all_err) // cfg.FPS + 1),
+    )
 
     # visualize crashes
     crashes = data_df[data_df["crashed"] == 1]
     is_crash = (crashes.crashed - 1) + threshold
-    plt.plot(is_crash, 'x:r', markersize=4)
+    plt.plot(is_crash, "x:r", markersize=4)
 
-    plt.plot(x_threshold, y_threshold, color='red', alpha=0.2)
-    plt.plot(x_losses, all_err, '--', color="black", alpha=0.4,
-             label=cfg.ANOMALY_DETECTOR_NAME + ' (original)')
-    plt.plot(x_losses, sma, '-.', color="blue", alpha=0.4,
-             label=cfg.ANOMALY_DETECTOR_NAME + ' (sma-w' + str(WINDOW) + ')')
-    plt.plot(x_losses, ewm, color="green", alpha=0.8,
-             label=cfg.ANOMALY_DETECTOR_NAME + ' (ewm-a' + str(ALPHA) + ')')
+    plt.plot(x_threshold, y_threshold, color="red", alpha=0.2)
+    plt.plot(
+        x_losses,
+        all_err,
+        "--",
+        color="black",
+        alpha=0.4,
+        label=cfg.ANOMALY_DETECTOR_NAME + " (original)",
+    )
+    plt.plot(
+        x_losses,
+        sma,
+        "-.",
+        color="blue",
+        alpha=0.4,
+        label=cfg.ANOMALY_DETECTOR_NAME + " (sma-w" + str(WINDOW) + ")",
+    )
+    plt.plot(
+        x_losses,
+        ewm,
+        color="green",
+        alpha=0.8,
+        label=cfg.ANOMALY_DETECTOR_NAME + " (ewm-a" + str(ALPHA) + ")",
+    )
 
     plt.legend()
-    plt.ylabel('Rec Err')
-    plt.xlabel('Frames')
-    plt.title("Rec Err values for "
-              + cfg.SIMULATION_NAME +
-              "\n# misbehaviour: %d" % times, fontsize=20)
+    plt.ylabel("Rec Err")
+    plt.xlabel("Frames")
+    plt.title(
+        "Rec Err values for "
+        + cfg.SIMULATION_NAME
+        + "\n# misbehaviour: %d" % times,
+        fontsize=20,
+    )
 
     # plt.savefig('plots/rec-err.png')
 

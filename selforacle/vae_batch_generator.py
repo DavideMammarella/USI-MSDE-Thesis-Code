@@ -4,17 +4,24 @@
 # developed within the ERC project PRECRIME
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
+import os
 import random
+
 import matplotlib.image as mpimg
 import numpy as np
 from tensorflow.keras.utils import Sequence
-import os
-from utils import RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS, resize, crop
+
 from selforacle.vae import normalize_and_reshape
+from utils import (
+    IMAGE_CHANNELS,
+    RESIZED_IMAGE_HEIGHT,
+    RESIZED_IMAGE_WIDTH,
+    crop,
+    resize,
+)
 
 
 class Generator(Sequence):
-
     def __init__(self, path_to_pictures, is_training, cfg, sample_weight):
         self.path_to_pictures = path_to_pictures
         self.is_training = is_training
@@ -27,12 +34,24 @@ class Generator(Sequence):
         batch_paths = self.path_to_pictures[start_index:end_index]
         weights = self.sample_weight[start_index:end_index]
 
-        images = np.empty([len(batch_paths), RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS])
+        images = np.empty(
+            [
+                len(batch_paths),
+                RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS,
+            ]
+        )
         for i, paths in enumerate(batch_paths):
 
-            center = batch_paths[i][0]  # select the center image from the batch
+            center = batch_paths[i][
+                0
+            ]  # select the center image from the batch
             try:
-                image = mpimg.imread(self.cfg.TRAINING_DATA_DIR + os.path.sep + self.cfg.TRAINING_SET_DIR + center)
+                image = mpimg.imread(
+                    self.cfg.TRAINING_DATA_DIR
+                    + os.path.sep
+                    + self.cfg.TRAINING_SET_DIR
+                    + center
+                )
             except FileNotFoundError:
                 image = mpimg.imread(center)
             image = resize(image)

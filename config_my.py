@@ -7,27 +7,49 @@
 
 # folder path
 SIMULATIONS_DIR = "data/simulations"  # folder where to store the simulations
-TRAINING_DATA_DIR = "data/datasets"  # root folder for all driving training sets
+TRAINING_DATA_DIR = (
+    "data/datasets"  # root folder for all driving training sets
+)
 TRAINING_SET_DIR = "dataset5"  # the driving training set to use
 SDC_MODELS_DIR = "models"  # self-driving car models
-SAO_MODELS_DIR = "models/sao"  # trained autoencoder-based self-assessment oracle models
+SAO_MODELS_DIR = (
+    "models/sao"  # trained autoencoder-based self-assessment oracle models
+)
 SIMULATOR_DIR = "simulator"  # name of the simulator to use
 
 # simulations settings
 TRACK = "track1"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
 TRACK1_DRIVING_STYLES = ["normal", "recovery", "reverse"]
-TRACK2_DRIVING_STYLES = ["normal", "recovery", "recovery2", "recovery3", "reverse", "sport_normal", "sport_reverse"]
-TRACK3_DRIVING_STYLES = ["normal", "recovery", "recovery2", "reverse", "sport_normal"]
+TRACK2_DRIVING_STYLES = [
+    "normal",
+    "recovery",
+    "recovery2",
+    "recovery3",
+    "reverse",
+    "sport_normal",
+    "sport_reverse",
+]
+TRACK3_DRIVING_STYLES = [
+    "normal",
+    "recovery",
+    "recovery2",
+    "reverse",
+    "sport_normal",
+]
 TRACK1_IMG_PER_LAP = 1140
 TRACK2_IMG_PER_LAP = 1870
 TRACK3_IMG_PER_LAP = 1375
 
 # self-driving car model settings
-TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
-SDC_MODEL_TYPE = "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
+TEST_SIZE = (
+    0.2  # split of training data used for the validation set (keep it low)
+)
+SDC_MODEL_TYPE = (
+    "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
+)
 SDC_MODEL_NAME = "track1-uwiz-mc-final"
-#SDC_MODEL_TYPE = "dave2"
-#SDC_MODEL_NAME = "dave2-mc-053.h5"
+# SDC_MODEL_TYPE = "dave2"
+# SDC_MODEL_NAME = "dave2-mc-053.h5"
 NUM_EPOCHS_SDC_MODEL = 500  # training epochs for the self-driving car model
 # SAMPLES_PER_EPOCH = 100  # number of samples to process before going to the next epoch
 BATCH_SIZE = 128  # number of samples per gradient update
@@ -46,7 +68,9 @@ MAX_LAPS = 1  # max laps before sim stops
 FPS = 15
 
 # autoencoder-based self-assessment oracle settings
-NUM_EPOCHS_SAO_MODEL = 10  # training epochs for the autoencoder-based self-assessment oracle
+NUM_EPOCHS_SAO_MODEL = (
+    10  # training epochs for the autoencoder-based self-assessment oracle
+)
 SAO_LATENT_DIM = 2  # dimension of the latent space
 LOSS_SAO_MODEL = "MSE"  # "VAE"|"MSE" objective function for the autoencoder-based self-assessment oracle
 # DO NOT TOUCH THESE
@@ -57,5 +81,3 @@ SAO_LEARNING_RATE = 0.0001
 UNCERTAINTY_TOLERANCE_LEVEL = 0.00328  # from Michelmore et al.
 CTE_TOLERANCE_LEVEL = 2.5  # from Stocco et al.
 IMPROVEMENT_RATIO = 1
-
-

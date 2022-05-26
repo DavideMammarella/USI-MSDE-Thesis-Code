@@ -13,19 +13,21 @@ import utils
 from config import Config
 from utils import *
 
-if __name__ == '__main__':
-    os.chdir(os.getcwd().replace('scripts', ''))
+if __name__ == "__main__":
+    os.chdir(os.getcwd().replace("scripts", ""))
     print(os.getcwd())
 
     cfg = Config()
     cfg.from_pyfile("config_my.py")
 
-    print("Script to compare offline vs online (within Udacity's) uncertainty values")
+    print(
+        "Script to compare offline vs online (within Udacity's) uncertainty values"
+    )
 
     # load the online uncertainty from csv
-    path = os.path.join(cfg.TESTING_DATA_DIR,
-                        cfg.SIMULATION_NAME,
-                        'driving_log.csv')
+    path = os.path.join(
+        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
+    )
     data_df = pd.read_csv(path)
     online_uncertainty = data_df["uncertainty"]
     print("loaded %d uncertainty values" % len(online_uncertainty))
@@ -34,7 +36,9 @@ if __name__ == '__main__':
     data = data_df["center"]
     print("read %d images from file" % len(data))
 
-    dave2 = tensorflow.keras.models.load_model(Path(os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)))
+    dave2 = tensorflow.keras.models.load_model(
+        Path(os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME))
+    )
 
     offline_uncertainty = []
     all_errors = []
@@ -82,42 +86,83 @@ if __name__ == '__main__':
         all_errors.append(error)
         offline_uncertainty.append(uncertainty)
 
-    print("All predictions completed in %s (%s/s)." % (
-        str(round(total_time, 0)), str(round(total_time / len(online_uncertainty), 2))))
+    print(
+        "All predictions completed in %s (%s/s)."
+        % (
+            str(round(total_time, 0)),
+            str(round(total_time / len(online_uncertainty), 2)),
+        )
+    )
     print("Mean error %s." % (str(np.sum(all_errors) / len(all_errors))))
 
     # compute and plot the rec errors
     x_losses = np.arange(len(online_uncertainty))
-    plt.plot(x_losses, online_uncertainty, color='blue', alpha=0.2, label='online uncertainty')
-    plt.plot(x_losses, offline_uncertainty, color='red', alpha=0.2, label='offline uncertainty')
+    plt.plot(
+        x_losses,
+        online_uncertainty,
+        color="blue",
+        alpha=0.2,
+        label="online uncertainty",
+    )
+    plt.plot(
+        x_losses,
+        offline_uncertainty,
+        color="red",
+        alpha=0.2,
+        label="offline uncertainty",
+    )
 
-    plt.ylabel('uncertainty')
-    plt.xlabel('Frames')
-    plt.title("offline vs online (within Udacity's) uncertainty values (batch_size=" + str(batch_size) + ")")
+    plt.ylabel("uncertainty")
+    plt.xlabel("Frames")
+    plt.title(
+        "offline vs online (within Udacity's) uncertainty values (batch_size="
+        + str(batch_size)
+        + ")"
+    )
     plt.legend()
     plt.savefig("plots/online-vs-offline-uncertainty.png")
     plt.show()
 
-    print(stats.mannwhitneyu(online_uncertainty, pd.Series(offline_uncertainty)))
+    print(
+        stats.mannwhitneyu(online_uncertainty, pd.Series(offline_uncertainty))
+    )
 
     plt.figure(figsize=(80, 16))
     # display original
     ax = plt.subplot(1, 2, 1)
-    plt.imshow(mpimg.imread(data[min_idx]).reshape(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS))
+    plt.imshow(
+        mpimg.imread(data[min_idx]).reshape(
+            IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS
+        )
+    )
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
-    plt.title("min diff (offline=%s, online=%s)" % (round(offline_uncertainty[min_idx][0], 8),
-                                                    round(online_uncertainty[min_idx], 8)),
-              fontsize=50)
+    plt.title(
+        "min diff (offline=%s, online=%s)"
+        % (
+            round(offline_uncertainty[min_idx][0], 8),
+            round(online_uncertainty[min_idx], 8),
+        ),
+        fontsize=50,
+    )
 
     # display reconstruction
     ax = plt.subplot(1, 2, 2)
-    plt.imshow(mpimg.imread(data[max_idx]).reshape(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS))
+    plt.imshow(
+        mpimg.imread(data[max_idx]).reshape(
+            IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS
+        )
+    )
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
-    plt.title("max diff (offline=%s, online=%s)" % (round(offline_uncertainty[max_idx][0], 8),
-                                                    round(online_uncertainty[max_idx], 8)),
-              fontsize=50)
+    plt.title(
+        "max diff (offline=%s, online=%s)"
+        % (
+            round(offline_uncertainty[max_idx][0], 8),
+            round(online_uncertainty[max_idx], 8),
+        ),
+        fontsize=50,
+    )
 
     plt.savefig("plots/uncertainty-diff.png")
     plt.show()

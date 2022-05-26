@@ -9,44 +9,62 @@ import os
 
 import pandas as pd
 from keras import backend as K
+from vae_evaluate import get_results_mispredictions, load_or_compute_losses
 
-from selforacle import utils_vae
 from config import Config
+from selforacle import utils_vae
 from utils import load_all_images
-from vae_evaluate import load_or_compute_losses, get_results_mispredictions
 
 
 def evaluate_novelty_detection(cfg, track, condition, metric, technique):
     """
-        1. compute reconstruction error on nominal images
-        and compute the likely false positives
+    1. compute reconstruction error on nominal images
+    and compute the likely false positives
     """
 
     # 1. recompute the nominal threshold
-    cfg.SIMULATION_NAME = 'gauss-journal-' + track + '-nominal'
+    cfg.SIMULATION_NAME = "gauss-journal-" + track + "-nominal"
     dataset = load_all_images(cfg)
 
-    path = os.path.join(cfg.TESTING_DATA_DIR,
-                        cfg.SIMULATION_NAME,
-                        'driving_log.csv')
+    path = os.path.join(
+        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
+    )
     data_df_nominal = pd.read_csv(path)
 
     if cfg.USE_ONLY_CENTER_IMG:
-        name = cfg.TRACK + '-' + cfg.LOSS_SAO_MODEL + "-latent" + str(cfg.SAO_LATENT_DIM) + technique + metric
+        name = (
+            cfg.TRACK
+            + "-"
+            + cfg.LOSS_SAO_MODEL
+            + "-latent"
+            + str(cfg.SAO_LATENT_DIM)
+            + technique
+            + metric
+        )
     else:
-        name = cfg.TRACK + '-' + cfg.LOSS_SAO_MODEL + "-latent" + str(cfg.SAO_LATENT_DIM) + technique + metric
+        name = (
+            cfg.TRACK
+            + "-"
+            + cfg.LOSS_SAO_MODEL
+            + "-latent"
+            + str(cfg.SAO_LATENT_DIM)
+            + technique
+            + metric
+        )
 
     vae = utils_vae.load_vae_by_name(name)
 
-    original_losses = load_or_compute_losses(vae, dataset, name, delete_cache=True)
+    original_losses = load_or_compute_losses(
+        vae, dataset, name, delete_cache=True
+    )
 
     # 2. evaluate on novel conditions (rain)
-    cfg.SIMULATION_NAME = 'gauss-journal-' + track + condition
+    cfg.SIMULATION_NAME = "gauss-journal-" + track + condition
     dataset = load_all_images(cfg)
 
-    path = os.path.join(cfg.TESTING_DATA_DIR,
-                        cfg.SIMULATION_NAME,
-                        'driving_log.csv')
+    path = os.path.join(
+        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
+    )
     data_df_anomalous = pd.read_csv(path)
 
     new_losses = load_or_compute_losses(vae, dataset, name, delete_cache=True)
@@ -54,10 +72,16 @@ def evaluate_novelty_detection(cfg, track, condition, metric, technique):
     sim_name = cfg.SIMULATION_NAME
 
     for seconds in range(1, 4):  # 1, 2, 3
-        get_results_mispredictions(cfg, sim_name, name,
-                                   original_losses, new_losses,
-                                   data_df_nominal, data_df_anomalous,
-                                   seconds)
+        get_results_mispredictions(
+            cfg,
+            sim_name,
+            name,
+            original_losses,
+            new_losses,
+            data_df_nominal,
+            data_df_anomalous,
+            seconds,
+        )
 
     del vae
     K.clear_session()
@@ -65,7 +89,7 @@ def evaluate_novelty_detection(cfg, track, condition, metric, technique):
 
 
 def main():
-    os.chdir(os.getcwd().replace('scripts', ''))
+    os.chdir(os.getcwd().replace("scripts", ""))
     print(os.getcwd())
 
     cfg = Config()
@@ -78,5 +102,5 @@ def main():
     # evaluate_novelty_detection(cfg, cfg.TRACK, condition, metric, technique)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

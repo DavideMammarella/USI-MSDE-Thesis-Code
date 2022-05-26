@@ -9,7 +9,6 @@ import types
 
 
 class Config:
-
     def __init__(self):
         self.SAO_MODELS_DIR = None
         self.CTE_TOLERANCE_LEVEL = None
@@ -41,13 +40,13 @@ class Config:
 
     def from_pyfile(self, filename, silent=False):
         # filename = os.path.join(self.root_path, filename)
-        d = types.ModuleType('config')
+        d = types.ModuleType("config")
         d.__file__ = filename
         try:
-            with open(filename, mode='rb') as config_file:
-                exec(compile(config_file.read(), filename, 'exec'), d.__dict__)
+            with open(filename, mode="rb") as config_file:
+                exec(compile(config_file.read(), filename, "exec"), d.__dict__)
         except IOError as e:
-            e.strerror = 'Unable to load configuration file (%s)' % e.strerror
+            e.strerror = "Unable to load configuration file (%s)" % e.strerror
             raise
         self.from_object(d)
         return True
@@ -74,14 +73,15 @@ class Config:
 def load_config(config_path=None, myconfig="config_my.py"):
     if config_path is None:
         import __main__ as main
+
         main_path = os.path.dirname(os.path.realpath(main.__file__))
-        config_path = os.path.join(main_path, 'config_my.py')
+        config_path = os.path.join(main_path, "config_my.py")
         if not os.path.exists(config_path):
-            local_config = os.path.join(os.path.curdir, 'config_my.py')
+            local_config = os.path.join(os.path.curdir, "config_my.py")
             if os.path.exists(local_config):
                 config_path = local_config
 
-    print('loading config file: {}'.format(config_path))
+    print("loading config file: {}".format(config_path))
     cfg = Config()
     cfg.from_pyfile(config_path)
 
@@ -108,5 +108,5 @@ def load_config(config_path=None, myconfig="config_my.py"):
 
     print()
 
-    print('config loaded')
+    print("config loaded")
     return cfg

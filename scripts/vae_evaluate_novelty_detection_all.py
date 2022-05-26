@@ -6,11 +6,12 @@
 # file that should have been included as part of this package.
 import os
 
-from config import Config
 from vae_evaluate_novelty_detection import evaluate_novelty_detection
 
-if __name__ == '__main__':
-    os.chdir(os.getcwd().replace('scripts', ''))
+from config import Config
+
+if __name__ == "__main__":
+    os.chdir(os.getcwd().replace("scripts", ""))
     print(os.getcwd())
 
     cfg = Config()

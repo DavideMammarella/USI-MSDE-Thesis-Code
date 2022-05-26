@@ -4,13 +4,14 @@
 # developed within the ERC project PRECRIME
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
+import os
+
 from config import Config
 from selforacle.utils_vae import load_data_for_vae_training, load_vae
 from selforacle.vae_train import train_vae_model
-import os
 
-if __name__ == '__main__':
-    os.chdir(os.getcwd().replace('scripts', ''))
+if __name__ == "__main__":
+    os.chdir(os.getcwd().replace("scripts", ""))
     print(os.getcwd())
 
     cfg = Config()
@@ -32,7 +33,13 @@ if __name__ == '__main__':
                 x_train, x_test = load_data_for_vae_training(cfg)
 
                 vae, name = load_vae(cfg, load_vae_from_disk=False)
-                train_vae_model(cfg, vae, name, x_train, x_test,
-                                delete_model=True,
-                                retraining=False,
-                                sample_weights=None)
+                train_vae_model(
+                    cfg,
+                    vae,
+                    name,
+                    x_train,
+                    x_test,
+                    delete_model=True,
+                    retraining=False,
+                    sample_weights=None,
+                )

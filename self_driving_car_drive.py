@@ -8,14 +8,13 @@
 import base64
 import logging
 import os
-import sched, time
+import sched
+import threading
+import time
 from datetime import datetime
 from pathlib import Path
 
-import threading
-
 import tensorflow
-
 import uncertainty_wizard as uwiz
 from tensorflow import keras
 
@@ -31,17 +30,17 @@ from warnings import simplefilter
 # ignore all future warnings
 simplefilter(action="ignore", category=FutureWarning)
 
-import numpy as np
-
-import socketio
-import eventlet.wsgi
-from PIL import Image
-from flask import Flask
 from io import BytesIO
 
+import eventlet.wsgi
+import numpy as np
+import socketio
+from flask import Flask
+from PIL import Image
 from tensorflow.keras.models import load_model
-from utils import rmse, crop, resize
+
 from selforacle.vae import VAE, normalize_and_reshape
+from utils import crop, resize, rmse
 
 sio = socketio.Server(logger=True)
 app = Flask(__name__)
@@ -53,6 +52,7 @@ autoencoder_model = None
 frame_id = 0
 batch_size = 120
 uncertainty = -1
+
 
 def quantify_uncertainty_thread(image):
     threading.Timer(10, quantify_uncertainty_thread, args=image).start()
@@ -145,11 +145,11 @@ def telemetry(sid, data):
                 #     uncertainty = outputs[0][0]
                 # else:
 
-                    # save predictions from a sample pass
-                    outputs = model.predict(image)
+                # save predictions from a sample pass
+                outputs = model.predict(image)
 
-                    # average over all passes is the final steering angle
-                    steering_angle = outputs[0][0]
+                # average over all passes is the final steering angle
+                steering_angle = outputs[0][0]
 
             else:
                 steering_angle = float(model.predict(image, batch_size=1))
@@ -176,11 +176,18 @@ def telemetry(sid, data):
             global frame_id
 
             send_control(
-                steering_angle, throttle, confidence, loss, cfg.MAX_LAPS, uncertainty
+                steering_angle,
+                throttle,
+                confidence,
+                loss,
+                cfg.MAX_LAPS,
+                uncertainty,
             )
 
             if cfg.TESTING_DATA_DIR:
-                csv_path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME)
+                csv_path = os.path.join(
+                    cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME
+                )
                 utils.write_csv_line(
                     csv_path,
                     [
@@ -216,14 +223,18 @@ def telemetry(sid, data):
     else:
         sio.emit("manual", data={}, skip_sid=True)  # DO NOT CHANGE THIS
 
+
 # DO NOT CHANGE THIS
 @sio.on("connect")
 def connect(sid, environ):
     print("connect ", sid)
     send_control(0, 0, 1, 0, 1, 1)
 
+
 # DO NOT CHANGE THIS
-def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertainty):
+def send_control(
+    steering_angle, throttle, confidence, loss, max_laps, uncertainty
+):
     sio.emit(
         "steer",
         data={
@@ -251,19 +262,31 @@ if __name__ == "__main__":
     if cfg.SDC_MODEL_TYPE == "uwiz":
         model = uwiz.models.load_model(model_path)
     elif cfg.SDC_MODEL_TYPE == "chauffeur":
-        model = tensorflow.keras.models.load_model(model_path, custom_objects={"rmse": rmse})
-    elif cfg.SDC_MODEL_TYPE == "dave2" or cfg.SDC_MODEL_TYPE == "epoch" or cfg.SDC_MODEL_TYPE == "commaai":
+        model = tensorflow.keras.models.load_model(
+            model_path, custom_objects={"rmse": rmse}
+        )
+    elif (
+        cfg.SDC_MODEL_TYPE == "dave2"
+        or cfg.SDC_MODEL_TYPE == "epoch"
+        or cfg.SDC_MODEL_TYPE == "commaai"
+    ):
         model = tensorflow.keras.models.load_model(model_path)
     else:
-         print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
-         exit()
+        print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
+        exit()
 
     # load the self-assessment oracle model
     encoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR + os.path.sep + "encoder-" + cfg.ANOMALY_DETECTOR_NAME
+        cfg.SAO_MODELS_DIR
+        + os.path.sep
+        + "encoder-"
+        + cfg.ANOMALY_DETECTOR_NAME
     )
     decoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR + os.path.sep + "decoder-" + cfg.ANOMALY_DETECTOR_NAME
+        cfg.SAO_MODELS_DIR
+        + os.path.sep
+        + "decoder-"
+        + cfg.ANOMALY_DETECTOR_NAME
     )
 
     anomaly_detection = VAE(

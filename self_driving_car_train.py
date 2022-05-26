@@ -46,34 +46,45 @@ def load_data(cfg):
 
     for drive_style in drive:
         try:
-            path = os.path.join(cfg.TRAINING_DATA_DIR,
-                                cfg.TRAINING_SET_DIR,
-                                cfg.TRACK,
-                                drive_style,
-                                'driving_log.csv')
+            path = os.path.join(
+                cfg.TRAINING_DATA_DIR,
+                cfg.TRAINING_SET_DIR,
+                cfg.TRACK,
+                drive_style,
+                "driving_log.csv",
+            )
             data_df = pd.read_csv(path)
             if x is None:
-                x = data_df[['center', 'left', 'right']].values
-                y = data_df['steering'].values
+                x = data_df[["center", "left", "right"]].values
+                y = data_df["steering"].values
             else:
-                x = np.concatenate((x, data_df[['center', 'left', 'right']].values), axis=0)
-                y = np.concatenate((y, data_df['steering'].values), axis=0)
+                x = np.concatenate(
+                    (x, data_df[["center", "left", "right"]].values), axis=0
+                )
+                y = np.concatenate((y, data_df["steering"].values), axis=0)
         except FileNotFoundError:
             print("Unable to read file %s" % path)
             continue
 
     if x is None:
-        print("No driving data_nominal were provided for training. Provide correct paths to the driving_log.csv files")
+        print(
+            "No driving data_nominal were provided for training. Provide correct paths to the driving_log.csv files"
+        )
         exit()
 
     try:
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=cfg.TEST_SIZE, random_state=0)
+        x_train, x_test, y_train, y_test = train_test_split(
+            x, y, test_size=cfg.TEST_SIZE, random_state=0
+        )
     except TypeError:
         print("Missing header to csv files")
         exit()
 
     duration_train = time.time() - start
-    print("Loading training set completed in %s." % str(datetime.timedelta(seconds=round(duration_train))))
+    print(
+        "Loading training set completed in %s."
+        % str(datetime.timedelta(seconds=round(duration_train)))
+    )
 
     print("Data set: " + str(len(x)) + " elements")
     print("Training set: " + str(len(x_train)) + " elements")
@@ -86,25 +97,30 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
     Train the self-driving car model
     """
     if cfg.USE_PREDICTIVE_UNCERTAINTY:
-        name = os.path.join(cfg.SDC_MODELS_DIR,
-                            cfg.TRACK + '-' + cfg.SDC_MODEL_TYPE + '-mc' + '-{epoch:03d}')
+        name = os.path.join(
+            cfg.SDC_MODELS_DIR,
+            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-mc" + "-{epoch:03d}",
+        )
     else:
-        name = os.path.join(cfg.SDC_MODELS_DIR,
-                            cfg.TRACK + '-' + cfg.SDC_MODEL_TYPE.replace('.h5', '') + '-{epoch:03d}.h5')
+        name = os.path.join(
+            cfg.SDC_MODELS_DIR,
+            cfg.TRACK
+            + "-"
+            + cfg.SDC_MODEL_TYPE.replace(".h5", "")
+            + "-{epoch:03d}.h5",
+        )
 
     checkpoint = ModelCheckpoint(
-        name,
-        monitor='val_loss',
-        verbose=0,
-        save_best_only=True,
-        mode='auto')
+        name, monitor="val_loss", verbose=0, save_best_only=True, mode="auto"
+    )
 
-    early_stop = keras.callbacks.EarlyStopping(monitor='loss',
-                                               min_delta=.0005,
-                                               patience=10,
-                                               mode='auto')
+    early_stop = keras.callbacks.EarlyStopping(
+        monitor="loss", min_delta=0.0005, patience=10, mode="auto"
+    )
 
-    model.compile(loss='mean_squared_error', optimizer=Adam(lr=cfg.LEARNING_RATE))
+    model.compile(
+        loss="mean_squared_error", optimizer=Adam(lr=cfg.LEARNING_RATE)
+    )
 
     x_train, y_train = shuffle(x_train, y_train, random_state=0)
     x_test, y_test = shuffle(x_test, y_test, random_state=0)
@@ -112,26 +128,36 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
     train_generator = Generator(x_train, y_train, True, cfg)
     val_generator = Generator(x_test, y_test, False, cfg)
 
-    history = model.fit(train_generator,
-                        validation_data=val_generator,
-                        epochs=cfg.NUM_EPOCHS_SDC_MODEL,
-                        callbacks=[checkpoint, early_stop],
-                        verbose=1)
+    history = model.fit(
+        train_generator,
+        validation_data=val_generator,
+        epochs=cfg.NUM_EPOCHS_SDC_MODEL,
+        callbacks=[checkpoint, early_stop],
+        verbose=1,
+    )
 
     # summarize history for loss
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'val'], loc='upper left')
+    plt.plot(history.history["loss"])
+    plt.plot(history.history["val_loss"])
+    plt.title("model loss")
+    plt.ylabel("loss")
+    plt.xlabel("epoch")
+    plt.legend(["train", "val"], loc="upper left")
     plt.show()
 
     if cfg.USE_PREDICTIVE_UNCERTAINTY:
-        name = os.path.join(cfg.SDC_MODELS_DIR,
-                            cfg.TRACK + '-' + cfg.SDC_MODEL_TYPE + '-mc-final')
+        name = os.path.join(
+            cfg.SDC_MODELS_DIR,
+            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-mc-final",
+        )
     else:
-        name = os.path.join(cfg.SDC_MODELS_DIR, cfg.TRACK + '-' + cfg.SDC_MODEL_TYPE.replace('.h5', '') + '-final.h5')
+        name = os.path.join(
+            cfg.SDC_MODELS_DIR,
+            cfg.TRACK
+            + "-"
+            + cfg.SDC_MODEL_TYPE.replace(".h5", "")
+            + "-final.h5",
+        )
 
     # save the last model anyway (might not be the best)
     model.save(name)
@@ -151,5 +177,5 @@ def main():
     train_model(model, cfg, x_train, x_test, y_train, y_test)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -5,8 +5,8 @@
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
 import datetime
-import os
 import gc
+import os
 import shutil
 import time
 from pathlib import Path
@@ -17,11 +17,13 @@ from keras import backend as K
 from sklearn.utils import shuffle
 
 from config import Config
-from selforacle.utils_vae import load_vae, load_data_for_vae_training
+from selforacle.utils_vae import load_data_for_vae_training, load_vae
 from selforacle.vae_batch_generator import Generator
 
 
-def train_vae_model(cfg, vae, name, x_train, x_test, delete_model, retraining, sample_weights):
+def train_vae_model(
+    cfg, vae, name, x_train, x_test, delete_model, retraining, sample_weights
+):
     """
     Train the VAE model
     """
@@ -40,11 +42,21 @@ def train_vae_model(cfg, vae, name, x_train, x_test, delete_model, retraining, s
 
     if my_encoder.exists() and my_decoder.exists():
         if retraining:
-            print("Model %s already exists and retraining=true. Keep training." % str(name))
-            my_encoder = Path(os.path.join(cfg.SAO_MODELS_DIR, "encoder-" + name))
-            my_decoder = Path(os.path.join(cfg.SAO_MODELS_DIR, "decoder-" + name))
+            print(
+                "Model %s already exists and retraining=true. Keep training."
+                % str(name)
+            )
+            my_encoder = Path(
+                os.path.join(cfg.SAO_MODELS_DIR, "encoder-" + name)
+            )
+            my_decoder = Path(
+                os.path.join(cfg.SAO_MODELS_DIR, "decoder-" + name)
+            )
         else:
-            print("Model %s already exists and retraining=false. Quit training." % str(name))
+            print(
+                "Model %s already exists and retraining=false. Quit training."
+                % str(name)
+            )
             return
     else:
         print("Model %s does not exist. Training." % str(name))
@@ -65,28 +77,37 @@ def train_vae_model(cfg, vae, name, x_train, x_test, delete_model, retraining, s
     train_generator = Generator(x_train, True, cfg, weights)
     val_generator = Generator(x_test, True, cfg, weights)
 
-    history = vae.fit(train_generator,
-                      validation_data=val_generator,
-                      shuffle=True,
-                      epochs=cfg.NUM_EPOCHS_SAO_MODEL,
-                      verbose=0)
+    history = vae.fit(
+        train_generator,
+        validation_data=val_generator,
+        shuffle=True,
+        epochs=cfg.NUM_EPOCHS_SAO_MODEL,
+        verbose=0,
+    )
 
     duration_train = time.time() - start
-    print("Training completed in %s." % str(datetime.timedelta(seconds=round(duration_train))))
+    print(
+        "Training completed in %s."
+        % str(datetime.timedelta(seconds=round(duration_train)))
+    )
 
     # Plot the autoencoder training history
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_total_loss'])
-    plt.ylabel('reconstruction loss (' + str(cfg.LOSS_SAO_MODEL) + ')')
-    plt.xlabel('epoch')
-    plt.title('training-' + str(vae.model_name))
-    plt.legend(['train', 'val'], loc='upper left')
-    plt.savefig('plots/history-training-' + str(vae.model_name) + '.png')
+    plt.plot(history.history["loss"])
+    plt.plot(history.history["val_total_loss"])
+    plt.ylabel("reconstruction loss (" + str(cfg.LOSS_SAO_MODEL) + ")")
+    plt.xlabel("epoch")
+    plt.title("training-" + str(vae.model_name))
+    plt.legend(["train", "val"], loc="upper left")
+    plt.savefig("plots/history-training-" + str(vae.model_name) + ".png")
     plt.show()
 
     # save the last model
-    vae.encoder.save(my_encoder.__str__(), save_format="tf", include_optimizer=True)
-    vae.decoder.save(my_decoder.__str__(), save_format="tf", include_optimizer=True)
+    vae.encoder.save(
+        my_encoder.__str__(), save_format="tf", include_optimizer=True
+    )
+    vae.decoder.save(
+        my_decoder.__str__(), save_format="tf", include_optimizer=True
+    )
 
     del vae
     K.clear_session()
@@ -94,7 +115,7 @@ def train_vae_model(cfg, vae, name, x_train, x_test, delete_model, retraining, s
 
 
 def main():
-    os.chdir(os.getcwd().replace('selforacle', ''))
+    os.chdir(os.getcwd().replace("selforacle", ""))
     print(os.getcwd())
 
     cfg = Config()
@@ -102,8 +123,17 @@ def main():
 
     x_train, x_test = load_data_for_vae_training(cfg)
     vae, name = load_vae(cfg, load_vae_from_disk=False)
-    train_vae_model(cfg, vae, name, x_train, x_test, delete_model=True, retraining=False, sample_weights=None)
+    train_vae_model(
+        cfg,
+        vae,
+        name,
+        x_train,
+        x_test,
+        delete_model=True,
+        retraining=False,
+        sample_weights=None,
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

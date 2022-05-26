@@ -5,19 +5,23 @@ import sys
 
 sys.path.append("..")
 
-from tqdm import tqdm
+import csv
 import os
 import pathlib
 from pathlib import Path
-import csv
+
+from tqdm import tqdm
+
 from config import Config
 
 
 class MyDictReader(csv.DictReader):
-
     @property
     def fieldnames(self):
-        fields = ["_".join(field.lower().split()) for field in super(MyDictReader, self).fieldnames]
+        fields = [
+            "_".join(field.lower().split())
+            for field in super(MyDictReader, self).fieldnames
+        ]
         for i in range(len(fields)):
             if fields[i].startswith("self_driving"):
                 fields[i] = "model"
@@ -32,25 +36,52 @@ class MyDictReader(csv.DictReader):
 
 def check_driving_log(csv_file, csv_file_normalized):
     with open(csv_file) as f:
-        driving_log = [{k: v for k, v in row.items()}
-                       for row in MyDictReader(f, skipinitialspace=True)]
+        driving_log = [
+            {k: v for k, v in row.items()}
+            for row in MyDictReader(f, skipinitialspace=True)
+        ]
     with open(csv_file_normalized) as f_normalized:
-        driving_log_to_check = [{k: v for k, v in row.items()}
-                                for row in MyDictReader(f_normalized, skipinitialspace=True)]
+        driving_log_to_check = [
+            {k: v for k, v in row.items()}
+            for row in MyDictReader(f_normalized, skipinitialspace=True)
+        ]
     for d in tqdm(driving_log, position=0, leave=False):
         for d_to_check in driving_log_to_check:
             if d.get("frameid") == d_to_check.get("frame_id"):
-                assert normalize_img_path(str(d.get("center"))) == d_to_check.get("center")
+                assert normalize_img_path(
+                    str(d.get("center"))
+                ) == d_to_check.get("center")
     f.close()
     f_normalized.close()
+
 
 def write_driving_log(dict, sim_path):
     csv_file_normalized = sim_path / "driving_log_normalized.csv"
 
     with csv_file_normalized.open(mode="w") as f_normalized:
-        headers = ["frame_id", "model", "anomaly_detector", "threshold", "sim_name", "lap", "waypoint", "loss",
-                   "uncertainty", "cte", "steering_angle", "throttle", "speed", "brake", "crashed", "distance", "time",
-                   "ang_diff", "center", "tot_OBEs", "tot_crashes"]
+        headers = [
+            "frame_id",
+            "model",
+            "anomaly_detector",
+            "threshold",
+            "sim_name",
+            "lap",
+            "waypoint",
+            "loss",
+            "uncertainty",
+            "cte",
+            "steering_angle",
+            "throttle",
+            "speed",
+            "brake",
+            "crashed",
+            "distance",
+            "time",
+            "ang_diff",
+            "center",
+            "tot_OBEs",
+            "tot_crashes",
+        ]
         writer = csv.DictWriter(f_normalized, fieldnames=headers)
         writer.writeheader()
         for data in dict:
@@ -69,48 +100,58 @@ def normalize_simulation(sim_path):
     csv_file = sim_path / "driving_log.csv"
 
     with open(csv_file) as f:
-        driving_log = [{k: v for k, v in row.items()}
-                       for row in MyDictReader(f, skipinitialspace=True)]
+        driving_log = [
+            {k: v for k, v in row.items()}
+            for row in MyDictReader(f, skipinitialspace=True)
+        ]
 
     final_output = []
     for d in driving_log:
         final_output.append(
-            {'frame_id': d.get("frameid"),
-             'model': str(d.get("model", "")).rsplit("/", 1)[-1],
-             'anomaly_detector': str(d.get("anomaly_detector", "")).rsplit("/", 1)[-1],
-             'threshold': d.get("threshold", ""),
-             'sim_name': d.get("sim_name", ""),
-             'lap': d.get("lap", ""),
-             'waypoint': d.get("waypoint", ""),
-             'loss': d.get("loss", ""),
-             'uncertainty': d.get("uncertainty", ""),
-             'cte': d.get("cte", ""),
-             'steering_angle': d.get("steering_angle", ""),
-             'throttle': d.get("throttle", ""),
-             'speed': d.get("speed", ""),
-             'brake': d.get("brake", ""),
-             'crashed': d.get("crashed", ""),
-             'distance': d.get("distance", ""),
-             'time': d.get("time", ""),
-             'ang_diff': d.get("ang_diff", ""),
-             'center': normalize_img_path(str(d.get("center"))),
-             'tot_OBEs': d.get("tot_obes", ""),
-             'tot_crashes': d.get("tot_crashes", "")
-             })
+            {
+                "frame_id": d.get("frameid"),
+                "model": str(d.get("model", "")).rsplit("/", 1)[-1],
+                "anomaly_detector": str(d.get("anomaly_detector", "")).rsplit(
+                    "/", 1
+                )[-1],
+                "threshold": d.get("threshold", ""),
+                "sim_name": d.get("sim_name", ""),
+                "lap": d.get("lap", ""),
+                "waypoint": d.get("waypoint", ""),
+                "loss": d.get("loss", ""),
+                "uncertainty": d.get("uncertainty", ""),
+                "cte": d.get("cte", ""),
+                "steering_angle": d.get("steering_angle", ""),
+                "throttle": d.get("throttle", ""),
+                "speed": d.get("speed", ""),
+                "brake": d.get("brake", ""),
+                "crashed": d.get("crashed", ""),
+                "distance": d.get("distance", ""),
+                "time": d.get("time", ""),
+                "ang_diff": d.get("ang_diff", ""),
+                "center": normalize_img_path(str(d.get("center"))),
+                "tot_OBEs": d.get("tot_obes", ""),
+                "tot_crashes": d.get("tot_crashes", ""),
+            }
+        )
     f.close()
 
     return final_output
 
 
 def collect_simulations(sims_path):
-    _, dirs, _ = next(os.walk(sims_path))  # list all folders in simulations_path (only top level)
+    _, dirs, _ = next(
+        os.walk(sims_path)
+    )  # list all folders in simulations_path (only top level)
     sims = [d for d in dirs]  # collect all simulations name
     print(">> Simulations to evaluate:\t", len(sims))
     return sims
 
 
 def main():
-    curr_project_path = Path(os.path.normpath(os.getcwd() + os.sep + os.pardir))  # overcome OS issues
+    curr_project_path = Path(
+        os.path.normpath(os.getcwd() + os.sep + os.pardir)
+    )  # overcome OS issues
 
     cfg = Config()
     cfg_pyfile_path = curr_project_path / "config_my.py"
@@ -125,7 +166,9 @@ def main():
         sim_path = Path(curr_project_path, cfg.SIMULATIONS_DIR, sim)
         print("\nAnalyzing simulation: " + str(sim_path))
         csv_file_normalized = sim_path / "driving_log_normalized.csv"
-        if os.path.exists(csv_file_normalized) and os.path.isfile(csv_file_normalized):
+        if os.path.exists(csv_file_normalized) and os.path.isfile(
+            csv_file_normalized
+        ):
             os.remove(csv_file_normalized)
             print(">> Normalized CSV file already exists, deleting it..")
         print("Normalizing CSV for simulation: " + str(sim_path))
@@ -134,11 +177,12 @@ def main():
         print("Writing CSV for simulation: " + str(sim_path))
         write_driving_log(dict_to_print, sim_path)
         print(">> CSV written!")
-        #print("Check CSV integrity (Original vs Normalized)...")
-        #check_driving_log(Path(sim_path / "driving_log.csv"), Path(sim_path / "driving_log_normalized.csv"))
-        #print(">> Normalized CSV is OK!")
+        # print("Check CSV integrity (Original vs Normalized)...")
+        # check_driving_log(Path(sim_path / "driving_log.csv"), Path(sim_path / "driving_log_normalized.csv"))
+        # print(">> Normalized CSV is OK!")
 
     print(">> Simulations normalized: ", i)
+
 
 if __name__ == "__main__":
     main()

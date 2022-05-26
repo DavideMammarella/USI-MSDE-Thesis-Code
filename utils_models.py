@@ -4,11 +4,11 @@
 # developed within the ERC project PRECRIME
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
+import uncertainty_wizard as uwiz
 from tensorflow import keras
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Lambda, Conv2D, Dropout, Flatten, Dense
+from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, Lambda
 from tensorflow.keras.regularizers import l2
-import uncertainty_wizard as uwiz
 
 from utils import INPUT_SHAPE
 
@@ -37,16 +37,54 @@ def create_model(use_dropout):
         Uwiz model w Dropout layers
         """
         model = uwiz.models.StochasticSequential()
-        model.add(Lambda(lambda x: x / 127.5 - 1.0, input_shape=INPUT_SHAPE, name="lambda_layer"))
-        model.add(Conv2D(24, (5, 5), activation="relu", strides=(2, 2), kernel_regularizer=l2(1.0e-6), ))
+        model.add(
+            Lambda(
+                lambda x: x / 127.5 - 1.0,
+                input_shape=INPUT_SHAPE,
+                name="lambda_layer",
+            )
+        )
+        model.add(
+            Conv2D(
+                24,
+                (5, 5),
+                activation="relu",
+                strides=(2, 2),
+                kernel_regularizer=l2(1.0e-6),
+            )
+        )
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(36, (5, 5), activation="relu", strides=(2, 2), kernel_regularizer=l2(1.0e-6), ))
+        model.add(
+            Conv2D(
+                36,
+                (5, 5),
+                activation="relu",
+                strides=(2, 2),
+                kernel_regularizer=l2(1.0e-6),
+            )
+        )
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(48, (5, 5), activation="relu", strides=(2, 2), kernel_regularizer=l2(1.0e-6), ))
+        model.add(
+            Conv2D(
+                48,
+                (5, 5),
+                activation="relu",
+                strides=(2, 2),
+                kernel_regularizer=l2(1.0e-6),
+            )
+        )
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
+        model.add(
+            Conv2D(
+                64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)
+            )
+        )
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
+        model.add(
+            Conv2D(
+                64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)
+            )
+        )
         model.add(Dropout(rate=0.05))
         model.add(Flatten())
         model.add(Dense(100, activation="relu", kernel_regularizer=l2(1.0e-6)))

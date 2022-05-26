@@ -22,13 +22,38 @@ IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 160, 320, 3
 # INPUT_SHAPE = (IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS)
 INPUT_SHAPE = (RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS)
 
-csv_fieldnames_original_simulator = ["center", "left", "right", "steering", "throttle", "brake", "speed"]
-csv_fieldnames_improved_simulator = ["frameId", "model", "anomaly_detector", "threshold", "sim_name",
-                                     "lap", "waypoint", "loss",
-                                     "uncertainty",  # newly added
-                                     "cte", "steering_angle", "throttle", "speed", "brake", "crashed",
-                                     "distance", "time", "ang_diff",  # newly added
-                                     "center", "tot_OBEs", "tot_crashes"]
+csv_fieldnames_original_simulator = [
+    "center",
+    "left",
+    "right",
+    "steering",
+    "throttle",
+    "brake",
+    "speed",
+]
+csv_fieldnames_improved_simulator = [
+    "frameId",
+    "model",
+    "anomaly_detector",
+    "threshold",
+    "sim_name",
+    "lap",
+    "waypoint",
+    "loss",
+    "uncertainty",  # newly added
+    "cte",
+    "steering_angle",
+    "throttle",
+    "speed",
+    "brake",
+    "crashed",
+    "distance",
+    "time",
+    "ang_diff",  # newly added
+    "center",
+    "tot_OBEs",
+    "tot_crashes",
+]
 
 
 def load_image(data_dir, image_file):
@@ -36,7 +61,11 @@ def load_image(data_dir, image_file):
     Load RGB images from a file
     """
     image_dir = data_dir
-    local_path = "/".join(image_file.split("/")[-4:-1]) + "/" + image_file.split("/")[-1]
+    local_path = (
+        "/".join(image_file.split("/")[-4:-1])
+        + "/"
+        + image_file.split("/")[-1]
+    )
     img_path = "{0}/{1}".format(image_dir, local_path)
     try:
         return mpimg.imread(img_path)
@@ -56,7 +85,9 @@ def resize(image):
     """
     Resize the image to the input_image shape used by the network model
     """
-    return cv2.resize(image, (RESIZED_IMAGE_WIDTH, RESIZED_IMAGE_HEIGHT), cv2.INTER_AREA)
+    return cv2.resize(
+        image, (RESIZED_IMAGE_WIDTH, RESIZED_IMAGE_HEIGHT), cv2.INTER_AREA
+    )
 
 
 def rgb2yuv(image):
@@ -64,7 +95,7 @@ def rgb2yuv(image):
     Convert the image from RGB to YUV (This is what the NVIDIA model does)
     """
     # return cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
-    return cv2.cvtColor(image.astype('uint8') * 255, cv2.COLOR_RGB2YUV)
+    return cv2.cvtColor(image.astype("uint8") * 255, cv2.COLOR_RGB2YUV)
 
 
 def preprocess(image):
@@ -124,7 +155,7 @@ def random_shadow(image):
     xm, ym = np.mgrid[0:IMAGE_HEIGHT, 0:IMAGE_WIDTH]
 
     # mathematically speaking, we want to set 1 below the line and zero otherwise
-    # Our coordinate is up side down.  So, the above the line: 
+    # Our coordinate is up side down.  So, the above the line:
     # (ym-y1)/(xm-x1) > (y2-y1)/(x2-x1)
     # as x2 == x1 causes zero-division problem, we'll write it in the below form:
     # (ym-y1)*(x2-x1) - (y2-y1)*(xm-x1) > 0
@@ -152,15 +183,21 @@ def random_brightness(image):
     return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
 
-def augment(data_dir, center, left, right, steering_angle, range_x=100, range_y=10):
+def augment(
+    data_dir, center, left, right, steering_angle, range_x=100, range_y=10
+):
     """
     Generate an augmented image and adjust steering angle.
     (The steering angle is associated with the center image)
     """
-    image, steering_angle = choose_image(data_dir, center, left, right, steering_angle)
+    image, steering_angle = choose_image(
+        data_dir, center, left, right, steering_angle
+    )
     # TODO: flip should be applied to left/right only and w/ no probability
     image, steering_angle = random_flip(image, steering_angle)
-    image, steering_angle = random_translate(image, steering_angle, range_x, range_y)
+    image, steering_angle = random_translate(
+        image, steering_angle, range_x, range_y
+    )
     image = random_shadow(image)
     image = random_brightness(image)
     return image, steering_angle
@@ -176,12 +213,14 @@ def rmse(y_true, y_pred):
 def write_csv_line(filename, row):
     if filename is not None:
         filename += "/driving_log.csv"
-        with open(filename, mode='a') as result_file:
-            writer = csv.writer(result_file,
-                                delimiter=',',
-                                quotechar='"',
-                                quoting=csv.QUOTE_MINIMAL,
-                                lineterminator='\n')
+        with open(filename, mode="a") as result_file:
+            writer = csv.writer(
+                result_file,
+                delimiter=",",
+                quotechar='"',
+                quoting=csv.QUOTE_MINIMAL,
+                lineterminator="\n",
+            )
             writer.writerow(row)
             result_file.flush()
             result_file.close()
@@ -195,8 +234,14 @@ def create_csv_results_file_header(file_name, fieldnames):
     """
     if file_name is not None:
         file_name += "/driving_log.csv"
-        with open(file_name, mode='w', newline='') as result_file:
-            csv.writer(result_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
+        with open(file_name, mode="w", newline="") as result_file:
+            csv.writer(
+                result_file,
+                delimiter=",",
+                quotechar='"',
+                quoting=csv.QUOTE_MINIMAL,
+                lineterminator="\n",
+            )
             writer = csv.DictWriter(result_file, fieldnames=fieldnames)
             writer.writeheader()
             result_file.flush()
@@ -228,8 +273,12 @@ def load_driving_data_log(cfg: object) -> object:
     path = None
     data_df = None
     try:
-        data_df = pd.read_csv(os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, 'driving_log.csv'),
-                              keep_default_na=False)
+        data_df = pd.read_csv(
+            os.path.join(
+                cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
+            ),
+            keep_default_na=False,
+        )
     except FileNotFoundError:
         print("Unable to read file %s" % path)
         exit()
@@ -263,29 +312,33 @@ def load_improvement_set(cfg, ids):
     path = None
 
     try:
-        path = os.path.join(cfg.TESTING_DATA_DIR,
-                            cfg.SIMULATION_NAME,
-                            'driving_log.csv')
+        path = os.path.join(
+            cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
+        )
         data_df = pd.read_csv(path)
 
         print("Filtering only false positives")
-        data_df = data_df[data_df['frameId'].isin(ids)]
+        data_df = data_df[data_df["frameId"].isin(ids)]
 
         if x is None:
-            x = data_df[['center']].values
+            x = data_df[["center"]].values
         else:
-            x = np.concatenate((x, data_df[['center']].values), axis=0)
+            x = np.concatenate((x, data_df[["center"]].values), axis=0)
 
     except FileNotFoundError:
         print("Unable to read file %s" % path)
 
     if x is None:
-        print("No driving data_nominal were provided for training. Provide correct paths to the driving_log.csv files")
+        print(
+            "No driving data_nominal were provided for training. Provide correct paths to the driving_log.csv files"
+        )
         exit()
 
     duration_train = time.time() - start
-    print("Loading improvement data_nominal set completed in %s." % str(
-        datetime.timedelta(seconds=round(duration_train))))
+    print(
+        "Loading improvement data_nominal set completed in %s."
+        % str(datetime.timedelta(seconds=round(duration_train)))
+    )
 
     print("False positive data_nominal set: " + str(len(x)) + " elements")
 
@@ -296,9 +349,9 @@ def load_all_images(cfg):
     """
     Load the actual images (not the paths!) in the cfg.SIMULATION_NAME directory.
     """
-    path = os.path.join(cfg.TESTING_DATA_DIR,
-                        cfg.SIMULATION_NAME,
-                        'driving_log.csv')
+    path = os.path.join(
+        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
+    )
     data_df = pd.read_csv(path)
 
     x = data_df["center"]
@@ -320,14 +373,19 @@ def load_all_images(cfg):
         images[i] = image
 
     duration_train = time.time() - start
-    print("Loading data_nominal set completed in %s." % str(datetime.timedelta(seconds=round(duration_train))))
+    print(
+        "Loading data_nominal set completed in %s."
+        % str(datetime.timedelta(seconds=round(duration_train)))
+    )
 
     print("Data set: " + str(len(images)) + " elements")
 
     return images
 
 
-def plot_reconstruction_losses(losses, new_losses, name, threshold, new_threshold, data_df):
+def plot_reconstruction_losses(
+    losses, new_losses, name, threshold, new_threshold, data_df
+):
     """
     Plots the reconstruction errors for one or two sets of losses, along with given thresholds.
     Crashes are visualized in red.
@@ -337,26 +395,41 @@ def plot_reconstruction_losses(losses, new_losses, name, threshold, new_threshol
 
     x_threshold = np.arange(len(x_losses))
     y_threshold = [threshold] * len(x_threshold)
-    plt.plot(x_threshold, y_threshold, '--', color='black', alpha=0.4, label='threshold')
+    plt.plot(
+        x_threshold,
+        y_threshold,
+        "--",
+        color="black",
+        alpha=0.4,
+        label="threshold",
+    )
 
     # visualize crashes
     crashes = data_df[data_df["crashed"] == 1]
     is_crash = (crashes.crashed - 1) + threshold
-    plt.plot(is_crash, 'x:r', markersize=4)
+    plt.plot(is_crash, "x:r", markersize=4)
 
     if new_threshold is not None:
-        plt.plot(x_threshold, [new_threshold] * len(x_threshold), color='red', alpha=0.4, label='new threshold')
+        plt.plot(
+            x_threshold,
+            [new_threshold] * len(x_threshold),
+            color="red",
+            alpha=0.4,
+            label="new threshold",
+        )
 
-    plt.plot(x_losses, losses, '-.', color='blue', alpha=0.7, label='original')
+    plt.plot(x_losses, losses, "-.", color="blue", alpha=0.7, label="original")
     if new_losses is not None:
-        plt.plot(x_losses, new_losses, color='green', alpha=0.7, label='retrained')
+        plt.plot(
+            x_losses, new_losses, color="green", alpha=0.7, label="retrained"
+        )
 
     plt.legend()
-    plt.ylabel('Loss')
-    plt.xlabel('Number of Instances')
+    plt.ylabel("Loss")
+    plt.xlabel("Number of Instances")
     plt.title("Reconstruction error for " + name)
 
-    plt.savefig('plots/reconstruction-plot-' + name + '.png')
+    plt.savefig("plots/reconstruction-plot-" + name + ".png")
 
     plt.show()
 

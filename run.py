@@ -6,46 +6,51 @@
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
 
+import base64
+import logging
+
 # Standard library import ----------------------------------------------------------------------------------------------
 import os
+import sched
+import signal
 import sys
+import time
+from datetime import datetime
+from io import BytesIO
+from pathlib import Path
 from sys import exit
 from warnings import simplefilter
-from datetime import datetime
-from pathlib import Path
-from PIL import Image
-import sched, time
+
+import eventlet.wsgi
 import numpy as np
-import logging
-import signal
-import base64
-from io import BytesIO
-import run
-
-# Local libraries import -----------------------------------------------------------------------------------------------
-from config import Config
-import utils
-from utils import rmse, crop, resize
-
-# Tensorflow library import --------------------------------------------------------------------------------------------
-import tensorflow
-from tensorflow import keras
-from tensorflow.keras.models import load_model
-from selforacle.vae import VAE, normalize_and_reshape
-import uncertainty_wizard as uwiz
 
 # Flask, eventlet, socketio library import -----------------------------------------------------------------------------
 import socketio
+
+# Tensorflow library import --------------------------------------------------------------------------------------------
+import tensorflow
+import uncertainty_wizard as uwiz
 from flask import Flask
-import eventlet.wsgi
+from PIL import Image
+from tensorflow import keras
+from tensorflow.keras.models import load_model
+
+import run
+import utils
+
+# Local libraries import -----------------------------------------------------------------------------------------------
+from config import Config
+from selforacle.vae import VAE, normalize_and_reshape
+from utils import crop, resize, rmse
+
 eventlet.patcher.monkey_patch()
 
 # Multiprocessing library import ---------------------------------------------------------------------------------------
 import subprocess
+import time
 
 # Timer class import --------------------------------------------------------------------------------------------------
 from threading import Timer
-import time
 
 # Server setup ---------------------------------------------------------------------------------------------------------
 sio = socketio.Server(async_mode=None, logger=False)
@@ -64,47 +69,54 @@ uncertainty = -1
 def start_simulator():  # DO NOT CHANGE THIS
     for file in os.listdir(cfg.SIMULATOR_DIR):
         if file.endswith(".app") or file.endswith(".exe"):
-            simulator_name=file
+            simulator_name = file
 
     cmd = "open " + simulator_name
-    subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                     stderr=subprocess.STDOUT)  # subprocess as os.system py doc
+    subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )  # subprocess as os.system py doc
 
 
-@sio.on('connect')  # DO NOT CHANGE THIS
+@sio.on("connect")  # DO NOT CHANGE THIS
 def connect(sid, environ):
     print("connect ", sid)
     send_control(0, 0, 1, 0, 1, 1)
 
 
-@sio.on('disconnect')  # DO NOT CHANGE THIS
+@sio.on("disconnect")  # DO NOT CHANGE THIS
 def disconnect(sid):
     print("disconnect ", sid)
     sio.disconnect(sid)
     os.kill(os.getpid(), signal.SIGTERM)
 
 
-@sio.on('telemetry')
+@sio.on("telemetry")
 def telemetry(sid, data):
     if data:
 
         # Shutdown input to the simulator after certain lapNumber ------------------------------------------------------
         if int(data["lapNumber"]) > cfg.MAX_LAPS:
-            sio.emit('shutdown', data={}, skip_sid=True)
+            sio.emit("shutdown", data={}, skip_sid=True)
 
         # Data from the simulator --------------------------------------------------------------------------------------
         speed = float(data["speed"])  # current speed of the car
         wayPoint = int(data["currentWayPoint"])  # current waypoint of the car
         lapNumber = int(data["lapNumber"])  # current lap of the car
-        cte = float(data["cte"])  # Cross-Track Error: distance from the center of the lane
+        cte = float(
+            data["cte"]
+        )  # Cross-Track Error: distance from the center of the lane
         brake = float(data["brake"])
         distance = float(data["distance"])  # distance driven by the car
         sim_time = int(data["sim_time"])  # time driven by the car
         ang_diff = float(data["ang_diff"])  # angular difference
         isCrash = int(data["crash"])  # whether an OBE or crash occurred
         number_obe = int(data["tot_obes"])  # total number of crashes so far
-        number_crashes = int(data["tot_crashes"])  # total number of OBEs so far
-        image = Image.open(BytesIO(base64.b64decode(data["image"])))  # current image from the center camera of the car
+        number_crashes = int(
+            data["tot_crashes"]
+        )  # total number of OBEs so far
+        image = Image.open(
+            BytesIO(base64.b64decode(data["image"]))
+        )  # current image from the center camera of the car
 
         # Save frame ----------------------------------------------------------------------------------------------------
         image_path = ""
@@ -141,19 +153,32 @@ def telemetry(sid, data):
 
                 if cfg.SDC_MODEL_TYPE == "uwiz" and PREDICT_UNC_FLAG:
                     PREDICT_UNC_FLAG = False
-                    outputs, unc = model.predict_quantified(image, quantifier="std_dev", sample_size=20, batch_size=20)
+                    outputs, unc = model.predict_quantified(
+                        image,
+                        quantifier="std_dev",
+                        sample_size=20,
+                        batch_size=20,
+                    )
                     print("Unc quantified!")
                     steering_angle = outputs[0][0]
                     uncertainty = unc[0][0]
                 else:
                     # ORIGINAL PREDICTION
-                    x = np.concatenate([image for idx in range(batch_size)]) # take batch of data_nominal
-                    outputs = model.predict_on_batch(x) # save predictions from a sample pass
-                    steering_angle = outputs.mean(axis=0)[0] # average over all passes is the final steering angle
-                    uncertainty = outputs.var(axis=0)[0] # variance of predictions gives the uncertainty
+                    x = np.concatenate(
+                        [image for idx in range(batch_size)]
+                    )  # take batch of data_nominal
+                    outputs = model.predict_on_batch(
+                        x
+                    )  # save predictions from a sample pass
+                    steering_angle = outputs.mean(axis=0)[
+                        0
+                    ]  # average over all passes is the final steering angle
+                    uncertainty = outputs.var(axis=0)[
+                        0
+                    ]  # variance of predictions gives the uncertainty
 
-                    #outputs = model.predict(image, batch_size = 1)
-                    #steering_angle = outputs[0][0]
+                    # outputs = model.predict(image, batch_size = 1)
+                    # steering_angle = outputs[0][0]
             else:
                 steering_angle = float(model.predict(image, batch_size=1))
 
@@ -174,15 +199,22 @@ def telemetry(sid, data):
             else:
                 confidence = 1
 
-            throttle = 1.0 - steering_angle ** 2 - (speed / speed_limit) ** 2
+            throttle = 1.0 - steering_angle**2 - (speed / speed_limit) ** 2
 
             # Send control commands to the simulator -------------------------------------------------------------------
             send_control(
-                steering_angle, throttle, confidence, loss, cfg.MAX_LAPS, uncertainty
+                steering_angle,
+                throttle,
+                confidence,
+                loss,
+                cfg.MAX_LAPS,
+                uncertainty,
             )
 
             if cfg.TESTING_DATA_DIR:
-                csv_path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME)
+                csv_path = os.path.join(
+                    cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME
+                )
                 utils.write_csv_line(
                     csv_path,
                     [
@@ -219,7 +251,9 @@ def telemetry(sid, data):
         sio.emit("manual", data={}, skip_sid=True)  # DO NOT CHANGE THIS
 
 
-def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertainty):  # DO NOT CHANGE THIS
+def send_control(
+    steering_angle, throttle, confidence, loss, max_laps, uncertainty
+):  # DO NOT CHANGE THIS
     sio.emit(
         "steer",
         data={
@@ -234,7 +268,7 @@ def send_control(steering_angle, throttle, confidence, loss, max_laps, uncertain
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cfg = Config()
     cfg.from_pyfile("config_my.py")
     speed_limit = cfg.MAX_SPEED
@@ -247,8 +281,14 @@ if __name__ == '__main__':
     if cfg.SDC_MODEL_TYPE == "uwiz":
         model = uwiz.models.load_model(model_path)
     elif cfg.SDC_MODEL_TYPE == "chauffeur":
-        model = tensorflow.keras.models.load_model(model_path, custom_objects={"rmse": rmse})
-    elif cfg.SDC_MODEL_TYPE == "dave2" or cfg.SDC_MODEL_TYPE == "epoch" or cfg.SDC_MODEL_TYPE == "commaai":
+        model = tensorflow.keras.models.load_model(
+            model_path, custom_objects={"rmse": rmse}
+        )
+    elif (
+        cfg.SDC_MODEL_TYPE == "dave2"
+        or cfg.SDC_MODEL_TYPE == "epoch"
+        or cfg.SDC_MODEL_TYPE == "commaai"
+    ):
         model = tensorflow.keras.models.load_model(model_path)
     else:
         print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
@@ -256,10 +296,16 @@ if __name__ == '__main__':
 
     # Load self-assessment oracle model --------------------------------------------------------------------------------
     encoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR + os.path.sep + "encoder-" + cfg.ANOMALY_DETECTOR_NAME
+        cfg.SAO_MODELS_DIR
+        + os.path.sep
+        + "encoder-"
+        + cfg.ANOMALY_DETECTOR_NAME
     )
     decoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR + os.path.sep + "decoder-" + cfg.ANOMALY_DETECTOR_NAME
+        cfg.SAO_MODELS_DIR
+        + os.path.sep
+        + "decoder-"
+        + cfg.ANOMALY_DETECTOR_NAME
     )
 
     anomaly_detection = VAE(
@@ -281,6 +327,10 @@ if __name__ == '__main__':
         print("NOT RECORDING THIS RUN ...")
 
     # Deploy server ----------------------------------------------------------------------------------------------------
-    #newTimer()
-    app = socketio.Middleware(sio, app)  # wrap Flask application with engineio's middleware
-    eventlet.wsgi.server(eventlet.listen(("", 4567)), app)  # deploy as an eventlet WSGI server
+    # newTimer()
+    app = socketio.Middleware(
+        sio, app
+    )  # wrap Flask application with engineio's middleware
+    eventlet.wsgi.server(
+        eventlet.listen(("", 4567)), app
+    )  # deploy as an eventlet WSGI server

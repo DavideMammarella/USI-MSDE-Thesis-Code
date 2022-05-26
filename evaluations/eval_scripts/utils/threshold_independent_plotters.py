@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("..")
 
 import abc
@@ -12,17 +13,20 @@ from evaluations.eval_db import eval_window
 from evaluations.eval_db.database import Database
 from evaluations.eval_scripts import a_set_true_labels, b_precision_recall_auroc
 
-AD_NAMES = {
-    "uwiz": "uwiz"
-}
+AD_NAMES = {"uwiz": "uwiz"}
 
 logger = logging.Logger("Plotters")
 utils_logging.log_info(logger)
 
 
 class AbstractThresholdIndependentPlotter(abc.ABC):
-
-    def __init__(self, x_axis: numpy.array, x_axis_label: str, file_name: str, db: Database):
+    def __init__(
+        self,
+        x_axis: numpy.array,
+        x_axis_label: str,
+        file_name: str,
+        db: Database,
+    ):
         self.db = db
         self.x_axis = x_axis
         self.x_axis_label = x_axis_label
@@ -53,7 +57,12 @@ class AbstractThresholdIndependentPlotter(abc.ABC):
                     auroc_results[ad] = []
                     auc_prec_recall_results[ad] = []
                     auc_f1_results[ad] = []
-                auroc, auc_pr = b_precision_recall_auroc.calc_auroc_and_auc_prec_recall(db=self.db, ad_name=ad)
+                (
+                    auroc,
+                    auc_pr,
+                ) = b_precision_recall_auroc.calc_auroc_and_auc_prec_recall(
+                    db=self.db, ad_name=ad
+                )
                 auroc_results[ad].append(auroc)
                 auc_prec_recall_results[ad].append(auc_pr)
 
@@ -63,14 +72,20 @@ class AbstractThresholdIndependentPlotter(abc.ABC):
 
     def plot_graph(self, auroc_results, y_label: str):
         for ad_key, ad_label in AD_NAMES.items():
-            plt.plot(self.x_axis, numpy.asarray(auroc_results[ad_key], ), label=ad_label)
-        plt.legend(loc='lower left')
+            plt.plot(
+                self.x_axis,
+                numpy.asarray(
+                    auroc_results[ad_key],
+                ),
+                label=ad_label,
+            )
+        plt.legend(loc="lower left")
         plt.xlabel(self.x_axis_label)
         plt.ylabel(ylabel=y_label)
         to_print = plt.gcf()
         plt.show()
         file_name_with_metric = y_label + "-" + self.file_name
-        to_print.savefig(file_name_with_metric, bbox_inches='tight')
+        to_print.savefig(file_name_with_metric, bbox_inches="tight")
 
 
 class ReactionTimePlotter(AbstractThresholdIndependentPlotter):
@@ -79,13 +94,14 @@ class ReactionTimePlotter(AbstractThresholdIndependentPlotter):
     step = 10
 
     def __init__(self, db: Database):
-        x_axis = numpy.arange(- self.start, -self.stop, self.step)
+        x_axis = numpy.arange(-self.start, -self.stop, self.step)
         x_axis_label = "number of images before misbehavior"
         file_name = "reaction-time.pdf"
         super().__init__(x_axis, x_axis_label, file_name, db)
 
     def _set_variable_values(self, data_point: int) -> None:
         a_set_true_labels.REACTION_TIME = self.start - (data_point * self.step)
+
 
 class KSizePlotter(AbstractThresholdIndependentPlotter):
     start = 1
@@ -100,4 +116,3 @@ class KSizePlotter(AbstractThresholdIndependentPlotter):
 
     def _set_variable_values(self, data_point: int) -> None:
         eval_window.CALC_SCOPE = data_point + 1
-
