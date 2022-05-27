@@ -8,8 +8,8 @@ import os
 from pathlib import Path
 
 import utils_logging
-import utils
 
+import utils
 from config import Config
 from evaluations.eval_db.database import Database
 from evaluations.eval_db.eval_setting import Setting
@@ -31,6 +31,7 @@ SETTING_START_ID = 3000
 EVAL_TIME = ["DayNight", "DayOnly"]
 EVAL_WEATHER = ["Fog", "Rain", "Snow", "Sunny"]
 
+
 def collect_simulations(sims_path):
     sims = []
     for sim_path in sims_path.iterdir():
@@ -50,7 +51,7 @@ def store_uncertainties(db, setting, sim_path):
     with open(csv_file, mode="r") as f:
         reader = csv.DictReader(f, skipinitialspace=True)
         for i, row in enumerate(reader, start=1):
-            setting_id = setting.id # TODO: fix on settings (to be asked)
+            setting_id = setting.id  # TODO: fix on settings (to be asked)
             frame_id, uncertainty, is_crash, x = (
                 row.get("frame_id"),
                 row.get("uncertainty"),

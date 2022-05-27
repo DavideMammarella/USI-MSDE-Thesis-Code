@@ -9,9 +9,9 @@ import datetime
 import os
 import shutil
 import time
+from pathlib import Path
 
 import cv2
-from pathlib import Path
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -56,11 +56,13 @@ csv_fieldnames_improved_simulator = [
     "tot_crashes",
 ]
 
+
 def get_project_root() -> Path:
     """
     Get the project root directory.
     """
     return Path(__file__).parent
+
 
 def load_image(data_dir, image_file):
     """
