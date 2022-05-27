@@ -5,11 +5,10 @@ sys.path.append("..")
 import csv
 import logging
 import os
-import pathlib
 from pathlib import Path
 
-import numpy
 import utils_logging
+import utils
 
 from config import Config
 from evaluations.eval_db.database import Database
@@ -32,8 +31,18 @@ SETTING_START_ID = 3000
 EVAL_TIME = ["DayNight", "DayOnly"]
 EVAL_WEATHER = ["Fog", "Rain", "Snow", "Sunny"]
 
+def collect_simulations(sims_path):
+    sims = []
+    for sim_path in sims_path.iterdir():
+        if sim_path.is_dir() and sim_path.name.endswith(
+            "-uncertainty-evaluated"
+        ):
+            sims.append(sim_path.name)
+    print(">> Collected simulations: " + str(len(sims)) + "\n")
+    return sims
 
-def store_uncertainties(db, sim_path):
+
+def store_uncertainties(db, setting, sim_path):
     csv_file = sim_path / "driving_log_normalized.csv"
 
     logger.info("Analyzing " + str(sim_path))
@@ -41,7 +50,7 @@ def store_uncertainties(db, sim_path):
     with open(csv_file, mode="r") as f:
         reader = csv.DictReader(f, skipinitialspace=True)
         for i, row in enumerate(reader, start=1):
-            # setting_id = setting.id # TODO: fix on settings (to be asked)
+            setting_id = setting.id # TODO: fix on settings (to be asked)
             frame_id, uncertainty, is_crash, x = (
                 row.get("frame_id"),
                 row.get("uncertainty"),
@@ -49,7 +58,7 @@ def store_uncertainties(db, sim_path):
                 row.get("center"),
             )
             to_store = SingleImgUncertainty(
-                setting_id=3000,
+                setting_id=setting_id,
                 row_id=frame_id,
                 is_crash=is_crash,
                 uncertainty=uncertainty,
@@ -83,32 +92,19 @@ def _create_all_settings(db: Database):
     return settings
 
 
-def collect_simulations(sims_path):
-    sims = []
-    for sim_path in sims_path.iterdir():
-        if sim_path.is_dir() and sim_path.name.endswith(
-            "-uncertainty-evaluated"
-        ):
-            sims.append(sim_path.name)
-    print(">> Collected simulations: " + str(len(sims)) + "\n")
-    return sims
-
-
 def main():
-    curr_project_path = Path(
-        os.path.normpath(os.getcwd() + os.sep + os.pardir)
-    )  # overcome OS issues
+    root_dir = utils.get_project_root()
 
     cfg = Config()
-    cfg_pyfile_path = curr_project_path / "config_my.py"
+    cfg_pyfile_path = root_dir / "config_my.py"
     cfg.from_pyfile(cfg_pyfile_path)
 
-    sims_path = Path(curr_project_path, cfg.SIMULATIONS_DIR)
+    sims_path = Path(root_dir, cfg.SIMULATIONS_DIR)
     simulations = collect_simulations(sims_path)
 
     for i, sim in enumerate(simulations, start=1):
         # Database creation (1 DB for each simulation) -----------------------------------------------------------------
-        Path(curr_project_path, "databases").mkdir(
+        Path(root_dir, "databases").mkdir(
             parents=True, exist_ok=True
         )  # create DB folder if not exists
         db_name = "../databases/" + sim + "-based-eval.sqlite"
@@ -116,13 +112,14 @@ def main():
         # TODO: fix on settings (to be asked, settings from folders?, we analyze Track1 under different conditions)
         settings = _create_all_settings(db)
 
-        # Extract uncertainties (from CSV to DB) -----------------------------------------------------------------------
-        store_uncertainties(db, Path(sims_path, sim))
+        for setting in settings:
+            # Extract uncertainties (from CSV to DB) -----------------------------------------------------------------------
+            store_uncertainties(db, setting, Path(sims_path, sim))
 
-        # Calculate True Labels, Precision, Recall, Auroc --------------------------------------------------------------
-        set_true_labels(db_name)
-        calc_precision_recall(db_name)
-        print_auroc_timeline(db_name)
+            # Calculate True Labels, Precision, Recall, Auroc --------------------------------------------------------------
+            set_true_labels(db_name)
+            calc_precision_recall(db_name)
+            print_auroc_timeline(db_name)
 
     logger.info(">> Simulations analyzed: " + str(i))
 
