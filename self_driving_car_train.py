@@ -99,7 +99,7 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
     if cfg.USE_PREDICTIVE_UNCERTAINTY:
         name = os.path.join(
             cfg.SDC_MODELS_DIR,
-            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-mc" + "-{epoch:03d}",
+            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-{epoch:03d}",
         )
     else:
         name = os.path.join(
@@ -148,7 +148,7 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
     if cfg.USE_PREDICTIVE_UNCERTAINTY:
         name = os.path.join(
             cfg.SDC_MODELS_DIR,
-            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-mc-final",
+            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-final",
         )
     else:
         name = os.path.join(
