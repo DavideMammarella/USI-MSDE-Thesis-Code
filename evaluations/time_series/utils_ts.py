@@ -14,6 +14,7 @@ from config import Config
 
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 30, 30
 
+
 def collect_simulations(sims_path):
     sims = []
     for sim_path in sims_path.iterdir():
@@ -21,7 +22,8 @@ def collect_simulations(sims_path):
                 "-uncertainty-evaluated"
         ):
             sims.append(sim_path.name)
-    return sims
+
+    return ["DAVE2-Track1-Normal-uncertainty-evaluated", "xai-track1-fog-100-uncertainty-evaluated"]  # TODO: put sims after TESTING
 
 
 def get_frame_ids(np_array):
@@ -40,11 +42,13 @@ def driving_log_to_np(csv_file):
 
     return driving_log_2d
 
+
 def load_config():
     root_dir = utils.get_project_root()
     cfg = Config()
     cfg.from_pyfile(root_dir / "config_my.py")
     return root_dir, cfg
+
 
 ###############################################################################
 # CHECKS
