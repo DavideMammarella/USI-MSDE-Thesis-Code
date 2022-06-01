@@ -16,6 +16,8 @@ SAO_MODELS_DIR = (
     "models/sao"  # trained autoencoder-based self-assessment oracle models
 )
 SIMULATOR_DIR = "simulator"  # name of the simulator to use
+DATABASES_DIR = "databases"  # name of the databases to use
+EVALUATIONS_OUT_DIR = "data/evaluations"  # name of the databases to use
 
 # simulations settings
 TRACK = "track1"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use

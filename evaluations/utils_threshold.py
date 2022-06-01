@@ -4,11 +4,7 @@ import os
 from pathlib import Path
 
 import numpy
-import utils_logging
 from scipy.stats import gamma
-
-logger = logging.Logger("utils_thresholds")
-utils_logging.log_info(logger)
 
 
 def calc_and_store_thresholds(
@@ -22,7 +18,7 @@ def calc_and_store_thresholds(
     """
     Path(thresholds_location).mkdir(parents=True, exist_ok=True)
 
-    logger.info(
+    print(
         "Fitting reconstruction error distribution of UWIZ using Gamma distribution params"
     )
 
@@ -31,7 +27,7 @@ def calc_and_store_thresholds(
 
     conf_intervals = [0.68, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999]
 
-    logger.info(
+    print(
         "Creating thresholds using the confidence intervals: %s"
         % conf_intervals
     )

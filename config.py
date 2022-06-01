@@ -37,6 +37,8 @@ class Config:
         self.CLIENTS_NAME = None
         self.USE_UWIZ = None
         self.SIMULATIONS_DIR = None
+        self.DATABASES_DIR = None
+        self.EVALUATIONS_OUT_DIR = None
 
     def from_pyfile(self, filename, silent=False):
         # filename = os.path.join(self.root_path, filename)

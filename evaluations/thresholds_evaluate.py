@@ -18,13 +18,9 @@ from io import BytesIO
 from pathlib import Path
 
 import numpy as np
-import utils_logging
 from PIL import Image
 
 from evaluations.utils_threshold import calc_and_store_thresholds
-
-logger = logging.Logger("utils_thresholds")
-utils_logging.log_info(logger)
 
 import utils
 
