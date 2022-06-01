@@ -42,6 +42,17 @@ def driving_log_to_np(csv_file):
 
     return driving_log_2d
 
+def create_prec_recall_csv(data_path):
+    csv_file_normalized = data_path / "prec_recall.csv"
+    with csv_file_normalized.open(mode="w") as f:
+        headers = ["simulation", "threshold_type", "threshold", "true_positives", "false_positives",
+                   "true_negatives", "false_negatives", "prec", "recall", "f1", "num_anomalies", "num_normal", "auroc",
+                   "false_positive_rate", "pr_auc"]  # based on prec-recall DB-schema
+
+        writer = csv.DictWriter(f, fieldnames=headers)
+        writer.writeheader()
+
+    f.close()
 
 def load_config():
     root_dir = utils.get_project_root()

@@ -3,6 +3,7 @@ import os
 import numpy as np
 
 import warnings
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 sys.path.append("")
 
@@ -11,20 +12,27 @@ import evaluations.time_series.calc_positive_negative as calc_positive_negative
 from pathlib import Path
 
 THRESHOLDS = {
-    "uwiz": {
-        "0.68": 0.019586066769424662,
-        "0.9": 0.025550906432089442,
-        "0.95": 0.028553180589225853,
-        "0.99": 0.034772484504920306,
-        "0.999": 0.04268394415631666,
-        "0.9999": 0.04996533591706328,
-        "0.99999": 0.056863799480413445,
-    }
+    "0.68": 0.019586066769424662,
+    "0.9": 0.025550906432089442,
+    "0.95": 0.028553180589225853,
+    "0.99": 0.034772484504920306,
+    "0.999": 0.04268394415631666,
+    "0.9999": 0.04996533591706328,
+    "0.99999": 0.056863799480413445,
 }
 
 # REACTION_TIME = 50
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 30, 30
 
+
+def write_nominal(data_dir, sim_name, windows, threshold_type, threshold, tot_FP, tot_TN):
+    # TODO: window can be used to add additional information on windows inside csv
+    prec_recall_csv = data_dir / "prec_recall.csv"
+
+    with prec_recall_csv.open(mode="a") as f:
+        f.write(sim_name + "," + str(threshold_type) + "," + str(threshold) + ",," + str(tot_FP) + "," + str(tot_TN) + ",,,,,,,,,," +"\n")
+
+    f.close()
 
 
 def window_stack(a: np.array, stepsize=NORMAL_WINDOW_LENGTH, width=NORMAL_WINDOW_LENGTH):
@@ -36,8 +44,11 @@ def window_stack(a: np.array, stepsize=NORMAL_WINDOW_LENGTH, width=NORMAL_WINDOW
 
 def main():
     root_dir, cfg = utils_ts.load_config()
+    data_dir = Path(root_dir, "data")
     sims_path = Path(root_dir, cfg.SIMULATIONS_DIR)
+
     Path(root_dir, cfg.EVALUATIONS_OUT_DIR).mkdir(parents=True, exist_ok=True)  # create analysis folder
+    utils_ts.create_prec_recall_csv(data_dir)
 
     sims = utils_ts.collect_simulations(sims_path)
     print(">> Collected simulations: " + str(len(sims)))
@@ -57,13 +68,17 @@ def main():
         assert utils_ts.windows_check(len(uncertainties), len(uncertainties_windows)), True
         print(">> Windows created: " + str(len(uncertainties_windows)))
 
-        # OTTIENI IL FRAME_ID DELLA WINDOW FACENDO WINDOW_ID/WINDOW_LENGTH SSE WINDOW_ID > WINDOW_LENGTH
-        # TODO: in caso di step?
-        calc_positive_negative._on_nominal(uncertainties_windows, 0.019586066769424662)
+        for threshold_type in THRESHOLDS:
+            threshold = THRESHOLDS[threshold_type]
+            if sim == "DAVE2-Track1-Normal-uncertainty-evaluated":
+                windows, windows_FP, windows_TN = calc_positive_negative._on_nominal(uncertainties_windows, threshold)
+                write_nominal(data_dir, sim, windows, threshold_type, threshold, windows_FP, windows_TN)
+            else:
+                #windows, windows_FP, windows_TN = calc_positive_negative._on_anomalous(uncertainties_windows, threshold)
 
+                print("w topogigio")
 
         # Calculate True Labels, Precision, Recall, Auroc ------------------------------------------------------
-        # set_true_labels(str(db_name))
         # calc_precision_recall(str(db_name))
         # print_auroc_timeline(str(db_name))
     print("###########################################################")
