@@ -37,16 +37,54 @@ def create_model(use_dropout):
         Uwiz model w Dropout layers
         """
         model = uwiz.models.StochasticSequential()
-        model.add(Lambda(lambda x: x / 127.5 - 1.0, input_shape=INPUT_SHAPE, name="lambda_layer", ))
-        model.add(Conv2D(24, (5, 5), activation="relu", strides=(2, 2), kernel_regularizer=l2(1.0e-6), ))
+        model.add(
+            Lambda(
+                lambda x: x / 127.5 - 1.0,
+                input_shape=INPUT_SHAPE,
+                name="lambda_layer",
+            )
+        )
+        model.add(
+            Conv2D(
+                24,
+                (5, 5),
+                activation="relu",
+                strides=(2, 2),
+                kernel_regularizer=l2(1.0e-6),
+            )
+        )
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(36, (5, 5), activation="relu", strides=(2, 2), kernel_regularizer=l2(1.0e-6), ))
+        model.add(
+            Conv2D(
+                36,
+                (5, 5),
+                activation="relu",
+                strides=(2, 2),
+                kernel_regularizer=l2(1.0e-6),
+            )
+        )
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(48, (5, 5), activation="relu", strides=(2, 2), kernel_regularizer=l2(1.0e-6), ))
+        model.add(
+            Conv2D(
+                48,
+                (5, 5),
+                activation="relu",
+                strides=(2, 2),
+                kernel_regularizer=l2(1.0e-6),
+            )
+        )
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
+        model.add(
+            Conv2D(
+                64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)
+            )
+        )
         model.add(Dropout(rate=0.05))
-        model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
+        model.add(
+            Conv2D(
+                64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)
+            )
+        )
         model.add(Dropout(rate=0.05))
         model.add(Flatten())
         model.add(Dense(100, activation="relu", kernel_regularizer=l2(1.0e-6)))

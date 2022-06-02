@@ -186,7 +186,7 @@ def random_brightness(image):
     """
     # HSV (Hue, Saturation, Value) is also called HSB ('B' for Brightness).
     hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-    ratio = .2 + (0.5 * (np.random.rand() - 0.5))
+    ratio = 0.2 + (0.5 * (np.random.rand() - 0.5))
     hsv[:, :, 2] = hsv[:, :, 2] * ratio
     return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 

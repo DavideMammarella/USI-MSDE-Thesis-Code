@@ -20,12 +20,11 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from evaluations.utils_threshold import calc_and_store_thresholds
-
 import utils
 
 # Local libraries import -----------------------------------------------------------------------------------------------
 from config import Config
+from evaluations.utils_threshold import calc_and_store_thresholds
 from utils import resize
 
 
