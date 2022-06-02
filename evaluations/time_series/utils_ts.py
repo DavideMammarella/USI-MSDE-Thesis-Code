@@ -23,7 +23,7 @@ def collect_simulations(sims_path):
         ):
             sims.append(sim_path.name)
 
-    return ["DAVE2-Track1-Normal-uncertainty-evaluated", "xai-track1-fog-100-uncertainty-evaluated"]  # TODO: put sims after TESTING
+    return sims
 
 
 def get_frame_ids(np_array):
@@ -31,8 +31,13 @@ def get_frame_ids(np_array):
     for index, val in np.ndenumerate(np_array):
         print("{}, {}".format(index[0], val))
 
+def get_crashes(csv_file):
+    columns_to_read = ["crashed"]
+    df = pd.read_csv(csv_file, usecols=columns_to_read)
 
-def driving_log_to_np(csv_file):
+    return df.to_dict().get("crashed")
+
+def get_uncertainties(csv_file):
     columns_to_read = ["uncertainty"]
     df = pd.read_csv(csv_file, usecols=columns_to_read)
     driving_log_2d = df.to_numpy()

@@ -1,6 +1,7 @@
 import sys
 import os
 import numpy as np
+import pprint
 
 import warnings
 
@@ -25,12 +26,14 @@ THRESHOLDS = {
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 30, 30
 
 
-def write_nominal(data_dir, sim_name, windows, threshold_type, threshold, tot_FP, tot_TN):
+def write_positive_negative(data_dir, sim_name, windows, threshold_type, threshold, windows_TP, windows_FN, windows_FP,
+                            windows_TN):
     # TODO: window can be used to add additional information on windows inside csv
     prec_recall_csv = data_dir / "prec_recall.csv"
 
     with prec_recall_csv.open(mode="a") as f:
-        f.write(sim_name + "," + str(threshold_type) + "," + str(threshold) + ",," + str(tot_FP) + "," + str(tot_TN) + ",,,,,,,,,," +"\n")
+        f.write(sim_name + "," + str(threshold_type) + "," + str(threshold) + "," + str(windows_TP) + "," + str(
+            windows_FP) + "," + str(windows_TN) + "," + str(windows_FN) + ",,,,,,,," + "\n")
 
     f.close()
 
@@ -60,7 +63,7 @@ def main():
         print("\n###########################################################")
         print("Analyzing " + str(sim))
         print("----------------------------------------------------------")
-        uncertainties = utils_ts.driving_log_to_np(csv_file)  # np array of uncertainties (index is frame_id)
+        uncertainties = utils_ts.get_uncertainties(csv_file)  # np array of uncertainties (index is frame_id)
         # get_frame_ids(uncertainties)
 
         # WINDOWS SPLITTING
@@ -68,19 +71,17 @@ def main():
         assert utils_ts.windows_check(len(uncertainties), len(uncertainties_windows)), True
         print(">> Windows created: " + str(len(uncertainties_windows)))
 
+        crashes_per_frame = utils_ts.get_crashes(csv_file)  # dict {frame_id : crash}
+
         for threshold_type in THRESHOLDS:
             threshold = THRESHOLDS[threshold_type]
-            if sim == "DAVE2-Track1-Normal-uncertainty-evaluated":
-                windows, windows_FP, windows_TN = calc_positive_negative._on_nominal(uncertainties_windows, threshold)
-                write_nominal(data_dir, sim, windows, threshold_type, threshold, windows_FP, windows_TN)
-            else:
-                #windows, windows_FP, windows_TN = calc_positive_negative._on_anomalous(uncertainties_windows, threshold)
-
-                print("w topogigio")
-
-        # Calculate True Labels, Precision, Recall, Auroc ------------------------------------------------------
-        # calc_precision_recall(str(db_name))
-        # print_auroc_timeline(str(db_name))
+            windows, windows_TP, windows_FN, windows_FP, windows_TN = calc_positive_negative._on_windows(
+                uncertainties_windows, crashes_per_frame, threshold)
+            write_positive_negative(data_dir, sim, windows, threshold_type, threshold, windows_TP, windows_FN,
+                                    windows_FP, windows_TN)
+            # Calculate True Labels, Precision, Recall, Auroc ------------------------------------------------------
+            # calc_precision_recall(str(db_name))
+            # print_auroc_timeline(str(db_name))
     print("###########################################################")
     print("\n>> Simulations analyzed: " + str(i))
 
