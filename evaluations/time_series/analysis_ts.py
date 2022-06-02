@@ -27,13 +27,14 @@ NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 30, 30
 
 
 def write_positive_negative(data_dir, sim_name, windows, threshold_type, threshold, windows_TP, windows_FN, windows_FP,
-                            windows_TN):
+                            windows_TN, crashes, precision, recall, f1, fpr):
     # TODO: window can be used to add additional information on windows inside csv
     prec_recall_csv = data_dir / "prec_recall.csv"
 
     with prec_recall_csv.open(mode="a") as f:
         f.write(sim_name + "," + str(threshold_type) + "," + str(threshold) + "," + str(windows_TP) + "," + str(
-            windows_FP) + "," + str(windows_TN) + "," + str(windows_FN) + ",,,,,,,," + "\n")
+            windows_FP) + "," + str(windows_TN) + "," + str(windows_FN) + "," + str(precision) + "," + str(
+            recall) + "," + str(f1) + "," + str(crashes) + ",,," + str(fpr) + "," + "\n")
 
     f.close()
 
@@ -68,19 +69,28 @@ def main():
 
         # WINDOWS SPLITTING
         uncertainties_windows = window_stack(uncertainties)
-        assert utils_ts.windows_check(len(uncertainties), len(uncertainties_windows)), True
+        print(">> Number of Frames: " + str(len(uncertainties)))
         print(">> Windows created: " + str(len(uncertainties_windows)))
 
         crashes_per_frame = utils_ts.get_crashes(csv_file)  # dict {frame_id : crash}
 
         for threshold_type in THRESHOLDS:
             threshold = THRESHOLDS[threshold_type]
-            windows, windows_TP, windows_FN, windows_FP, windows_TN = calc_positive_negative._on_windows(
+
+            # CALCULATE FP, TP, TN, FN
+            windows, windows_TP, windows_FN, windows_FP, windows_TN, crashes = calc_positive_negative._on_windows(
                 uncertainties_windows, crashes_per_frame, threshold)
+            assert windows_TP <= len(windows) and windows_FN <= len(windows) and windows_FP <= len(
+                windows) and windows_TN <= len(windows)
+
+            # CALCULATE PRECISION, RECALL, F1
+            precision, recall, f1, fpr = calc_positive_negative._calc_precision_recall_f1_fpr(windows_TP, windows_FN,
+                                                                                              windows_FP, windows_TN)
+            assert float(precision) <= 1 and float(recall) <= 1 and float(f1) <= 1
+
             write_positive_negative(data_dir, sim, windows, threshold_type, threshold, windows_TP, windows_FN,
-                                    windows_FP, windows_TN)
+                                    windows_FP, windows_TN, crashes, precision, recall, f1, fpr)
             # Calculate True Labels, Precision, Recall, Auroc ------------------------------------------------------
-            # calc_precision_recall(str(db_name))
             # print_auroc_timeline(str(db_name))
     print("###########################################################")
     print("\n>> Simulations analyzed: " + str(i))
