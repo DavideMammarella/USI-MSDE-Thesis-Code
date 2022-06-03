@@ -13,7 +13,7 @@ import pandas as pd
 import utils as utils
 from config import Config
 
-NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 30, 30
+NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
 
 
 def get_frame_ids(np_array):
@@ -30,7 +30,7 @@ def collect_simulations(sims_path):
         ):
             sims.append(sim_path.name)
 
-    return sims
+    return sims #["DAVE2-Track1-Normal-uncertainty-evaluated", "xai-track1-snow-10-uncertainty-evaluated"]
 
 
 def load_config():
