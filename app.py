@@ -1,43 +1,24 @@
 import base64
-import logging
-
-# Standard library import ----------------------------------------------------------------------------------------------
 import os
-import sched
 import signal
-import sys
-import time
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 from sys import exit
-from warnings import simplefilter
-
 import eventlet.wsgi
 import numpy as np
-
-# Flask, eventlet, socketio library import -----------------------------------------------------------------------------
 import socketio
-
-# Tensorflow library import --------------------------------------------------------------------------------------------
 import tensorflow
 import uncertainty_wizard as uwiz
 from flask import Flask
 from PIL import Image
 from tensorflow import keras
 from tensorflow.keras.models import load_model
-
-import app
 import utils
-
-# Local libraries import -----------------------------------------------------------------------------------------------
 from config import Config
 from selforacle.vae import VAE, normalize_and_reshape
 from utils import crop, resize, rmse
 
-eventlet.patcher.monkey_patch()
-
-# Model setup ----------------------------------------------------------------------------------------------------------
 model = None
 prev_image_array = None
 anomaly_detection = None
