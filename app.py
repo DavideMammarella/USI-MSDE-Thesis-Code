@@ -49,7 +49,6 @@ uncertainty = -1
 sio = socketio.Server(async_mode=None, logger=False)
 app = Flask(__name__)
 
-
 cfg = Config()
 cfg.from_pyfile("config_my.py")
 speed_limit = cfg.MAX_SPEED
@@ -203,7 +202,7 @@ def telemetry(sid, data):
                         sample_size=20,
                         batch_size=20,
                     )
-                    print("Unc quantified!")
+                    # print("Unc quantified!")
                     steering_angle = outputs[0][0]
                     uncertainty = unc[0][0]
                 else:
@@ -293,6 +292,7 @@ def telemetry(sid, data):
 
     else:
         sio.emit("manual", data={}, skip_sid=True)  # DO NOT CHANGE THIS
+
 
 # Deploy server ----------------------------------------------------------------------------------------------------
 app = socketio.Middleware(
