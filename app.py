@@ -1,11 +1,3 @@
-# Copyright 2022 Testing Automated @ Università della Svizzera italiana (USI)
-# Code adapted from https://github.com/naokishibuya/car-behavioral-cloning
-# All rights reserved.
-# This file is part of the project SelfOracle, a misbehaviour predictor for autonomous vehicles,
-# developed within the ERC project PRECRIME
-# and is released under the "MIT License Agreement". Please see the LICENSE
-# file that should have been included as part of this package.
-
 import base64
 import logging
 
@@ -35,7 +27,7 @@ from PIL import Image
 from tensorflow import keras
 from tensorflow.keras.models import load_model
 
-import run
+import app
 import utils
 
 # Local libraries import -----------------------------------------------------------------------------------------------
@@ -44,17 +36,6 @@ from selforacle.vae import VAE, normalize_and_reshape
 from utils import crop, resize, rmse
 
 eventlet.patcher.monkey_patch()
-
-# Multiprocessing library import ---------------------------------------------------------------------------------------
-import subprocess
-import time
-
-# Timer class import --------------------------------------------------------------------------------------------------
-from threading import Timer
-
-# Server setup ---------------------------------------------------------------------------------------------------------
-sio = socketio.Server(async_mode=None, logger=False)
-app = Flask(__name__)
 
 # Model setup ----------------------------------------------------------------------------------------------------------
 model = None
@@ -65,16 +46,81 @@ frame_id = 0
 batch_size = 1
 uncertainty = -1
 
+sio = socketio.Server(async_mode=None, logger=False)
+app = Flask(__name__)
 
-def start_simulator():  # DO NOT CHANGE THIS
-    for file in os.listdir(cfg.SIMULATOR_DIR):
-        if file.endswith(".app") or file.endswith(".exe"):
-            simulator_name = file
 
-    cmd = "open " + simulator_name
-    subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-    )  # subprocess as os.system py doc
+cfg = Config()
+cfg.from_pyfile("config_my.py")
+speed_limit = cfg.MAX_SPEED
+
+# Load the self-driving car model ----------------------------------------------------------------------------------
+model_path = os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)
+
+if cfg.SDC_MODEL_TYPE == "uwiz":
+    model = uwiz.models.load_model(model_path)
+elif cfg.SDC_MODEL_TYPE == "chauffeur":
+    model = tensorflow.keras.models.load_model(
+        model_path, custom_objects={"rmse": rmse}
+    )
+elif (
+        cfg.SDC_MODEL_TYPE == "dave2"
+        or cfg.SDC_MODEL_TYPE == "epoch"
+        or cfg.SDC_MODEL_TYPE == "commaai"
+):
+    model = tensorflow.keras.models.load_model(model_path)
+else:
+    print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
+    exit()
+
+# Load self-assessment oracle model --------------------------------------------------------------------------------
+encoder = tensorflow.keras.models.load_model(
+    cfg.SAO_MODELS_DIR
+    + os.path.sep
+    + "encoder-"
+    + cfg.ANOMALY_DETECTOR_NAME
+)
+decoder = tensorflow.keras.models.load_model(
+    cfg.SAO_MODELS_DIR
+    + os.path.sep
+    + "decoder-"
+    + cfg.ANOMALY_DETECTOR_NAME
+)
+
+anomaly_detection = VAE(
+    model_name=cfg.ANOMALY_DETECTOR_NAME,
+    loss=cfg.LOSS_SAO_MODEL,
+    latent_dim=cfg.SAO_LATENT_DIM,
+    encoder=encoder,
+    decoder=decoder,
+)
+anomaly_detection.compile(
+    optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE)
+)
+
+# Create output dir ------------------------------------------------------------------------------------------------
+if cfg.TESTING_DATA_DIR != "":
+    utils.create_output_dir(cfg, utils.csv_fieldnames_improved_simulator)
+    print("RECORDING THIS RUN ...")
+else:
+    print("NOT RECORDING THIS RUN ...")
+
+
+def send_control(
+        steering_angle, throttle, confidence, loss, max_laps, uncertainty
+):  # DO NOT CHANGE THIS
+    sio.emit(
+        "steer",
+        data={
+            "steering_angle": steering_angle.__str__(),
+            "throttle": throttle.__str__(),
+            "confidence": confidence.__str__(),
+            "loss": loss.__str__(),
+            "max_laps": max_laps.__str__(),
+            "uncertainty": uncertainty.__str__(),
+        },
+        skip_sid=True,
+    )
 
 
 @sio.on("connect")  # DO NOT CHANGE THIS
@@ -129,7 +175,6 @@ def telemetry(sid, data):
             image.save(image_path)
 
         try:
-            global PREDICT_UNC_FLAG
             global steering_angle
             global uncertainty
             global batch_size
@@ -151,8 +196,7 @@ def telemetry(sid, data):
             # Predict steering angle and uncertainty -------------------------------------------------------------------
             if cfg.USE_PREDICTIVE_UNCERTAINTY:
 
-                if cfg.SDC_MODEL_TYPE == "uwiz" and PREDICT_UNC_FLAG:
-                    PREDICT_UNC_FLAG = False
+                if cfg.SDC_MODEL_TYPE == "uwiz":
                     outputs, unc = model.predict_quantified(
                         image,
                         quantifier="std_dev",
@@ -199,7 +243,7 @@ def telemetry(sid, data):
             else:
                 confidence = 1
 
-            throttle = 1.0 - steering_angle**2 - (speed / speed_limit) ** 2
+            throttle = 1.0 - steering_angle ** 2 - (speed / speed_limit) ** 2
 
             # Send control commands to the simulator -------------------------------------------------------------------
             send_control(
@@ -250,87 +294,10 @@ def telemetry(sid, data):
     else:
         sio.emit("manual", data={}, skip_sid=True)  # DO NOT CHANGE THIS
 
-
-def send_control(
-    steering_angle, throttle, confidence, loss, max_laps, uncertainty
-):  # DO NOT CHANGE THIS
-    sio.emit(
-        "steer",
-        data={
-            "steering_angle": steering_angle.__str__(),
-            "throttle": throttle.__str__(),
-            "confidence": confidence.__str__(),
-            "loss": loss.__str__(),
-            "max_laps": max_laps.__str__(),
-            "uncertainty": uncertainty.__str__(),
-        },
-        skip_sid=True,
-    )
-
-
-if __name__ == "__main__":
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
-    speed_limit = cfg.MAX_SPEED
-
-    start_simulator()
-
-    # Load the self-driving car model ----------------------------------------------------------------------------------
-    model_path = os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)
-
-    if cfg.SDC_MODEL_TYPE == "uwiz":
-        model = uwiz.models.load_model(model_path)
-    elif cfg.SDC_MODEL_TYPE == "chauffeur":
-        model = tensorflow.keras.models.load_model(
-            model_path, custom_objects={"rmse": rmse}
-        )
-    elif (
-        cfg.SDC_MODEL_TYPE == "dave2"
-        or cfg.SDC_MODEL_TYPE == "epoch"
-        or cfg.SDC_MODEL_TYPE == "commaai"
-    ):
-        model = tensorflow.keras.models.load_model(model_path)
-    else:
-        print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
-        exit()
-
-    # Load self-assessment oracle model --------------------------------------------------------------------------------
-    encoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR
-        + os.path.sep
-        + "encoder-"
-        + cfg.ANOMALY_DETECTOR_NAME
-    )
-    decoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR
-        + os.path.sep
-        + "decoder-"
-        + cfg.ANOMALY_DETECTOR_NAME
-    )
-
-    anomaly_detection = VAE(
-        model_name=cfg.ANOMALY_DETECTOR_NAME,
-        loss=cfg.LOSS_SAO_MODEL,
-        latent_dim=cfg.SAO_LATENT_DIM,
-        encoder=encoder,
-        decoder=decoder,
-    )
-    anomaly_detection.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE)
-    )
-
-    # Create output dir ------------------------------------------------------------------------------------------------
-    if cfg.TESTING_DATA_DIR != "":
-        utils.create_output_dir(cfg, utils.csv_fieldnames_improved_simulator)
-        print("RECORDING THIS RUN ...")
-    else:
-        print("NOT RECORDING THIS RUN ...")
-
-    # Deploy server ----------------------------------------------------------------------------------------------------
-    # newTimer()
-    app = socketio.Middleware(
-        sio, app
-    )  # wrap Flask application with engineio's middleware
-    eventlet.wsgi.server(
-        eventlet.listen(("", 4567)), app
-    )  # deploy as an eventlet WSGI server
+# Deploy server ----------------------------------------------------------------------------------------------------
+app = socketio.Middleware(
+    sio, app
+)  # wrap Flask application with engineio's middleware
+eventlet.wsgi.server(
+    eventlet.listen(("", 4567)), app
+)  # deploy as an eventlet WSGI server
