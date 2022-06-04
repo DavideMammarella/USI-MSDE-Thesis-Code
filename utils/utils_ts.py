@@ -3,15 +3,12 @@ import sys
 sys.path.append("")
 
 import csv
-import os
-from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-import utils as utils
-from config import Config
+from utils import utils as utils
+from configurations.config import Config
 
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
 
@@ -32,12 +29,6 @@ def collect_simulations(sims_path):
 
     return sims #["DAVE2-Track1-Normal-uncertainty-evaluated", "xai-track1-snow-10-uncertainty-evaluated"]
 
-
-def load_config():
-    root_dir = utils.get_project_root()
-    cfg = Config()
-    cfg.from_pyfile(root_dir / "config_my.py")
-    return root_dir, cfg
 
 
 ###############################################################################

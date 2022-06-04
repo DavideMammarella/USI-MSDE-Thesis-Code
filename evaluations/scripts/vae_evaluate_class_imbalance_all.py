@@ -6,9 +6,9 @@
 # file that should have been included as part of this package.
 import os
 
-from vae_evaluate import load_all_images, load_and_eval_vae
+from vae_evaluate_class_imbalance import evaluate_class_imbalance
 
-from config import Config
+from src.config import Config
 
 if __name__ == "__main__":
     os.chdir(os.getcwd().replace("scripts", ""))
@@ -19,15 +19,14 @@ if __name__ == "__main__":
 
     tracks = ["track1", "track2", "track3"]
 
-    loss_func = ["MSE", "VAE"]
     latent_space = [2, 4, 8, 16]
-
-    data = load_all_images(cfg)
+    loss_func = ["VAE"]
+    cfg.NUM_EPOCHS_SAO_MODEL = 50
 
     for t in tracks:
         cfg.TRACK = t
-        for loss in loss_func:
-            cfg.LOSS_SAO_MODEL = loss
-            for ld in latent_space:
-                cfg.SAO_LATENT_DIM = ld
-                load_and_eval_vae(cfg, data, delete_cache=True)
+        for ld in latent_space:
+            cfg.SAO_LATENT_DIM = ld
+            for loss in loss_func:
+                cfg.LOSS_SAO_MODEL = loss
+                evaluate_class_imbalance(cfg)

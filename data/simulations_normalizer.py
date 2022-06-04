@@ -7,12 +7,11 @@ sys.path.append("..")
 
 import csv
 import os
-import pathlib
 from pathlib import Path
 
 from tqdm import tqdm
 
-from config import Config
+from src.config import Config
 
 
 class MyDictReader(csv.DictReader):

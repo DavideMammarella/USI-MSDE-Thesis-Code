@@ -6,9 +6,9 @@
 # file that should have been included as part of this package.
 import numpy as np
 
-from config import Config
-from self_driving_car_train import load_data, train_model
-from utils_models import *
+from src.config import Config
+from selfdrivingcar.train import load_data, train_model
+from utils.utils_models import *
 
 np.random.seed(0)
 

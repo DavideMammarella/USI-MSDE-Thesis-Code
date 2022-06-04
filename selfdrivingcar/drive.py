@@ -3,7 +3,6 @@ import os
 import signal
 from datetime import datetime
 from io import BytesIO
-from pathlib import Path
 from sys import exit
 import eventlet.wsgi
 import numpy as np
@@ -13,11 +12,9 @@ import uncertainty_wizard as uwiz
 from flask import Flask
 from PIL import Image
 from tensorflow import keras
-from tensorflow.keras.models import load_model
-import utils
-from config import Config
 from selforacle.vae import VAE, normalize_and_reshape
-from utils import crop, resize, rmse
+from utils.utils import resize, rmse
+from utils import utils
 
 model = None
 prev_image_array = None
@@ -30,8 +27,7 @@ uncertainty = -1
 sio = socketio.Server(async_mode=None, logger=False)
 app = Flask(__name__)
 
-cfg = Config()
-cfg.from_pyfile("config_my.py")
+root_dir, cfg = utils.load_config()
 speed_limit = cfg.MAX_SPEED
 
 # Load the self-driving car model ----------------------------------------------------------------------------------
@@ -276,9 +272,7 @@ def telemetry(sid, data):
 
 
 # Deploy server ----------------------------------------------------------------------------------------------------
-app = socketio.Middleware(
-    sio, app
-)  # wrap Flask application with engineio's middleware
+app = socketio.WSGIApp(sio, app)  # wrap Flask application with engineio's middleware
 eventlet.wsgi.server(
     eventlet.listen(("", 4567)), app
 )  # deploy as an eventlet WSGI server

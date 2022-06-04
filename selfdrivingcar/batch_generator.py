@@ -9,7 +9,7 @@ import os
 import numpy as np
 from tensorflow.keras.utils import Sequence
 
-from utils import (
+from utils.utils import (
     IMAGE_CHANNELS,
     RESIZED_IMAGE_HEIGHT,
     RESIZED_IMAGE_WIDTH,

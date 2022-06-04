@@ -4,8 +4,8 @@
 # developed within the ERC project PRECRIME
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
-from config import Config
-from utils import *
+from src.config import Config
+from utils.utils import *
 
 if __name__ == "__main__":
     os.chdir(os.getcwd().replace("scripts", ""))

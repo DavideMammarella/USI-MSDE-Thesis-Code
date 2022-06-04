@@ -14,9 +14,9 @@ import tensorflow
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 
-from config import Config
+from src.config import Config
 from selforacle.vae import VAE, Decoder, Encoder
-from utils import (
+from utils.utils import (
     IMAGE_CHANNELS,
     RESIZED_IMAGE_HEIGHT,
     RESIZED_IMAGE_WIDTH,

@@ -7,25 +7,15 @@ import sys
 
 sys.path.append("..")
 
-import base64
 import csv
-import logging
 
 # Standard library import ----------------------------------------------------------------------------------------------
 import os
-import pathlib
-from io import BytesIO
 from pathlib import Path
 
-import numpy as np
-from PIL import Image
-
-import utils
-
 # Local libraries import -----------------------------------------------------------------------------------------------
-from config import Config
-from evaluations.utils_threshold import calc_and_store_thresholds
-from utils import resize
+from src.config import Config
+from utils.utils_threshold import calc_and_store_thresholds
 
 
 def visit_nominal_simulation(sim_path):

@@ -5,18 +5,16 @@
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
 import os
-import random
 
 import matplotlib.image as mpimg
 import numpy as np
 from tensorflow.keras.utils import Sequence
 
 from selforacle.vae import normalize_and_reshape
-from utils import (
+from utils.utils import (
     IMAGE_CHANNELS,
     RESIZED_IMAGE_HEIGHT,
     RESIZED_IMAGE_WIDTH,
-    crop,
     resize,
 )
 

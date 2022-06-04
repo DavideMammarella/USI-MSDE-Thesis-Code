@@ -8,7 +8,7 @@ import os
 
 from vae_evaluate_novelty_detection import evaluate_novelty_detection
 
-from config import Config
+from src.config import Config
 
 if __name__ == "__main__":
     os.chdir(os.getcwd().replace("scripts", ""))

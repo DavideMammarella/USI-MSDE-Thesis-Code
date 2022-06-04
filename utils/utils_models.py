@@ -5,12 +5,11 @@
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
 import uncertainty_wizard as uwiz
-from tensorflow import keras
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, Lambda
 from tensorflow.keras.regularizers import l2
 
-from utils import INPUT_SHAPE
+from utils.utils import INPUT_SHAPE
 
 
 def build_model(model_name, use_dropout=False):

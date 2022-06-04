@@ -1,5 +1,3 @@
-import os
-import pprint
 import sys
 import warnings
 
@@ -10,8 +8,8 @@ sys.path.append("")
 
 from pathlib import Path
 
-import evaluations.time_series.calc_positive_negative as calc_positive_negative
-import evaluations.time_series.utils_ts as utils_ts
+import evaluations.calc_positive_negative as calc_positive_negative
+import utils.utils_ts as utils_ts
 
 THRESHOLDS = {
     "0.68": 0.019586066769424662,

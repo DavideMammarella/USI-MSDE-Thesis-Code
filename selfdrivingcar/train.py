@@ -17,10 +17,10 @@ from sklearn.utils import shuffle
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
-from config import Config
-from self_driving_car_batch_generator import Generator
-from utils import get_driving_styles
-from utils_models import *
+from src.config import Config
+from batch_generator import Generator
+from utils.utils import get_driving_styles
+from utils.utils_models import *
 
 np.random.seed(0)
 

@@ -11,9 +11,9 @@ import pandas as pd
 from keras import backend as K
 from vae_evaluate import get_results_mispredictions, load_or_compute_losses
 
-from config import Config
+from src.config import Config
 from selforacle import utils_vae
-from utils import load_all_images
+from utils.utils import load_all_images
 
 
 def evaluate_novelty_detection(cfg, track, condition, metric, technique):

@@ -5,17 +5,11 @@ import os
 import subprocess
 from pathlib import Path
 
-from evaluations.time_series import utils_ts
-
-from config import Config
+from utils import utils
 
 def start_simulator():  # DO NOT CHANGE THIS
-    root_dir, cfg = utils_ts.load_config()
-
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    root_dir, cfg = utils.load_config()
     simulator_path = Path(root_dir, cfg.SIMULATOR_DIR)
-    print(str(simulator_path))
 
     for file in os.listdir(simulator_path):
         if file.endswith(".app") or file.endswith(".exe"):
@@ -30,5 +24,5 @@ def start_simulator():  # DO NOT CHANGE THIS
 
 if __name__ == '__main__':
     start_simulator()
-    from app import app
+    from selfdrivingcar.drive import app
     app()

@@ -13,33 +13,25 @@ import sys
 
 sys.path.append("..")
 
-import base64
 import csv
-import pathlib
-from io import BytesIO
 from pathlib import Path
 
 import numpy as np
 
 # Tensorflow library import --------------------------------------------------------------------------------------------
-import tensorflow
 import uncertainty_wizard as uwiz
 from PIL import Image
-from tensorflow import keras
-from tensorflow.keras.models import load_model
 from tqdm import tqdm
 
-import utils
+from utils import utils
 
 # Local libraries import -----------------------------------------------------------------------------------------------
-from config import Config
+from src.config import Config
 from data.simulations_normalizer import (
     check_driving_log,
     normalize_img_path,
     write_driving_log,
 )
-from selforacle.vae import VAE, normalize_and_reshape
-from utils import resize
 
 # Model setup ----------------------------------------------------------------------------------------------------------
 model = None

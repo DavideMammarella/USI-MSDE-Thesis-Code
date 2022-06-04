@@ -8,10 +8,10 @@ import tensorflow
 from scipy.stats import ttest_rel
 from tqdm import tqdm
 
-import utils
-from config import Config
+from utils import utils
+from src.config import Config
 from selforacle.vae import VAE, normalize_and_reshape
-from utils import *
+from utils.utils import *
 
 WHAT = "-latent16-centerimg-nocrop"
 

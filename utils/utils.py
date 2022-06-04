@@ -1,9 +1,3 @@
-# Copyright 2021 Testing Automated @ Università della Svizzera italiana (USI)
-# All rights reserved.
-# This file is part of the project SelfOracle, a misbehaviour predictor for autonomous vehicles,
-# developed within the ERC project PRECRIME
-# and is released under the "MIT License Agreement". Please see the LICENSE
-# file that should have been included as part of this package.
 import csv
 import datetime
 import os
@@ -17,6 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from tensorflow.keras import backend as K
+
+from configurations.config import Config
 
 RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH = 80, 160
 IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 160, 320, 3
@@ -56,12 +52,17 @@ csv_fieldnames_improved_simulator = [
     "tot_crashes",
 ]
 
+def load_config():
+    root_dir = get_root_dir()
+    cfg = Config()
+    cfg.from_pyfile(Path(root_dir, "configurations", "config_my.py"))
+    return root_dir, cfg
 
-def get_project_root() -> Path:
+def get_root_dir() -> Path:
     """
     Get the project root directory.
     """
-    return Path(__file__).parent
+    return Path(__file__).parent.parent
 
 
 def load_image(data_dir, image_file):

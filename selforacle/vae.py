@@ -11,7 +11,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.layers import Dense
 
-from utils import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
+from utils.utils import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
 
 original_dim = RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS
 
