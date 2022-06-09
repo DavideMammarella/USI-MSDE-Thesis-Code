@@ -1,0 +1,121 @@
+# !!! Simulations must be in the project folder under: simulations/<name_of_simulation>
+# !!! <name_of_simulation> folder must contain: IMG folder (with .jpg) and driving_log.csv
+
+# This script must be used only with UWIZ models
+import csv
+import json
+import logging
+import os
+import sys
+from pathlib import Path
+
+import numpy
+from scipy.stats import gamma
+
+
+def visit_nominal_simulation(sim_path):
+    csv_file = sim_path / "driving_log_normalized.csv"
+    uncertainties = []
+
+    with open(csv_file, mode="r") as f:
+        reader = csv.DictReader(f, skipinitialspace=True)
+        for row in reader:
+            uncertainties.append(float(row.get("uncertainty")))
+
+    return uncertainties
+
+
+def visit_simulation(sim_path):
+    csv_file = sim_path / "driving_log_normalized.csv"
+    print("\nReading simulation:\t", str(sim_path))
+    images_dict = []
+    with open(csv_file) as f:
+        driving_log_normalized = [
+            {k: v for k, v in row.items()}
+            for row in csv.DictReader(f, skipinitialspace=True)
+        ]
+    for d in driving_log_normalized:
+        images_dict.append(
+            {
+                "frame_id": d.get("frame_id"),
+                "center": Path(sim_path, d.get("center")),
+            }
+        )
+    f.close()
+
+    return driving_log_normalized, images_dict
+
+
+def create_driving_log(sim_path, driving_log, predictions_dict):
+    final_output = []
+
+    for d in driving_log:
+        for prediction in predictions_dict:
+            if d.get("frame_id") == prediction.get("frame_id") and d.get(
+                "center"
+            ) == prediction.get("center"):
+                final_output.append(
+                    {
+                        "frame_id": d.get("frame_id"),
+                        "model": d.get("model"),
+                        "anomaly_detector": d.get("anomaly_detector"),
+                        "threshold": d.get("threshold"),
+                        "sim_name": d.get("sim_name"),
+                        "lap": d.get("lap"),
+                        "waypoint": d.get("waypoint"),
+                        "loss": d.get("loss"),
+                        "uncertainty": prediction.get("uncertainty"),
+                        "cte": d.get("cte"),
+                        "steering_angle": prediction.get("steering_angle"),
+                        "throttle": d.get("throttle"),
+                        "speed": d.get("speed"),
+                        "brake": d.get("brake"),
+                        "crashed": d.get("crashed"),
+                        "distance": d.get("distance"),
+                        "time": d.get("time"),
+                        "ang_diff": d.get("ang_diff"),
+                        "center": prediction.get("center"),
+                        "tot_OBEs": d.get("tot_obes"),
+                        "tot_crashes": d.get("tot_crashes"),
+                    }
+                )
+
+    folder = Path(str(sim_path) + "-uncertainty-evaluated")
+    folder.mkdir(parents=True, exist_ok=True)
+
+    write_driving_log(final_output, folder)
+
+
+def write_driving_log(dict, sim_path):
+    csv_file_normalized = sim_path / "driving_log_normalized.csv"
+
+    with csv_file_normalized.open(mode="w") as f_normalized:
+        headers = [
+            "frame_id",
+            "model",
+            "anomaly_detector",
+            "threshold",
+            "sim_name",
+            "lap",
+            "waypoint",
+            "loss",
+            "uncertainty",
+            "cte",
+            "steering_angle",
+            "throttle",
+            "speed",
+            "brake",
+            "crashed",
+            "distance",
+            "time",
+            "ang_diff",
+            "center",
+            "tot_OBEs",
+            "tot_crashes",
+        ]
+        writer = csv.DictWriter(f_normalized, fieldnames=headers)
+        writer.writeheader()
+        for data in dict:
+            writer.writerow(data)
+
+    f_normalized.close()

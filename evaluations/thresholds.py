@@ -3,25 +3,22 @@
 
 # This script must be used only with UWIZ models
 
-import sys
 import csv
 import json
 import logging
 import os
+import sys
 from pathlib import Path
-import utils.csv
 
 import numpy
 from scipy.stats import gamma
 
-import os
-from pathlib import Path
-
+import utils.ultracsv
 from utils import utils
 
 
 def calc_and_store_thresholds(
-        uncertainties: numpy.array, thresholds_location
+    uncertainties: numpy.array, thresholds_location
 ) -> dict:
     """
     Calculates all thresholds stores them on a file system
@@ -78,9 +75,9 @@ def visit_nominal_simulation(sim_path):
 def get_nominal_simulation(sims_path):
     for sim_path in sims_path.iterdir():
         if (
-                sim_path.is_dir()
-                and "normal" in str(sim_path).casefold()
-                and sim_path.name.endswith("-uncertainty-evaluated")
+            sim_path.is_dir()
+            and "normal" in str(sim_path).casefold()
+            and sim_path.name.endswith("-uncertainty-evaluated")
         ):
             return sim_path.name
 
@@ -92,9 +89,7 @@ def main():
     sims_path = Path(root_dir, cfg.SIMULATIONS_DIR)
     nominal_sim = get_nominal_simulation(sims_path)
     uncertainties = visit_nominal_simulation(sims_path / nominal_sim)
-    calc_and_store_thresholds(
-        uncertainties, Path(root_dir, "data")
-    )
+    calc_and_store_thresholds(uncertainties, Path(root_dir, "data"))
 
 
 if __name__ == "__main__":

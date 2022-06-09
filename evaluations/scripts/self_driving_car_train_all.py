@@ -5,8 +5,8 @@
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
 import numpy as np
-
 from src.config import Config
+
 from selfdrivingcar.train import load_data, train_model
 from utils.model import *
 

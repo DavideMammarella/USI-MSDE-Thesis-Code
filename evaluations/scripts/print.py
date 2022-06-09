@@ -6,11 +6,11 @@
 # file that should have been included as part of this package.
 import tensorflow
 from scipy.stats import ttest_rel
+from src.config import Config
 from tqdm import tqdm
 
-from utils import utils
-from src.config import Config
 from selforacle.vae import VAE, normalize_and_reshape
+from utils import utils
 from utils.utils import *
 
 WHAT = "-latent16-centerimg-nocrop"

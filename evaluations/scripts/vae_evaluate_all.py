@@ -6,9 +6,8 @@
 # file that should have been included as part of this package.
 import os
 
-from vae_evaluate import load_all_images, load_and_eval_vae
-
 from src.config import Config
+from vae_evaluate import load_all_images, load_and_eval_vae
 
 if __name__ == "__main__":
     os.chdir(os.getcwd().replace("scripts", ""))

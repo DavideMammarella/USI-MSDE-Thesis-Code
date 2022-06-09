@@ -52,18 +52,6 @@ csv_fieldnames_improved_simulator = [
     "tot_crashes",
 ]
 
-def load_config():
-    root_dir = get_root_dir()
-    cfg = Config()
-    cfg.from_pyfile(Path(root_dir, "configurations", "config_my.py"))
-    return root_dir, cfg
-
-def get_root_dir() -> Path:
-    """
-    Get the project root directory.
-    """
-    return Path(__file__).parent.parent
-
 
 def load_image(data_dir, image_file):
     """

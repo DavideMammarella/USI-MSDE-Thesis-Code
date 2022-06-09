@@ -6,10 +6,10 @@
 # file that should have been included as part of this package.
 import tensorflow
 from scipy.stats import stats
-
-from utils import utils
 from src.config import Config
+
 from selforacle.vae import VAE, normalize_and_reshape
+from utils import utils
 from utils.utils import *
 
 ANOMALY_DETECTOR = "track1-MSEloss-latent2-centerimg-nocrop"

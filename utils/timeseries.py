@@ -1,7 +1,6 @@
-import csv
-
 import numpy as np
 import pandas as pd
+import ultracsv
 
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
 
@@ -10,18 +9,6 @@ def get_frame_ids(np_array):
     print("{}, {}".format("frame_id", "uncertainty"))
     for index, val in np.ndenumerate(np_array):
         print("{}, {}".format(index[0], val))
-
-
-def collect_simulations(sims_path):
-    sims = []
-    for sim_path in sims_path.iterdir():
-        if sim_path.is_dir() and sim_path.name.endswith(
-            "-uncertainty-evaluated"
-        ):
-            sims.append(sim_path.name)
-
-    return sims #["DAVE2-Track1-Normal-uncertainty-evaluated", "xai-track1-snow-10-uncertainty-evaluated"]
-
 
 
 ###############################################################################

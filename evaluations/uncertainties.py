@@ -4,36 +4,20 @@
 
 # This script must be used only with UWIZ models
 
-# Standard library import ----------------------------------------------------------------------------------------------
 import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow warnings
 
-import sys
-
-sys.path.append("..")
-
-import csv
 from pathlib import Path
 
 import numpy as np
-
-# Tensorflow library import --------------------------------------------------------------------------------------------
 import uncertainty_wizard as uwiz
 from PIL import Image
 from tqdm import tqdm
 
-from utils import utils
+from data.simulations_normalizer import check_driving_log, normalize_img_path
+from utils import navigate, ultracsv, utils
 
-# Local libraries import -----------------------------------------------------------------------------------------------
-from src.config import Config
-from data.simulations_normalizer import (
-    check_driving_log,
-    normalize_img_path,
-    write_driving_log,
-)
-
-# Model setup ----------------------------------------------------------------------------------------------------------
 model = None
 prev_image_array = None
 anomaly_detection = None
@@ -91,130 +75,40 @@ def predict_on_IMG(images_dict):
     return predictions_dict
 
 
-def visit_simulation(sim_path):
-    csv_file = sim_path / "driving_log_normalized.csv"
-    print("\nReading simulation:\t", str(sim_path))
-    images_dict = []
-    with open(csv_file) as f:
-        driving_log_normalized = [
-            {k: v for k, v in row.items()}
-            for row in csv.DictReader(f, skipinitialspace=True)
-        ]
-    for d in driving_log_normalized:
-        images_dict.append(
-            {
-                "frame_id": d.get("frame_id"),
-                "center": Path(sim_path, d.get("center")),
-            }
-        )
-    f.close()
-
-    return driving_log_normalized, images_dict
-
-
-def collect_simulations(sims_path):
-    # First Iteration: collect all simulations -------------------------------------------------------------------------
-    _, dirs, _ = next(
-        os.walk(sims_path)
-    )  # list all folders in simulations_path (only top level)
-
-    # Second iteration: collect all simulations to exclude -------------------------------------------------------------
-    exclude = []
-    for d in dirs:
-        if "-uncertainty-evaluated" in d:
-            exclude.append(d)
-            exclude.append(d[: -len("-uncertainty-evaluated")])
-
-    sims_evaluated = int(len(exclude) / 2)
-    print(">> Total simulations:\t", len(dirs) - sims_evaluated)
-    print(">> Simulations already evaluated:\t", sims_evaluated)
-
-    # Third iteration: collect all simulations to evaluate (excluding those already evaluated) -------------------------
-    sims = [d for d in dirs if d not in exclude]
-    print(">> Simulations to evaluate:\t", len(sims))
-
-    return sims
-
-
-def create_driving_log(sim_path, driving_log, predictions_dict):
-    final_output = []
-
-    for d in driving_log:
-        for prediction in predictions_dict:
-            if d.get("frame_id") == prediction.get("frame_id") and d.get(
-                "center"
-            ) == prediction.get("center"):
-                final_output.append(
-                    {
-                        "frame_id": d.get("frame_id"),
-                        "model": d.get("model"),
-                        "anomaly_detector": d.get("anomaly_detector"),
-                        "threshold": d.get("threshold"),
-                        "sim_name": d.get("sim_name"),
-                        "lap": d.get("lap"),
-                        "waypoint": d.get("waypoint"),
-                        "loss": d.get("loss"),
-                        "uncertainty": prediction.get("uncertainty"),
-                        "cte": d.get("cte"),
-                        "steering_angle": prediction.get("steering_angle"),
-                        "throttle": d.get("throttle"),
-                        "speed": d.get("speed"),
-                        "brake": d.get("brake"),
-                        "crashed": d.get("crashed"),
-                        "distance": d.get("distance"),
-                        "time": d.get("time"),
-                        "ang_diff": d.get("ang_diff"),
-                        "center": prediction.get("center"),
-                        "tot_OBEs": d.get("tot_obes"),
-                        "tot_crashes": d.get("tot_crashes"),
-                    }
-                )
-
-    folder = Path(str(sim_path) + "-uncertainty-evaluated")
-    folder.mkdir(parents=True, exist_ok=True)
-
-    write_driving_log(final_output, folder)
-
-
 def main():
-    curr_project_path = Path(
-        os.path.normpath(os.getcwd() + os.sep + os.pardir)
-    )  # overcome OS issues
-    cfg = Config()
-    cfg_pyfile_path = curr_project_path / "config_my.py"
-    cfg.from_pyfile(cfg_pyfile_path)
+    cfg = navigate.config()
+    model_path = Path(navigate.models_dir(), cfg.SDC_MODEL_NAME)
+
+    sims_path = navigate.simulations_dir()
+    simulations = navigate.collect_simulations_to_evaluate(sims_path)
 
     # Load the self-driving car model ----------------------------------------------------------------------------------
     global model
-    model_path = os.path.join(
-        curr_project_path, cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME
-    )
-    model = uwiz.models.load_model(model_path)
-
-    # Analyse all simulations ------------------------------------------------------------------------------------------
-    sims_path = Path(curr_project_path, cfg.SIMULATIONS_DIR)
-    simulations = collect_simulations(sims_path)
+    model = uwiz.models.load_model(str(model_path))
 
     for sim in simulations:
-        sim_path = Path(curr_project_path, cfg.SIMULATIONS_DIR, sim)
-        driving_log, images_dict = visit_simulation(sim_path)
+        sim_path = Path(sims_path, sim)
+        driving_log, images_dict = ultracsv.visit_simulation(sim_path)
+
         print("Calculating uncertainties using UWIZ on IMGs...")
         predictions_dict = predict_on_IMG(images_dict)
         print(">> Predictions done:", len(predictions_dict))
+
         print("Writing CSV...")
-        create_driving_log(sim_path, driving_log, predictions_dict)
+        ultracsv.create_driving_log(sim_path, driving_log, predictions_dict)
         print(
             ">> CSV written to:\t" + str(sim_path) + "-uncertainty-evaluated"
         )
-        print("Check CSV integrity (Original Normalized vs Predicted)...")
-        check_driving_log(
-            Path(sim_path / "driving_log_normalized.csv"),
-            Path(
-                str(sim_path)
-                + "-uncertainty-evaluated/driving_log_normalized.csv"
-            ),
-        )
-        print(">> CSV is OK!")
+
+        # print("Check CSV integrity (Original Normalized vs Predicted)...")
+        # check_driving_log(
+        #     Path(sim_path / "driving_log_normalized.csv"),
+        #     Path(
+        #         str(sim_path)
+        #         + "-uncertainty-evaluated/driving_log_normalized.csv"
+        #     ),
+        # )
+        # print(">> CSV is OK!")
 
 
 if __name__ == "__main__":

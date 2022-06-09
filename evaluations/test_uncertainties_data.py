@@ -4,25 +4,15 @@
 
 # This script must be used only with UWIZ models
 
-# Standard library import ----------------------------------------------------------------------------------------------
 import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow warnings
-
-import sys
-
-sys.path.append("..")
 
 import csv
 import statistics
 from pathlib import Path
 
-# Tensorflow library import --------------------------------------------------------------------------------------------
-
-from utils import utils
-
-# Local libraries import -----------------------------------------------------------------------------------------------
-from src.config import Config
+from utils import navigate
 
 
 def get_avg_unc(sim_path):
@@ -44,25 +34,10 @@ def get_avg_unc(sim_path):
     return avg_unc
 
 
-def collect_simulations(sims_path):
-    sims = []
-    for sim_path in sims_path.iterdir():
-        if sim_path.is_dir() and sim_path.name.endswith(
-            "-uncertainty-evaluated"
-        ):
-            sims.append(sim_path.name)
-    print(">> Collected simulations: " + str(len(sims)) + "\n")
-    return sims
-
-
 def main():
-    root_dir = utils.get_project_root()
-    cfg = Config()
-    cfg_pyfile_path = root_dir / "config_my.py"
-    cfg.from_pyfile(cfg_pyfile_path)
-
-    sims_path = Path(root_dir, cfg.SIMULATIONS_DIR)
-    simulations = collect_simulations(sims_path)
+    cfg = navigate.config()
+    sims_path = navigate.simulations_dir()
+    simulations = navigate.collect_simulations_evaluated(sims_path)
 
     print(
         "{:<30} {:<15}\n----------------------------------------------------".format(
@@ -71,7 +46,7 @@ def main():
     )
     avgs = []
     for sim in simulations:
-        sim_path = Path(root_dir, cfg.SIMULATIONS_DIR, sim)
+        sim_path = Path(sims_path, sim)
         avg_unc = get_avg_unc(sim_path)
         avgs.append(avg_unc)
         print(

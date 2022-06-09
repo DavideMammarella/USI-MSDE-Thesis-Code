@@ -7,9 +7,9 @@
 
 import tensorflow
 from scipy.stats import stats
+from src.config import Config
 
 from utils import utils
-from src.config import Config
 from utils.utils import *
 
 if __name__ == "__main__":

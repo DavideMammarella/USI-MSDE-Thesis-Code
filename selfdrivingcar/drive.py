@@ -4,6 +4,7 @@ import signal
 from datetime import datetime
 from io import BytesIO
 from sys import exit
+
 import eventlet.wsgi
 import numpy as np
 import socketio
@@ -12,9 +13,10 @@ import uncertainty_wizard as uwiz
 from flask import Flask
 from PIL import Image
 from tensorflow import keras
+
 from selforacle.vae import VAE, normalize_and_reshape
-from utils.utils import resize, rmse
 from utils import utils
+from utils.utils import resize, rmse
 
 model = None
 prev_image_array = None
@@ -40,9 +42,9 @@ elif cfg.SDC_MODEL_TYPE == "chauffeur":
         model_path, custom_objects={"rmse": rmse}
     )
 elif (
-        cfg.SDC_MODEL_TYPE == "dave2"
-        or cfg.SDC_MODEL_TYPE == "epoch"
-        or cfg.SDC_MODEL_TYPE == "commaai"
+    cfg.SDC_MODEL_TYPE == "dave2"
+    or cfg.SDC_MODEL_TYPE == "epoch"
+    or cfg.SDC_MODEL_TYPE == "commaai"
 ):
     model = tensorflow.keras.models.load_model(model_path)
 else:
@@ -51,16 +53,10 @@ else:
 
 # Load self-assessment oracle model --------------------------------------------------------------------------------
 encoder = tensorflow.keras.models.load_model(
-    cfg.SAO_MODELS_DIR
-    + os.path.sep
-    + "encoder-"
-    + cfg.ANOMALY_DETECTOR_NAME
+    cfg.SAO_MODELS_DIR + os.path.sep + "encoder-" + cfg.ANOMALY_DETECTOR_NAME
 )
 decoder = tensorflow.keras.models.load_model(
-    cfg.SAO_MODELS_DIR
-    + os.path.sep
-    + "decoder-"
-    + cfg.ANOMALY_DETECTOR_NAME
+    cfg.SAO_MODELS_DIR + os.path.sep + "decoder-" + cfg.ANOMALY_DETECTOR_NAME
 )
 
 anomaly_detection = VAE(
@@ -83,7 +79,7 @@ else:
 
 
 def send_control(
-        steering_angle, throttle, confidence, loss, max_laps, uncertainty
+    steering_angle, throttle, confidence, loss, max_laps, uncertainty
 ):  # DO NOT CHANGE THIS
     sio.emit(
         "steer",
@@ -219,7 +215,7 @@ def telemetry(sid, data):
             else:
                 confidence = 1
 
-            throttle = 1.0 - steering_angle ** 2 - (speed / speed_limit) ** 2
+            throttle = 1.0 - steering_angle**2 - (speed / speed_limit) ** 2
 
             # Send control commands to the simulator -------------------------------------------------------------------
             send_control(
@@ -272,7 +268,9 @@ def telemetry(sid, data):
 
 
 # Deploy server ----------------------------------------------------------------------------------------------------
-app = socketio.WSGIApp(sio, app)  # wrap Flask application with engineio's middleware
+app = socketio.WSGIApp(
+    sio, app
+)  # wrap Flask application with engineio's middleware
 eventlet.wsgi.server(
     eventlet.listen(("", 4567)), app
 )  # deploy as an eventlet WSGI server

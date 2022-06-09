@@ -1,17 +1,14 @@
 # !!! Simulations must be in the project folder under: simulations/<name_of_simulation>
 # !!! <name_of_simulation> folder must contain: IMG folder (with .jpg) and driving_log.csv
 
-import sys
-
-sys.path.append("..")
-
 import csv
 import os
 from pathlib import Path
 
 from tqdm import tqdm
 
-from src.config import Config
+from utils import navigate
+from utils import ultracsv as csv_utils
 
 
 class MyDictReader(csv.DictReader):
@@ -51,41 +48,6 @@ def check_driving_log(csv_file, csv_file_normalized):
                     str(d.get("center"))
                 ) == d_to_check.get("center")
     f.close()
-    f_normalized.close()
-
-
-def write_driving_log(dict, sim_path):
-    csv_file_normalized = sim_path / "driving_log_normalized.csv"
-
-    with csv_file_normalized.open(mode="w") as f_normalized:
-        headers = [
-            "frame_id",
-            "model",
-            "anomaly_detector",
-            "threshold",
-            "sim_name",
-            "lap",
-            "waypoint",
-            "loss",
-            "uncertainty",
-            "cte",
-            "steering_angle",
-            "throttle",
-            "speed",
-            "brake",
-            "crashed",
-            "distance",
-            "time",
-            "ang_diff",
-            "center",
-            "tot_OBEs",
-            "tot_crashes",
-        ]
-        writer = csv.DictWriter(f_normalized, fieldnames=headers)
-        writer.writeheader()
-        for data in dict:
-            writer.writerow(data)
-
     f_normalized.close()
 
 
@@ -138,44 +100,30 @@ def normalize_simulation(sim_path):
     return final_output
 
 
-def collect_simulations(sims_path):
-    _, dirs, _ = next(
-        os.walk(sims_path)
-    )  # list all folders in simulations_path (only top level)
-    sims = [d for d in dirs]  # collect all simulations name
-    print(">> Simulations to evaluate:\t", len(sims))
-    return sims
-
-
 def main():
-    curr_project_path = Path(
-        os.path.normpath(os.getcwd() + os.sep + os.pardir)
-    )  # overcome OS issues
-
-    cfg = Config()
-    cfg_pyfile_path = curr_project_path / "config_my.py"
-    cfg.from_pyfile(cfg_pyfile_path)
-
-    # Analyse all simulations ------------------------------------------------------------------------------------------
-    sims_path = Path(curr_project_path, cfg.SIMULATIONS_DIR)
-    simulations = collect_simulations(sims_path)
+    sims_path = navigate.simulations_dir()
+    simulations = navigate.collect_simulations_to_normalize(sims_path)
 
     # Normalize all simulations ----------------------------------------------------------------------------------------
     for i, sim in enumerate(simulations, start=0):
-        sim_path = Path(curr_project_path, cfg.SIMULATIONS_DIR, sim)
+        sim_path = Path(sims_path, sim)
+
         print("\nAnalyzing simulation: " + str(sim_path))
-        csv_file_normalized = sim_path / "driving_log_normalized.csv"
+        csv_file_normalized = Path(sim_path, "driving_log_normalized.csv")
         if os.path.exists(csv_file_normalized) and os.path.isfile(
             csv_file_normalized
         ):
             os.remove(csv_file_normalized)
             print(">> Normalized CSV file already exists, deleting it..")
+
         print("Normalizing CSV for simulation: " + str(sim_path))
         dict_to_print = normalize_simulation(sim_path)
         print(">> CSV Normalized!")
+
         print("Writing CSV for simulation: " + str(sim_path))
-        write_driving_log(dict_to_print, sim_path)
+        csv_utils.write_driving_log(dict_to_print, sim_path)
         print(">> CSV written!")
+
         # print("Check CSV integrity (Original vs Normalized)...")
         # check_driving_log(Path(sim_path / "driving_log.csv"), Path(sim_path / "driving_log_normalized.csv"))
         # print(">> Normalized CSV is OK!")

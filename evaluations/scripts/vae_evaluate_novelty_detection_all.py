@@ -6,9 +6,8 @@
 # file that should have been included as part of this package.
 import os
 
-from vae_evaluate_novelty_detection import evaluate_novelty_detection
-
 from src.config import Config
+from vae_evaluate_novelty_detection import evaluate_novelty_detection
 
 if __name__ == "__main__":
     os.chdir(os.getcwd().replace("scripts", ""))

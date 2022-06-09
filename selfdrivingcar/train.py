@@ -12,15 +12,15 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from batch_generator import Generator
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
+from src.config import Config
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
-from src.config import Config
-from batch_generator import Generator
-from utils.utils import get_driving_styles
 from utils.model import *
+from utils.utils import get_driving_styles
 
 np.random.seed(0)
 

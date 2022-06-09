@@ -22,10 +22,9 @@ from sklearn.metrics import (
     roc_auc_score,
     roc_curve,
 )
+from src.config import Config
 from tqdm import tqdm
 
-from utils import utils
-from src.config import Config
 from selforacle.utils_vae import load_vae
 from selforacle.vae import (
     IMAGE_CHANNELS,
@@ -33,6 +32,7 @@ from selforacle.vae import (
     RESIZED_IMAGE_WIDTH,
     normalize_and_reshape,
 )
+from utils import utils
 from utils.utils import load_all_images, plot_reconstruction_losses
 
 np.random.seed(0)

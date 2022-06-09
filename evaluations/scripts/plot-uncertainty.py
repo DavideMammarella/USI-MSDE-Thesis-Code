@@ -5,8 +5,8 @@
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
 from scipy.stats import gamma
-
 from src.config import Config
+
 from utils.utils import *
 
 if __name__ == "__main__":

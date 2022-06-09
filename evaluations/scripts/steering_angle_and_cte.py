@@ -6,6 +6,7 @@
 # file that should have been included as part of this package.
 
 from src.config import Config
+
 from utils.utils import *
 
 if __name__ == "__main__":

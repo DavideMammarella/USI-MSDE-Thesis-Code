@@ -5,19 +5,16 @@
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
 
-# folder path
-SIMULATIONS_DIR = "data/simulations"  # folder where to store the simulations
-TRAINING_DATA_DIR = (
-    "data/datasets"  # root folder for all driving training sets
-)
-TRAINING_SET_DIR = "dataset5"  # the driving training set to use
+# FOLDERS PATH -> DO NO TOUCH
+DATA_DIR = "data"
+TRAINING_DATA_DIR = "datasets"  # root folder for all driving training sets)
+SIMULATIONS_DIR = "simulations"  # folder where to store the simulations
 SDC_MODELS_DIR = "models"  # self-driving car models
 SAO_MODELS_DIR = (
-    "models/sao"  # trained autoencoder-based self-assessment oracle models
+    "sao"  # trained autoencoder-based self-assessment oracle models
 )
+TRAINING_SET_DIR = "dataset5"  # the driving training set to use
 SIMULATOR_DIR = "simulator"  # name of the simulator to use
-DATABASES_DIR = "databases"  # name of the databases to use
-EVALUATIONS_OUT_DIR = "data/evaluations"  # name of the databases to use
 
 # simulations settings
 TRACK = "track1"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use

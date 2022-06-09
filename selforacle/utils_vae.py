@@ -12,9 +12,9 @@ import numpy as np
 import pandas as pd
 import tensorflow
 from sklearn.model_selection import train_test_split
+from src.config import Config
 from tensorflow import keras
 
-from src.config import Config
 from selforacle.vae import VAE, Decoder, Encoder
 from utils.utils import (
     IMAGE_CHANNELS,

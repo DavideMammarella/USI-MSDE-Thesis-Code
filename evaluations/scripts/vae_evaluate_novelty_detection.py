@@ -9,9 +9,9 @@ import os
 
 import pandas as pd
 from keras import backend as K
+from src.config import Config
 from vae_evaluate import get_results_mispredictions, load_or_compute_losses
 
-from src.config import Config
 from selforacle import utils_vae
 from utils.utils import load_all_images
 

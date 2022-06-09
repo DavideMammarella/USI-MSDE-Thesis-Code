@@ -1,4 +1,5 @@
 from gevent import monkey
+
 monkey.patch_all()
 
 import os
@@ -6,6 +7,7 @@ import subprocess
 from pathlib import Path
 
 from utils import utils
+
 
 def start_simulator():  # DO NOT CHANGE THIS
     root_dir, cfg = utils.load_config()
@@ -22,7 +24,8 @@ def start_simulator():  # DO NOT CHANGE THIS
     )  # subprocess as os.system py doc
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start_simulator()
     from selfdrivingcar.drive import app
+
     app()

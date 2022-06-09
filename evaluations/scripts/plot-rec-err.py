@@ -7,8 +7,8 @@
 import glob
 
 from scipy.stats import gamma
-
 from src.config import Config
+
 from utils.utils import *
 
 if __name__ == "__main__":
