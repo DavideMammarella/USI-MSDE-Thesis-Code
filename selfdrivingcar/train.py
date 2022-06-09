@@ -20,7 +20,7 @@ from tensorflow.keras.optimizers import Adam
 from src.config import Config
 from batch_generator import Generator
 from utils.utils import get_driving_styles
-from utils.utils_models import *
+from utils.model import *
 
 np.random.seed(0)
 

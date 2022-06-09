@@ -4,18 +4,63 @@
 # This script must be used only with UWIZ models
 
 import sys
-
-sys.path.append("..")
-
 import csv
+import json
+import logging
+import os
+from pathlib import Path
+import utils.csv
 
-# Standard library import ----------------------------------------------------------------------------------------------
+import numpy
+from scipy.stats import gamma
+
 import os
 from pathlib import Path
 
-# Local libraries import -----------------------------------------------------------------------------------------------
-from src.config import Config
-from utils.utils_threshold import calc_and_store_thresholds
+from utils import utils
+
+
+def calc_and_store_thresholds(
+        uncertainties: numpy.array, thresholds_location
+) -> dict:
+    """
+    Calculates all thresholds stores them on a file system
+    :param losses: array of shape (n,),
+                    where n is the number of training data points, containing the uncertainties calculated for these points
+    :return: a dictionary of where key = threshold_identifier and value = threshold_value
+    """
+    Path(thresholds_location).mkdir(parents=True, exist_ok=True)
+
+    print(
+        "Fitting reconstruction error distribution of UWIZ using Gamma distribution params"
+    )
+
+    shape, loc, scale = gamma.fit(uncertainties, floc=0)
+    thresholds = {}
+
+    conf_intervals = [0.68, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999]
+
+    print(
+        "Creating thresholds using the confidence intervals: %s"
+        % conf_intervals
+    )
+
+    for c in conf_intervals:
+        thresholds[str(c)] = gamma.ppf(c, shape, loc=loc, scale=scale)
+
+    as_json = json.dumps(thresholds)
+
+    json_filename = str(thresholds_location) + "/uwiz-thresholds.json"
+
+    print("Saving thresholds to %s" % json_filename)
+
+    if os.path.exists(json_filename):
+        os.remove(json_filename)
+
+    with open(json_filename, "a") as fp:
+        fp.write(as_json)
+
+    return thresholds
 
 
 def visit_nominal_simulation(sim_path):
@@ -33,28 +78,22 @@ def visit_nominal_simulation(sim_path):
 def get_nominal_simulation(sims_path):
     for sim_path in sims_path.iterdir():
         if (
-            sim_path.is_dir()
-            and "normal" in str(sim_path).casefold()
-            and sim_path.name.endswith("-uncertainty-evaluated")
+                sim_path.is_dir()
+                and "normal" in str(sim_path).casefold()
+                and sim_path.name.endswith("-uncertainty-evaluated")
         ):
             return sim_path.name
 
 
 def main():
-    curr_project_path = Path(
-        os.path.normpath(os.getcwd() + os.sep + os.pardir)
-    )  # overcome OS issues
-
-    cfg = Config()
-    cfg_pyfile_path = curr_project_path / "config_my.py"
-    cfg.from_pyfile(cfg_pyfile_path)
+    root_dir, cfg = utils.load_config()
 
     # Analyse all simulations ------------------------------------------------------------------------------------------
-    sims_path = Path(curr_project_path, cfg.SIMULATIONS_DIR)
+    sims_path = Path(root_dir, cfg.SIMULATIONS_DIR)
     nominal_sim = get_nominal_simulation(sims_path)
     uncertainties = visit_nominal_simulation(sims_path / nominal_sim)
     calc_and_store_thresholds(
-        uncertainties, Path(curr_project_path, "data", "thresholds")
+        uncertainties, Path(root_dir, "data")
     )
 
 

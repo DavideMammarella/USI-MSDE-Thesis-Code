@@ -8,7 +8,7 @@ import numpy as np
 
 from src.config import Config
 from selfdrivingcar.train import load_data, train_model
-from utils.utils_models import *
+from utils.model import *
 
 np.random.seed(0)
 

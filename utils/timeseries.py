@@ -1,14 +1,7 @@
-import sys
-
-sys.path.append("")
-
 import csv
 
 import numpy as np
 import pandas as pd
-
-from utils import utils as utils
-from configurations.config import Config
 
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
 
