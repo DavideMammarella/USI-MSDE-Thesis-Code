@@ -60,17 +60,17 @@ def perform_analysis_2(uncertainties_windows, crashes_per_frame, threshold):
 def perform_analysis_1(
     uncertainties_windows, crashes_per_frame, threshold, windows_nominal
 ):
-    windows_FP, windows_TN, crashes = 0, 0, 0
+    windows_FP, windows_TN, tot_crashes = 0, 0, 0
     (
         windows,
         windows_TP,
         windows_FN,
-        crashes,
+        tot_crashes
     ) = calc_positive_negative._on_anomalous(
         uncertainties_windows, crashes_per_frame, threshold
     )
     # vengono tenute FP, TN come variabili fisse, selezionando # window nella nominale pari ai crashes
-    for i in range(crashes):
+    for i in range(tot_crashes):
         window = random.choice(windows_nominal)
         print(
             ">> Windows chosen from nominal: " + str(window.get("window_id"))
@@ -78,13 +78,14 @@ def perform_analysis_1(
         windows_FP += window.get("FP")
         windows_TN += window.get("TN")
 
-    return windows_TP, windows_FN, windows_FP, windows_TN, crashes
+    assert (windows_FP + windows_TN) == tot_crashes
+
+    return windows_TP, windows_FN, windows_FP, windows_TN, tot_crashes
 
 
 def main():
     # Load configs and folders -----------------------------------------------------------------------------------------
     cfg = navigate.config()
-    root_path = navigate.root_dir()
     data_path = navigate.data_dir()
 
     sims_path = navigate.simulations_dir()
@@ -93,7 +94,10 @@ def main():
 
     print(">> Collected simulations: " + str(len(sims)))
 
-    utils_ts.create_prec_recall_csv(sims_path)
+    if ANALYSIS == 1:
+        utils_ts.create_prec_recall_csv(data_path / "prec_recall_analysis_1.csv",)
+    else:
+        utils_ts.create_prec_recall_csv(data_path / "prec_recall_analysis_2.csv",)
 
     for threshold_type in THRESHOLDS:
         threshold = THRESHOLDS[threshold_type]
@@ -103,7 +107,7 @@ def main():
         print("###########################################################")
 
         if ANALYSIS == 1:
-            csv_file = Path(sims_path, nominal_sim)
+            csv_file = Path(sims_path, nominal_sim, "driving_log_normalized.csv")
             uncertainties = utils_ts.get_uncertainties(
                 csv_file
             )  # np array of uncertainties (index is frame_id)
@@ -116,13 +120,8 @@ def main():
 
             # CALCULATE FP, TP, TN, FN
             (
-                windows_nominal,
-                _,
-                _,
-                _,
-                _,
-                _,
-            ) = calc_positive_negative._on_windows(
+                windows_nominal
+            ) = calc_positive_negative._on_windows_nominal(
                 uncertainties_windows, crashes_per_frame, threshold
             )
 
@@ -193,10 +192,10 @@ def main():
                     and float(f1) <= 1
                 )
 
-                utils_ts.write_positive_negative(
-                    data_path,
+                if ANALYSIS == 1:
+                    utils_ts.write_positive_negative(
+                    data_path / "prec_recall_analysis_1.csv",
                     sim,
-                    0,
                     threshold_type,
                     threshold,
                     windows_TP,
@@ -209,6 +208,22 @@ def main():
                     f1,
                     fpr,
                 )
+                else:
+                    utils_ts.write_positive_negative(
+                        data_path / "prec_recall_analysis_2.csv",
+                        sim,
+                        threshold_type,
+                        threshold,
+                        windows_TP,
+                        windows_FN,
+                        windows_FP,
+                        windows_TN,
+                        crashes,
+                        precision,
+                        recall,
+                        f1,
+                        fpr,
+                    )
                 print(
                     "----------------------------------------------------------"
                 )

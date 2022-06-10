@@ -17,9 +17,8 @@ def get_frame_ids(np_array):
 
 
 def write_positive_negative(
-    data_dir,
+    prec_recall_csv,
     sim_name,
-    windows,
     threshold_type,
     threshold,
     windows_TP,
@@ -33,7 +32,7 @@ def write_positive_negative(
     fpr,
 ):
     # TODO: window can be used to add additional information on windows inside csv
-    prec_recall_csv = data_dir / "prec_recall.csv"
+
 
     with prec_recall_csv.open(mode="a") as f:
         f.write(
@@ -67,8 +66,7 @@ def write_positive_negative(
     f.close()
 
 
-def create_prec_recall_csv(data_path):
-    csv_file_normalized = data_path / "prec_recall.csv"
+def create_prec_recall_csv(csv_file_normalized):
     with csv_file_normalized.open(mode="w") as f:
         headers = [
             "simulation",
