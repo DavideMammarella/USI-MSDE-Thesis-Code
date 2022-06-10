@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import ultracsv
+import csv
 
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
 
