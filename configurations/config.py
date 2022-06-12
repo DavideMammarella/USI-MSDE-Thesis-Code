@@ -38,6 +38,7 @@ class Config:
         self.USE_UWIZ = None
         self.SIMULATIONS_DIR = None
         self.DATA_DIR = None
+        self.PERFORMANCE_METRICS_DIR = None
 
     def from_pyfile(self, filename, silent=False):
         # filename = os.path.join(self.root_path, filename)

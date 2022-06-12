@@ -95,6 +95,10 @@ def simulations_dir() -> Path:
     p.mkdir(parents=True, exist_ok=True)
     return p
 
+def performance_metrics_dir() -> Path:
+    p = Path(data_dir(), config().PERFORMANCE_METRICS_DIR)
+    p.mkdir(parents=True, exist_ok=True)
+    return p
 
 def models_dir() -> Path:
     p = Path(root_dir(), config().SDC_MODELS_DIR)

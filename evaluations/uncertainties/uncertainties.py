@@ -15,7 +15,7 @@ import uncertainty_wizard as uwiz
 from PIL import Image
 from tqdm import tqdm
 
-from data.simulations_normalizer import check_driving_log, normalize_img_path
+from data.simulations.simulations_normalizer import normalize_img_path
 from utils import navigate, ultracsv, utils
 
 model = None

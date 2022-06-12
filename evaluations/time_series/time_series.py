@@ -1,18 +1,14 @@
 import random
-import sys
 import warnings
-from pprint import pprint
-
-import numpy as np
 
 from evaluations import performance_metrics
-from utils import navigate, utils
+from utils import navigate
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 from pathlib import Path
 
-import evaluations.windows_analysis as windows_analysis
+import evaluations.time_series.windows_analysis as windows_analysis
 import utils.timeseries as utils_ts
 
 THRESHOLDS = {
@@ -27,23 +23,10 @@ THRESHOLDS = {
 
 # REACTION_TIME = 50
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
-ANALYSIS = 2  # 1: normal (calculate nominal separately), 2: alternative (calculation based on crashes)
-
-
-def window_stack(
-    a: np.array, stepsize=NORMAL_WINDOW_LENGTH, width=NORMAL_WINDOW_LENGTH
-):
-    """
-    stackoverflow.com/questions/15722324/sliding-window-of-m-by-n-shape-numpy-ndarray/15722507#15722507
-    """
-    return np.hstack(
-        a[i : 1 + i - width or None : stepsize] for i in range(0, width)
-    )
+ANALYSIS = 1  # 1: normal (calculate nominal separately), 2: alternative (calculation based on crashes)
 
 
 def perform_analysis_2(uncertainties_windows, crashes_per_frame, threshold):
-    # FP in anomale (no nominale) -> prendendo n finestre = n failures -> finestra abbastanza precedente
-    # (prendi frame da prima della finestra di crash, da 4 a 6 secondi prima)
     (
         windows,
         windows_TP,
@@ -59,7 +42,7 @@ def perform_analysis_2(uncertainties_windows, crashes_per_frame, threshold):
 
 
 def perform_analysis_1(
-    uncertainties_windows, crashes_per_frame, threshold, windows_nominal
+        uncertainties_windows, crashes_per_frame, threshold, windows_nominal
 ):
     windows_FP, windows_TN, tot_crashes = 0, 0, 0
     (
@@ -73,11 +56,11 @@ def perform_analysis_1(
     # vengono tenute FP, TN come variabili fisse, selezionando # window nella nominale pari ai crashes
     for i in range(tot_crashes):
         window = random.choice(windows_nominal)
-        print(
-            ">> Windows chosen from nominal: " + str(window.get("window_id"))
-        )
         windows_FP += window.get("FP")
         windows_TN += window.get("TN")
+    print(
+        ">> Analyzed window (nominal): " + str(i+1) #because i start from 0
+    )
 
     assert (windows_FP + windows_TN) == tot_crashes
 
@@ -88,6 +71,7 @@ def main():
     # Load configs and folders -----------------------------------------------------------------------------------------
     cfg = navigate.config()
     data_path = navigate.data_dir()
+    metrics_path = navigate.performance_metrics_dir()
 
     sims_path = navigate.simulations_dir()
     sims = navigate.collect_simulations_evaluated(sims_path)
@@ -95,10 +79,8 @@ def main():
 
     print(">> Collected simulations: " + str(len(sims)))
 
-    if ANALYSIS == 1:
-        utils_ts.create_prec_recall_csv(data_path / "prec_recall_analysis_1.csv",)
-    else:
-        utils_ts.create_prec_recall_csv(data_path / "prec_recall_analysis_2.csv",)
+    prec_recall_filename = "analysis_" + str(ANALYSIS) + ".csv"
+    utils_ts.create_prec_recall_csv(Path(metrics_path, prec_recall_filename))
 
     for threshold_type in THRESHOLDS:
         threshold = THRESHOLDS[threshold_type]
@@ -114,7 +96,7 @@ def main():
             )  # np array of uncertainties (index is frame_id)
 
             # WINDOWS SPLITTING
-            uncertainties_windows = window_stack(uncertainties)
+            uncertainties_windows = windows_analysis.window_stack(uncertainties)
             crashes_per_frame = utils_ts.get_crashes(
                 csv_file
             )  # dict {frame_id : crash}
@@ -136,7 +118,7 @@ def main():
                 print("SIMULATION: " + sim)
 
                 # WINDOWS SPLITTING
-                uncertainties_windows = window_stack(uncertainties)
+                uncertainties_windows = windows_analysis.window_stack(uncertainties)
                 crashes_per_frame = utils_ts.get_crashes(
                     csv_file
                 )  # dict {frame_id : crash}
@@ -188,14 +170,13 @@ def main():
                     windows_TP, windows_FN, windows_FP, windows_TN
                 )
                 assert (
-                    float(precision) <= 1
-                    and float(recall) <= 1
-                    and float(f1) <= 1
+                        float(precision) <= 1
+                        and float(recall) <= 1
+                        and float(f1) <= 1
                 )
 
-                if ANALYSIS == 1:
-                    utils_ts.write_positive_negative(
-                    data_path / "prec_recall_analysis_1.csv",
+                utils_ts.write_positive_negative(
+                    Path(metrics_path, prec_recall_filename),
                     sim,
                     threshold_type,
                     threshold,
@@ -209,22 +190,6 @@ def main():
                     f1,
                     fpr,
                 )
-                else:
-                    utils_ts.write_positive_negative(
-                        data_path / "prec_recall_analysis_2.csv",
-                        sim,
-                        threshold_type,
-                        threshold,
-                        windows_TP,
-                        windows_FN,
-                        windows_FP,
-                        windows_TN,
-                        crashes,
-                        precision,
-                        recall,
-                        f1,
-                        fpr,
-                    )
                 print(
                     "----------------------------------------------------------"
                 )
