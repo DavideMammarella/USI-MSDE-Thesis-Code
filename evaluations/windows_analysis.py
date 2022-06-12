@@ -6,40 +6,6 @@ NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
 WINDOWS_BEFORE_CRASH_TO_ANALISE = 6
 
 
-def _calc_precision_recall_f1_fpr(
-        windows_TP, windows_FN, windows_FP, windows_TN
-):
-    TP_FN = windows_TP + windows_FN
-    TP_FP = windows_TP + windows_FP
-
-    if (
-            TP_FP == 0
-    ):  # nominal case (only TP e FP are 0, no anomalies) #TODO: check if its good to return 0
-        precision = 0
-    else:
-        precision = windows_TP / TP_FP
-
-    if (
-            TP_FN == 0
-    ):  # nominal case (only positive example, no negative) #TODO: check if its good to return 0
-        recall = 0
-    else:
-        recall = windows_TP / TP_FN
-
-    p_r = precision + recall
-    if p_r == 0:  # nominal case #TODO: check if its good to return 0
-        f1_score = 0
-    else:
-        f1_score = 2 * ((precision * recall) / p_r)
-
-    FP_TN = windows_FP + windows_TN
-    if FP_TN == 0:  # nominal case #TODO: check if its good to return 0
-        fpr = 0
-    else:
-        fpr = windows_FP / FP_TN
-    return precision, recall, f1_score, fpr
-
-
 def get_window_positive_negative(window, threshold):
     """
     Since Positive and Negative are calculated with same logic, this function is used to calculate both.
@@ -54,52 +20,6 @@ def get_window_positive_negative(window, threshold):
             FN_or_TN += 1
 
     return FP_or_TP, FN_or_TN
-
-
-def window_analysis_nominal(i, window,threshold):
-    assert len(window) == NORMAL_WINDOW_LENGTH
-
-    window_crash = False
-    window_FP, window_TN, tot_window_FP, tot_window_TN = 0, 0, 0, 0
-
-    tot_window_FP, tot_window_TN = get_window_positive_negative(
-            window, threshold
-        )
-
-    if tot_window_FP > tot_window_TN:
-        window_FP = 1
-    elif tot_window_FP < tot_window_TN:
-        window_TN = 1
-    elif tot_window_FP == tot_window_TN:
-        window_TN = 1
-
-    return {
-                "window": list(window),
-                "start_frame": int(i * NORMAL_WINDOW_LENGTH),
-                "end_frame": int(
-                    (((i * NORMAL_WINDOW_LENGTH) + NORMAL_WINDOW_LENGTH)) - 1
-                ),
-                "is_crash": int(window_crash),
-                "FP": int(window_FP),
-                "TN": int(window_TN),
-                "TP": int(0),
-                "FN": int(0),
-            }
-
-
-def _on_windows_nominal(uncertainties_windows, crashes_per_frame, threshold):
-    windows = []
-
-    for i in range(len(uncertainties_windows)):
-        (
-            window
-        ) = window_analysis_nominal(
-            i, uncertainties_windows[i], threshold
-        )
-        windows.append(window)  # based on windows DB-schema columns
-
-    return windows
-
 
 def before_window_crash_analysis(
         uncertainties_windows, current_frame, threshold
@@ -175,6 +95,50 @@ def window_crash_analysis(uncertainties_windows, current_frame, threshold) -> di
         "FP": int(0),
         "TN": int(0)
     }
+
+def window_nominal_analysis(i, window,threshold):
+    assert len(window) == NORMAL_WINDOW_LENGTH
+
+    window_crash = False
+    window_FP, window_TN, tot_window_FP, tot_window_TN = 0, 0, 0, 0
+
+    tot_window_FP, tot_window_TN = get_window_positive_negative(
+            window, threshold
+        )
+
+    if tot_window_FP > tot_window_TN:
+        window_FP = 1
+    elif tot_window_FP < tot_window_TN:
+        window_TN = 1
+    elif tot_window_FP == tot_window_TN:
+        window_TN = 1
+
+    return {
+                "window": list(window),
+                "start_frame": int(i * NORMAL_WINDOW_LENGTH),
+                "end_frame": int(
+                    (((i * NORMAL_WINDOW_LENGTH) + NORMAL_WINDOW_LENGTH)) - 1
+                ),
+                "is_crash": int(window_crash),
+                "FP": int(window_FP),
+                "TN": int(window_TN),
+                "TP": int(0),
+                "FN": int(0),
+            }
+
+
+def _on_windows_nominal(uncertainties_windows, crashes_per_frame, threshold):
+    windows = []
+
+    for i in range(len(uncertainties_windows)):
+        (
+            window
+        ) = window_nominal_analysis(
+            i, uncertainties_windows[i], threshold
+        )
+        windows.append(window)  # based on windows DB-schema columns
+
+    return windows
 
 
 def _on_anomalous_alternative(

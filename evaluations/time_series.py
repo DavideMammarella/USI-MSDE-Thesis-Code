@@ -5,13 +5,14 @@ from pprint import pprint
 
 import numpy as np
 
+from evaluations import performance_metrics
 from utils import navigate, utils
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 from pathlib import Path
 
-import evaluations.calc_positive_negative as calc_positive_negative
+import evaluations.windows_analysis as windows_analysis
 import utils.timeseries as utils_ts
 
 THRESHOLDS = {
@@ -50,7 +51,7 @@ def perform_analysis_2(uncertainties_windows, crashes_per_frame, threshold):
         windows_FP,
         windows_TN,
         crashes,
-    ) = calc_positive_negative._on_anomalous_alternative(
+    ) = windows_analysis._on_anomalous_alternative(
         uncertainties_windows, crashes_per_frame, threshold
     )
 
@@ -66,7 +67,7 @@ def perform_analysis_1(
         windows_TP,
         windows_FN,
         tot_crashes
-    ) = calc_positive_negative._on_anomalous(
+    ) = windows_analysis._on_anomalous(
         uncertainties_windows, crashes_per_frame, threshold
     )
     # vengono tenute FP, TN come variabili fisse, selezionando # window nella nominale pari ai crashes
@@ -121,7 +122,7 @@ def main():
             # CALCULATE FP, TP, TN, FN
             (
                 windows_nominal
-            ) = calc_positive_negative._on_windows_nominal(
+            ) = windows_analysis._on_windows_nominal(
                 uncertainties_windows, crashes_per_frame, threshold
             )
 
@@ -183,7 +184,7 @@ def main():
                     recall,
                     f1,
                     fpr,
-                ) = calc_positive_negative._calc_precision_recall_f1_fpr(
+                ) = performance_metrics._calculate_all(
                     windows_TP, windows_FN, windows_FP, windows_TN
                 )
                 assert (
