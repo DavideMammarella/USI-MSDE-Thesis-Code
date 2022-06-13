@@ -24,9 +24,7 @@ if __name__ == "__main__":
     )
 
     # load the online uncertainty from csv
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df = pd.read_csv(path)
     online_steering_angles = data_df["steering_angle"]
     print("loaded %d steering_angle values" % len(online_steering_angles))
@@ -113,9 +111,7 @@ if __name__ == "__main__":
     # display original
     ax = plt.subplot(1, 2, 1)
     plt.imshow(
-        mpimg.imread(data[min_idx]).reshape(
-            IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS
-        )
+        mpimg.imread(data[min_idx]).reshape(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS)
     )
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
@@ -131,9 +127,7 @@ if __name__ == "__main__":
     # display reconstruction
     ax = plt.subplot(1, 2, 2)
     plt.imshow(
-        mpimg.imread(data[max_idx]).reshape(
-            IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS
-        )
+        mpimg.imread(data[max_idx]).reshape(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS)
     )
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)

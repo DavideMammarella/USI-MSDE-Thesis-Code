@@ -29,9 +29,7 @@ def main():
         cfg.SDC_MODEL_NAME = m
         for unc in use_mc:
             cfg.USE_PREDICTIVE_UNCERTAINTY = unc
-            model = build_model(
-                cfg.SDC_MODEL_NAME, cfg.USE_PREDICTIVE_UNCERTAINTY
-            )
+            model = build_model(cfg.SDC_MODEL_NAME, cfg.USE_PREDICTIVE_UNCERTAINTY)
             train_model(model, cfg, x_train, x_test, y_train, y_test)
 
 

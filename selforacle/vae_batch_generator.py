@@ -40,9 +40,7 @@ class Generator(Sequence):
         )
         for i, paths in enumerate(batch_paths):
 
-            center = batch_paths[i][
-                0
-            ]  # select the center image from the batch
+            center = batch_paths[i][0]  # select the center image from the batch
             try:
                 image = mpimg.imread(
                     self.cfg.TRAINING_DATA_DIR

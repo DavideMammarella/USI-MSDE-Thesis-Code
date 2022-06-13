@@ -129,9 +129,7 @@ def telemetry(sid, data):
         ang_diff = float(data["ang_diff"])  # angular difference
         isCrash = int(data["crash"])  # whether an OBE or crash occurred
         number_obe = int(data["tot_obes"])  # total number of crashes so far
-        number_crashes = int(
-            data["tot_crashes"]
-        )  # total number of OBEs so far
+        number_crashes = int(data["tot_crashes"])  # total number of OBEs so far
         image = Image.open(
             BytesIO(base64.b64decode(data["image"]))
         )  # current image from the center camera of the car
@@ -228,9 +226,7 @@ def telemetry(sid, data):
             )
 
             if cfg.TESTING_DATA_DIR:
-                csv_path = os.path.join(
-                    cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME
-                )
+                csv_path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME)
                 utils.write_csv_line(
                     csv_path,
                     [
@@ -268,9 +264,7 @@ def telemetry(sid, data):
 
 
 # Deploy server ----------------------------------------------------------------------------------------------------
-app = socketio.WSGIApp(
-    sio, app
-)  # wrap Flask application with engineio's middleware
+app = socketio.WSGIApp(sio, app)  # wrap Flask application with engineio's middleware
 eventlet.wsgi.server(
     eventlet.listen(("", 4567)), app
 )  # deploy as an eventlet WSGI server

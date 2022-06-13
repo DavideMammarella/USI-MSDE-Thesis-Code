@@ -26,9 +26,7 @@ def evaluate_novelty_detection(cfg, track, condition, metric, technique):
     cfg.SIMULATION_NAME = "gauss-journal-" + track + "-nominal"
     dataset = load_all_images(cfg)
 
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df_nominal = pd.read_csv(path)
 
     if cfg.USE_ONLY_CENTER_IMG:
@@ -54,17 +52,13 @@ def evaluate_novelty_detection(cfg, track, condition, metric, technique):
 
     vae = utils_vae.load_vae_by_name(name)
 
-    original_losses = load_or_compute_losses(
-        vae, dataset, name, delete_cache=True
-    )
+    original_losses = load_or_compute_losses(vae, dataset, name, delete_cache=True)
 
     # 2. evaluate on novel conditions (rain)
     cfg.SIMULATION_NAME = "gauss-journal-" + track + condition
     dataset = load_all_images(cfg)
 
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df_anomalous = pd.read_csv(path)
 
     new_losses = load_or_compute_losses(vae, dataset, name, delete_cache=True)

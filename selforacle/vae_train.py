@@ -46,12 +46,8 @@ def train_vae_model(
                 "Model %s already exists and retraining=true. Keep training."
                 % str(name)
             )
-            my_encoder = Path(
-                os.path.join(cfg.SAO_MODELS_DIR, "encoder-" + name)
-            )
-            my_decoder = Path(
-                os.path.join(cfg.SAO_MODELS_DIR, "decoder-" + name)
-            )
+            my_encoder = Path(os.path.join(cfg.SAO_MODELS_DIR, "encoder-" + name))
+            my_decoder = Path(os.path.join(cfg.SAO_MODELS_DIR, "decoder-" + name))
         else:
             print(
                 "Model %s already exists and retraining=false. Quit training."
@@ -102,12 +98,8 @@ def train_vae_model(
     plt.show()
 
     # save the last model
-    vae.encoder.save(
-        my_encoder.__str__(), save_format="tf", include_optimizer=True
-    )
-    vae.decoder.save(
-        my_decoder.__str__(), save_format="tf", include_optimizer=True
-    )
+    vae.encoder.save(my_encoder.__str__(), save_format="tf", include_optimizer=True)
+    vae.decoder.save(my_decoder.__str__(), save_format="tf", include_optimizer=True)
 
     del vae
     K.clear_session()

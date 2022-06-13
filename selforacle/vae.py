@@ -65,9 +65,7 @@ class VAE(keras.Model, ABC):
     Define the VAE as a `Model` with a custom `train_step`
     """
 
-    def __init__(
-        self, model_name, loss, latent_dim, encoder, decoder, **kwargs
-    ):
+    def __init__(self, model_name, loss, latent_dim, encoder, decoder, **kwargs):
         super(VAE, self).__init__(**kwargs)
         self.model_name = model_name
         self.intermediate_dim = 512
@@ -93,9 +91,7 @@ class VAE(keras.Model, ABC):
                 kl_loss *= -0.5
                 total_loss = reconstruction_loss + kl_loss
                 grads = tape.gradient(total_loss, self.trainable_weights)
-                self.optimizer.apply_gradients(
-                    zip(grads, self.trainable_weights)
-                )
+                self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
                 return {
                     "loss": total_loss,
                     "reconstruction_loss": reconstruction_loss,
@@ -104,9 +100,7 @@ class VAE(keras.Model, ABC):
             else:
                 total_loss = reconstruction_loss
                 grads = tape.gradient(total_loss, self.trainable_weights)
-                self.optimizer.apply_gradients(
-                    zip(grads, self.trainable_weights)
-                )
+                self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
                 return {
                     "loss": total_loss,
                     "reconstruction_loss": reconstruction_loss,
@@ -154,14 +148,10 @@ def get_image_dim():
 
 def normalize_and_reshape(x):
     x = x.astype("float32") / 255.0
-    x = x.reshape(
-        -1, RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS
-    )
+    x = x.reshape(-1, RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS)
     return x
 
 
 def reshape(x):
-    x = x.reshape(
-        -1, RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS
-    )
+    x = x.reshape(-1, RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS)
     return x

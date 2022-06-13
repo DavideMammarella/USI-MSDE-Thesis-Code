@@ -38,9 +38,7 @@ from utils.utils import load_all_images, plot_reconstruction_losses
 np.random.seed(0)
 
 
-def load_or_compute_losses(
-    anomaly_detector, dataset, cached_file_name, delete_cache
-):
+def load_or_compute_losses(anomaly_detector, dataset, cached_file_name, delete_cache):
     losses = []
 
     current_path = os.getcwd()
@@ -49,10 +47,7 @@ def load_or_compute_losses(
     if delete_cache:
         if os.path.exists(cache_path):
             os.remove(cache_path)
-            print(
-                "delete_cache=true. Removed losses cache file "
-                + cached_file_name
-            )
+            print("delete_cache=true. Removed losses cache file " + cached_file_name)
 
     try:
         losses = np.load(cache_path)
@@ -61,9 +56,7 @@ def load_or_compute_losses(
         return losses
     except FileNotFoundError:
         print(
-            "Losses data_nominal for "
-            + cached_file_name
-            + " not found. Computing..."
+            "Losses data_nominal for " + cached_file_name + " not found. Computing..."
         )
 
         for x in tqdm(dataset):
@@ -92,9 +85,7 @@ def plot_picture_orig_dec(orig, dec, picture_name, losses, num=10):
         # display original
         ax = plt.subplot(2, n, i + 1)
         plt.imshow(
-            orig[i].reshape(
-                RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS
-            )
+            orig[i].reshape(RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS)
         )
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
@@ -103,9 +94,7 @@ def plot_picture_orig_dec(orig, dec, picture_name, losses, num=10):
         # display reconstruction
         ax = plt.subplot(2, n, i + 1 + n)
         plt.imshow(
-            dec[i].reshape(
-                RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS
-            )
+            dec[i].reshape(RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS)
         )
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
@@ -155,9 +144,7 @@ def get_results_mispredictions(
 
         if crashed_anomalous[idx] == 0 and crashed_anomalous[idx + 1] == 1:
             first_index_crash = idx + 1
-            all_first_frame_position_crashed_sequences.append(
-                first_index_crash
-            )
+            all_first_frame_position_crashed_sequences.append(first_index_crash)
             print("first_index_crash: %d" % first_index_crash)
 
     print(
@@ -191,9 +178,7 @@ def get_results_mispredictions(
         if crashed_anomalous[idx] == 0:
             idx_to_remove.append(idx)
 
-    crashed_anomalous = crashed_anomalous.drop(
-        crashed_anomalous.index[idx_to_remove]
-    )
+    crashed_anomalous = crashed_anomalous.drop(crashed_anomalous.index[idx_to_remove])
     sma_anomalous = sma_anomalous.drop(sma_anomalous.index[idx_to_remove])
     num_windows_anomalous = len(crashed_anomalous) // fps_anomalous
     frames_to_remove = (
@@ -235,9 +220,7 @@ def get_results_mispredictions(
 
             # print("true positives: %d - false negatives: %d" % (true_positive_windows, false_negative_windows))
 
-    assert (
-        false_negative_windows + true_positive_windows == num_windows_anomalous
-    )
+    assert false_negative_windows + true_positive_windows == num_windows_anomalous
     crashed_anomalous = crashed_anomalous[:-1]
     sma_anomalous = sma_anomalous[:-1]
 
@@ -254,9 +237,7 @@ def get_results_mispredictions(
     crashed_nominal.is_copy = None
 
     num_windows_nominal = len(crashed_nominal) // fps_nominal
-    num_to_delete = (
-        len(crashed_nominal) - (num_windows_nominal * fps_nominal) - 1
-    )
+    num_to_delete = len(crashed_nominal) - (num_windows_nominal * fps_nominal) - 1
 
     crashed_nominal = crashed_nominal[:-num_to_delete]
     losses_nominal = losses_on_nominal[:-num_to_delete]
@@ -273,12 +254,8 @@ def get_results_mispredictions(
 
             # print("window [%d - %d]" % (idx - fps_nominal, idx))
 
-            window_mean = pd.Series(
-                sma_nominal.iloc[idx - fps_nominal : idx]
-            ).mean()
-            crashed_mean = pd.Series(
-                crashed_nominal[idx - fps_nominal : idx]
-            ).mean()
+            window_mean = pd.Series(sma_nominal.iloc[idx - fps_nominal : idx]).mean()
+            crashed_mean = pd.Series(crashed_nominal[idx - fps_nominal : idx]).mean()
 
             if window_mean >= threshold:
                 if crashed_mean == 0:
@@ -301,9 +278,7 @@ def get_results_mispredictions(
         % (false_positive_windows, true_negative_windows)
     )
     # print("prediction size %d" % len(prediction))
-    assert (
-        false_positive_windows + true_negative_windows == num_windows_nominal
-    )
+    assert false_positive_windows + true_negative_windows == num_windows_nominal
 
     crashed_nominal = crashed_nominal[:-1]
     sma_nominal = crashed_nominal[:-1]
@@ -320,17 +295,9 @@ def get_results_mispredictions(
         + str(round(precision_score(crashed, prediction) * 100, 1))
         + " % "
     )
-    print(
-        "Recall: "
-        + str(round(recall_score(crashed, prediction) * 100, 1))
-        + " % "
-    )
+    print("Recall: " + str(round(recall_score(crashed, prediction) * 100, 1)) + " % ")
     # Obtain and print F1 score as a percentage
-    print(
-        "F1 score: "
-        + str(round(f1_score(crashed, prediction) * 100, 1))
-        + " %"
-    )
+    print("F1 score: " + str(round(f1_score(crashed, prediction) * 100, 1)) + " %")
 
     fpr, tpr, thresholds = roc_curve(crashed, prediction)
     # Obtain and print AUC-ROC
@@ -400,9 +367,7 @@ def get_results_mispredictions(
             )
 
     else:
-        with open(
-            "novelty_detection.csv", mode="a"
-        ) as novelty_detection_result_file:
+        with open("novelty_detection.csv", mode="a") as novelty_detection_result_file:
             writer = csv.writer(
                 novelty_detection_result_file,
                 delimiter=",",
@@ -463,17 +428,13 @@ def get_scores(cfg, name, new_losses, losses, threshold):
         threshold = get_threshold(losses, conf_level=0.95)
 
     # load the online uncertainty from csv
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df = pd.read_csv(path)
     uncertainties = data_df["uncertainty"]
     cte_values = data_df["cte"]
     crashed_values = data_df["crashed"]
 
-    cfg.UNCERTAINTY_TOLERANCE_LEVEL = get_threshold(
-        uncertainties, conf_level=0.95
-    )
+    cfg.UNCERTAINTY_TOLERANCE_LEVEL = get_threshold(uncertainties, conf_level=0.95)
 
     print(
         "loaded %d uncertainty and %d CTE values"
@@ -614,9 +575,7 @@ def get_scores(cfg, name, new_losses, losses, threshold):
                 ]
             )
     else:
-        with open(
-            "class_imbalance.csv", mode="a"
-        ) as class_imbalance_result_file:
+        with open("class_imbalance.csv", mode="a") as class_imbalance_result_file:
             writer = csv.writer(
                 class_imbalance_result_file,
                 delimiter=",",
@@ -645,19 +604,13 @@ def get_scores(cfg, name, new_losses, losses, threshold):
 def load_and_eval_vae(cfg, dataset, delete_cache):
     vae, name = load_vae(cfg, load_vae_from_disk=True)
 
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df = pd.read_csv(path)
 
     losses = load_or_compute_losses(vae, dataset, name, delete_cache)
     threshold_nominal = get_threshold(losses, conf_level=0.95)
-    plot_reconstruction_losses(
-        losses, None, name, threshold_nominal, None, data_df
-    )
-    lfp_unc, lfp_cte, _ = get_scores(
-        cfg, name, losses, losses, threshold_nominal
-    )
+    plot_reconstruction_losses(losses, None, name, threshold_nominal, None, data_df)
+    lfp_unc, lfp_cte, _ = get_scores(cfg, name, losses, losses, threshold_nominal)
 
     del vae
     K.clear_session()

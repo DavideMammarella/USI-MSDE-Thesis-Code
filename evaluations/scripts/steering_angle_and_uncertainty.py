@@ -18,14 +18,10 @@ if __name__ == "__main__":
 
     cfg.SIMULATION_NAME = "gauss-journal-track1-nominal"
 
-    print(
-        "Script to compare offline vs online (within Udacity's) uncertainty values"
-    )
+    print("Script to compare offline vs online (within Udacity's) uncertainty values")
 
     # load the online uncertainty from csv
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df = pd.read_csv(path)
 
     data_df = data_df[data_df["crashed"] == 0]

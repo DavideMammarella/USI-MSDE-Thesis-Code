@@ -1,18 +1,16 @@
-def _calculate_all(
-        windows_TP, windows_FN, windows_FP, windows_TN
-):
+def _calculate_all(windows_TP, windows_FN, windows_FP, windows_TN):
     TP_FN = windows_TP + windows_FN
     TP_FP = windows_TP + windows_FP
 
     if (
-            TP_FP == 0
+        TP_FP == 0
     ):  # nominal case (only TP e FP are 0, no anomalies) #TODO: check if its good to return 0
         precision = 0
     else:
         precision = windows_TP / TP_FP
 
     if (
-            TP_FN == 0
+        TP_FN == 0
     ):  # nominal case (only positive example, no negative) #TODO: check if its good to return 0
         recall = 0
     else:

@@ -28,13 +28,7 @@ def load_vae(cfg, load_vae_from_disk):
     """
     Load a trained VAE from disk and compile it, or creates a new one to be trained.
     """
-    name = (
-        cfg.TRACK
-        + "-"
-        + cfg.LOSS_SAO_MODEL
-        + "-latent"
-        + str(cfg.SAO_LATENT_DIM)
-    )
+    name = cfg.TRACK + "-" + cfg.LOSS_SAO_MODEL + "-latent" + str(cfg.SAO_LATENT_DIM)
 
     if load_vae_from_disk:
         encoder = tensorflow.keras.models.load_model(
@@ -59,9 +53,7 @@ def load_vae(cfg, load_vae_from_disk):
         encoder=encoder,
         decoder=decoder,
     )
-    vae.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE)
-    )
+    vae.compile(optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE))
 
     return vae, name
 
@@ -134,9 +126,7 @@ def load_data_for_vae_training(cfg, sampling=None):
         exit()
 
     try:
-        x_train, x_test = train_test_split(
-            x, test_size=cfg.TEST_SIZE, random_state=0
-        )
+        x_train, x_test = train_test_split(x, test_size=cfg.TEST_SIZE, random_state=0)
     except TypeError:
         print("Missing header to csv files")
         exit()
@@ -174,8 +164,6 @@ def load_vae_by_name(name):
         encoder=encoder,
         decoder=decoder,
     )
-    vae.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE)
-    )
+    vae.compile(optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE))
 
     return vae

@@ -96,9 +96,7 @@ def main():
 
         print("Writing CSV...")
         ultracsv.create_driving_log(sim_path, driving_log, predictions_dict)
-        print(
-            ">> CSV written to:\t" + str(sim_path) + "-uncertainty-evaluated"
-        )
+        print(">> CSV written to:\t" + str(sim_path) + "-uncertainty-evaluated")
 
         # print("Check CSV integrity (Original Normalized vs Predicted)...")
         # check_driving_log(

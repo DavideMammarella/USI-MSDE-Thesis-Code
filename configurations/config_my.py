@@ -10,9 +10,7 @@ DATA_DIR = "data"
 TRAINING_DATA_DIR = "datasets"  # root folder for all driving training sets)
 SIMULATIONS_DIR = "simulations"  # folder where to store the simulations
 SDC_MODELS_DIR = "models"  # self-driving car models
-SAO_MODELS_DIR = (
-    "sao"  # trained autoencoder-based self-assessment oracle models
-)
+SAO_MODELS_DIR = "sao"  # trained autoencoder-based self-assessment oracle models
 TRAINING_SET_DIR = "dataset5"  # the driving training set to use
 SIMULATOR_DIR = "simulator"  # name of the simulator to use
 PERFORMANCE_METRICS_DIR = "metrics"
@@ -41,12 +39,8 @@ TRACK2_IMG_PER_LAP = 1870
 TRACK3_IMG_PER_LAP = 1375
 
 # self-driving car model settings
-TEST_SIZE = (
-    0.2  # split of training data used for the validation set (keep it low)
-)
-SDC_MODEL_TYPE = (
-    "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
-)
+TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
+SDC_MODEL_TYPE = "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
 SDC_MODEL_NAME = "track1-uwiz-mc-final"
 # SDC_MODEL_TYPE = "dave2"
 # SDC_MODEL_NAME = "dave2-mc-053.h5"

@@ -19,14 +19,10 @@ if __name__ == "__main__":
     cfg = Config()
     cfg.from_pyfile("config_my.py")
 
-    print(
-        "Script to compare offline vs online (within Udacity's) uncertainty values"
-    )
+    print("Script to compare offline vs online (within Udacity's) uncertainty values")
 
     # load the online uncertainty from csv
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df = pd.read_csv(path)
     online_uncertainty = data_df["uncertainty"]
     print("loaded %d uncertainty values" % len(online_uncertainty))
@@ -122,17 +118,13 @@ if __name__ == "__main__":
     plt.savefig("plots/online-vs-offline-uncertainty.png")
     plt.show()
 
-    print(
-        stats.mannwhitneyu(online_uncertainty, pd.Series(offline_uncertainty))
-    )
+    print(stats.mannwhitneyu(online_uncertainty, pd.Series(offline_uncertainty)))
 
     plt.figure(figsize=(80, 16))
     # display original
     ax = plt.subplot(1, 2, 1)
     plt.imshow(
-        mpimg.imread(data[min_idx]).reshape(
-            IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS
-        )
+        mpimg.imread(data[min_idx]).reshape(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS)
     )
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
@@ -148,9 +140,7 @@ if __name__ == "__main__":
     # display reconstruction
     ax = plt.subplot(1, 2, 2)
     plt.imshow(
-        mpimg.imread(data[max_idx]).reshape(
-            IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS
-        )
+        mpimg.imread(data[max_idx]).reshape(IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS)
     )
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)

@@ -40,9 +40,7 @@ if __name__ == "__main__":
         encoder=encoder_mse,
         decoder=decoder_mse,
     )
-    vae_mse.compile(
-        optimizer=tensorflow.keras.optimizers.Adam(learning_rate=0.0001)
-    )
+    vae_mse.compile(optimizer=tensorflow.keras.optimizers.Adam(learning_rate=0.0001))
 
     encoder_vae = tensorflow.keras.models.load_model(
         "sao/encoder-track3-VAEloss" + WHAT + "-CI-RETRAINED-2X-UNC"
@@ -57,9 +55,7 @@ if __name__ == "__main__":
         encoder=encoder_vae,
         decoder=decoder_vae,
     )
-    vae_vae.compile(
-        optimizer=tensorflow.keras.optimizers.Adam(learning_rate=0.0001)
-    )
+    vae_vae.compile(optimizer=tensorflow.keras.optimizers.Adam(learning_rate=0.0001))
 
     i = 0
     list_original = []
@@ -73,9 +69,7 @@ if __name__ == "__main__":
         x = normalize_and_reshape(x)
 
         list_original.append(
-            x.reshape(
-                RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS
-            )
+            x.reshape(RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS)
         )
         # z_mean, z_log_var, z = vae_mse.encoder.predict(x)
         # decoded = vae_mse.decoder.predict(z)
@@ -136,9 +130,7 @@ if __name__ == "__main__":
         x = normalize_and_reshape(x)
 
         list_original_unseen.append(
-            x.reshape(
-                RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS
-            )
+            x.reshape(RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS)
         )
         # z_mean, z_log_var, z = vae_mse.encoder.predict(x)
         # decoded = vae_mse.decoder.predict(z)

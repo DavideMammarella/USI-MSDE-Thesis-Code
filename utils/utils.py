@@ -59,9 +59,7 @@ def load_image(data_dir, image_file):
     """
     image_dir = data_dir
     local_path = (
-        "/".join(image_file.split("/")[-4:-1])
-        + "/"
-        + image_file.split("/")[-1]
+        "/".join(image_file.split("/")[-4:-1]) + "/" + image_file.split("/")[-1]
     )
     img_path = "{0}/{1}".format(image_dir, local_path)
     try:
@@ -180,21 +178,15 @@ def random_brightness(image):
     return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
 
-def augment(
-    data_dir, center, left, right, steering_angle, range_x=100, range_y=10
-):
+def augment(data_dir, center, left, right, steering_angle, range_x=100, range_y=10):
     """
     Generate an augmented image and adjust steering angle.
     (The steering angle is associated with the center image)
     """
-    image, steering_angle = choose_image(
-        data_dir, center, left, right, steering_angle
-    )
+    image, steering_angle = choose_image(data_dir, center, left, right, steering_angle)
     # TODO: flip should be applied to left/right only and w/ no probability
     image, steering_angle = random_flip(image, steering_angle)
-    image, steering_angle = random_translate(
-        image, steering_angle, range_x, range_y
-    )
+    image, steering_angle = random_translate(image, steering_angle, range_x, range_y)
     image = random_shadow(image)
     image = random_brightness(image)
     return image, steering_angle
@@ -271,9 +263,7 @@ def load_driving_data_log(cfg: object) -> object:
     data_df = None
     try:
         data_df = pd.read_csv(
-            os.path.join(
-                cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-            ),
+            os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"),
             keep_default_na=False,
         )
     except FileNotFoundError:
@@ -346,9 +336,7 @@ def load_all_images(cfg):
     """
     Load the actual images (not the paths!) in the cfg.SIMULATION_NAME directory.
     """
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df = pd.read_csv(path)
 
     x = data_df["center"]
@@ -417,9 +405,7 @@ def plot_reconstruction_losses(
 
     plt.plot(x_losses, losses, "-.", color="blue", alpha=0.7, label="original")
     if new_losses is not None:
-        plt.plot(
-            x_losses, new_losses, color="green", alpha=0.7, label="retrained"
-        )
+        plt.plot(x_losses, new_losses, color="green", alpha=0.7, label="retrained")
 
     plt.legend()
     plt.ylabel("Loss")

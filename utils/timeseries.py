@@ -1,6 +1,7 @@
+import csv
+
 import numpy as np
 import pandas as pd
-import csv
 
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
 
@@ -32,7 +33,6 @@ def write_positive_negative(
     fpr,
 ):
     # TODO: window can be used to add additional information on windows inside csv
-
 
     with prec_recall_csv.open(mode="a") as f:
         f.write(

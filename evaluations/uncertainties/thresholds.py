@@ -17,9 +17,7 @@ import utils.ultracsv
 from utils import utils
 
 
-def calc_and_store_thresholds(
-    uncertainties: numpy.array, thresholds_location
-) -> dict:
+def calc_and_store_thresholds(uncertainties: numpy.array, thresholds_location) -> dict:
     """
     Calculates all thresholds stores them on a file system
     :param losses: array of shape (n,),
@@ -37,10 +35,7 @@ def calc_and_store_thresholds(
 
     conf_intervals = [0.68, 0.90, 0.95, 0.99, 0.999, 0.9999, 0.99999]
 
-    print(
-        "Creating thresholds using the confidence intervals: %s"
-        % conf_intervals
-    )
+    print("Creating thresholds using the confidence intervals: %s" % conf_intervals)
 
     for c in conf_intervals:
         thresholds[str(c)] = gamma.ppf(c, shape, loc=loc, scale=scale)

@@ -26,9 +26,7 @@ if __name__ == "__main__":
     )
 
     # load the online rec errors from csv
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df = pd.read_csv(path)
     online_losses = data_df["loss"]
     sim_time = np.max(data_df["time"])
@@ -41,12 +39,8 @@ if __name__ == "__main__":
     data = data_df["center"]
     print("read %d images from file" % len(data))
 
-    encoder_mse = tensorflow.keras.models.load_model(
-        "sao/encoder-" + ANOMALY_DETECTOR
-    )
-    decoder_mse = tensorflow.keras.models.load_model(
-        "sao/decoder-" + ANOMALY_DETECTOR
-    )
+    encoder_mse = tensorflow.keras.models.load_model("sao/encoder-" + ANOMALY_DETECTOR)
+    decoder_mse = tensorflow.keras.models.load_model("sao/decoder-" + ANOMALY_DETECTOR)
     vae = VAE(
         model_name="encoder_mse",
         loss="MSE",
@@ -54,9 +48,7 @@ if __name__ == "__main__":
         encoder=encoder_mse,
         decoder=decoder_mse,
     )
-    vae.compile(
-        optimizer=tensorflow.keras.optimizers.Adam(learning_rate=0.0001)
-    )
+    vae.compile(optimizer=tensorflow.keras.optimizers.Adam(learning_rate=0.0001))
 
     offline_reconstruction_errors = []
     total_time = 0
@@ -83,9 +75,7 @@ if __name__ == "__main__":
 
     # compute and plot the rec errors
     x_losses = np.arange(len(online_losses))
-    plt.plot(
-        x_losses, online_losses, color="blue", alpha=0.7, label="online losses"
-    )
+    plt.plot(x_losses, online_losses, color="blue", alpha=0.7, label="online losses")
     plt.plot(
         x_losses,
         offline_reconstruction_errors,

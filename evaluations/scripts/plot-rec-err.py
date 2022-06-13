@@ -26,9 +26,7 @@ if __name__ == "__main__":
 
     all_imgs = glob.glob(path + "/*.jpg")
 
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df = pd.read_csv(path)
     all_err = data_df["loss"]
 
@@ -91,9 +89,7 @@ if __name__ == "__main__":
     plt.ylabel("Rec Err")
     plt.xlabel("Frames")
     plt.title(
-        "Rec Err values for "
-        + cfg.SIMULATION_NAME
-        + "\n# misbehaviour: %d" % times,
+        "Rec Err values for " + cfg.SIMULATION_NAME + "\n# misbehaviour: %d" % times,
         fontsize=20,
     )
 

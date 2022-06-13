@@ -21,7 +21,6 @@ THRESHOLDS = {
     "0.99999": 0.056863799480413445,
 }
 
-# REACTION_TIME = 50
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
 ANALYSIS = 1  # 1: normal (calculate nominal separately), 2: alternative (calculation based on crashes)
 
@@ -42,15 +41,10 @@ def perform_analysis_2(uncertainties_windows, crashes_per_frame, threshold):
 
 
 def perform_analysis_1(
-        uncertainties_windows, crashes_per_frame, threshold, windows_nominal
+    uncertainties_windows, crashes_per_frame, threshold, windows_nominal
 ):
     windows_FP, windows_TN, tot_crashes = 0, 0, 0
-    (
-        windows,
-        windows_TP,
-        windows_FN,
-        tot_crashes
-    ) = windows_analysis._on_anomalous(
+    (windows, windows_TP, windows_FN, tot_crashes) = windows_analysis._on_anomalous(
         uncertainties_windows, crashes_per_frame, threshold
     )
     # vengono tenute FP, TN come variabili fisse, selezionando # window nella nominale pari ai crashes
@@ -58,9 +52,7 @@ def perform_analysis_1(
         window = random.choice(windows_nominal)
         windows_FP += window.get("FP")
         windows_TN += window.get("TN")
-    print(
-        ">> Analyzed window (nominal): " + str(i+1) #because i start from 0
-    )
+    print(">> Analyzed window (nominal): " + str(i + 1))  # because i start from 0
 
     assert (windows_FP + windows_TN) == tot_crashes
 
@@ -102,9 +94,7 @@ def main():
             )  # dict {frame_id : crash}
 
             # CALCULATE FP, TP, TN, FN
-            (
-                windows_nominal
-            ) = windows_analysis._on_windows_nominal(
+            (windows_nominal) = windows_analysis._on_windows_nominal(
                 uncertainties_windows, crashes_per_frame, threshold
             )
 
@@ -161,19 +151,10 @@ def main():
                 )
 
                 # CALCULATE PRECISION, RECALL, F1
-                (
-                    precision,
-                    recall,
-                    f1,
-                    fpr,
-                ) = performance_metrics._calculate_all(
+                (precision, recall, f1, fpr,) = performance_metrics._calculate_all(
                     windows_TP, windows_FN, windows_FP, windows_TN
                 )
-                assert (
-                        float(precision) <= 1
-                        and float(recall) <= 1
-                        and float(f1) <= 1
-                )
+                assert float(precision) <= 1 and float(recall) <= 1 and float(f1) <= 1
 
                 utils_ts.write_positive_negative(
                     Path(metrics_path, prec_recall_filename),
@@ -190,9 +171,7 @@ def main():
                     f1,
                     fpr,
                 )
-                print(
-                    "----------------------------------------------------------"
-                )
+                print("----------------------------------------------------------")
                 # print_auroc_timeline(str(db_name))
 
     print("###########################################################")

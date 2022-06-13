@@ -19,9 +19,7 @@ if __name__ == "__main__":
 
     plt.figure(figsize=(30, 8))
 
-    path = os.path.join(
-        cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv"
-    )
+    path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "driving_log.csv")
     data_df = pd.read_csv(path)
 
     # read CTE values

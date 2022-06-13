@@ -73,17 +73,9 @@ def create_model(use_dropout):
             )
         )
         model.add(Dropout(rate=0.05))
-        model.add(
-            Conv2D(
-                64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)
-            )
-        )
+        model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
         model.add(Dropout(rate=0.05))
-        model.add(
-            Conv2D(
-                64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)
-            )
-        )
+        model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
         model.add(Dropout(rate=0.05))
         model.add(Flatten())
         model.add(Dense(100, activation="relu", kernel_regularizer=l2(1.0e-6)))

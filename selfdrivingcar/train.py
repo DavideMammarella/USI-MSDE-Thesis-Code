@@ -104,10 +104,7 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
     else:
         name = os.path.join(
             cfg.SDC_MODELS_DIR,
-            cfg.TRACK
-            + "-"
-            + cfg.SDC_MODEL_TYPE.replace(".h5", "")
-            + "-{epoch:03d}.h5",
+            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE.replace(".h5", "") + "-{epoch:03d}.h5",
         )
 
     checkpoint = ModelCheckpoint(
@@ -118,9 +115,7 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
         monitor="loss", min_delta=0.0005, patience=10, mode="auto"
     )
 
-    model.compile(
-        loss="mean_squared_error", optimizer=Adam(lr=cfg.LEARNING_RATE)
-    )
+    model.compile(loss="mean_squared_error", optimizer=Adam(lr=cfg.LEARNING_RATE))
 
     x_train, y_train = shuffle(x_train, y_train, random_state=0)
     x_test, y_test = shuffle(x_test, y_test, random_state=0)
@@ -153,10 +148,7 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
     else:
         name = os.path.join(
             cfg.SDC_MODELS_DIR,
-            cfg.TRACK
-            + "-"
-            + cfg.SDC_MODEL_TYPE.replace(".h5", "")
-            + "-final.h5",
+            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE.replace(".h5", "") + "-final.h5",
         )
 
     # save the last model anyway (might not be the best)
