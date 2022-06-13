@@ -30,6 +30,24 @@ def get_window_positive_negative(window, threshold):
     return FP_or_TP, FN_or_TN
 
 
+def label_normal_window(tot_window_FP, tot_window_TN):
+    window_FP, window_TN = 0,0
+    if tot_window_FP > 0:
+        window_FP = 1
+    else:
+        window_TN = 1
+    return window_FP, window_TN
+
+
+def label_crash_window(tot_window_TP, tot_window_FN):
+    window_TP, window_FN = 0,0
+    if tot_window_TP > 0:
+        window_TP = 1
+    else:
+        window_FN = 1
+    return window_TP, window_FN
+
+
 def get_window_before_crash(
         uncertainties_windows, current_frame, threshold
 ) -> dict:
@@ -56,12 +74,7 @@ def get_window_before_crash(
         window_before_crash, threshold
     )
 
-    if tot_window_FP > tot_window_TN:
-        window_FP = 1
-    elif tot_window_FP < tot_window_TN:
-        window_TN = 1
-    elif tot_window_FP == tot_window_TN:
-        window_TN = 1
+    window_FP, window_TN = label_normal_window(tot_window_FP, tot_window_TN)
 
     return {
         "window": list(window_before_crash),
@@ -76,7 +89,6 @@ def get_window_before_crash(
 
 
 def get_crash_window(uncertainties_windows, current_frame, threshold) -> dict:
-    window_TP, window_FN = 0, 0
     start_frame = current_frame - NORMAL_WINDOW_LENGTH - 1
     uncertainties_windows_flatten = list(uncertainties_windows.flatten())
     crash_window = uncertainties_windows_flatten[
@@ -87,12 +99,7 @@ def get_crash_window(uncertainties_windows, current_frame, threshold) -> dict:
         crash_window, threshold
     )
 
-    if tot_window_TP > tot_window_FN:
-        window_TP = 1
-    elif tot_window_TP < tot_window_FN:
-        window_FN = 1
-    elif tot_window_TP == tot_window_FN:
-        window_TP = 1
+    window_TP, window_FN = label_crash_window(tot_window_TP, tot_window_FN)
 
     return {
         "window": list(crash_window),
@@ -112,16 +119,8 @@ def get_nominal_window(i, window, threshold):
     window_crash = False
     window_FP, window_TN, tot_window_FP, tot_window_TN = 0, 0, 0, 0
 
-    tot_window_FP, tot_window_TN = get_window_positive_negative(
-        window, threshold
-    )
-
-    if tot_window_FP > tot_window_TN:
-        window_FP = 1
-    elif tot_window_FP < tot_window_TN:
-        window_TN = 1
-    elif tot_window_FP == tot_window_TN:
-        window_TN = 1
+    tot_window_FP, tot_window_TN = get_window_positive_negative(window, threshold)
+    window_FP, window_TN = label_normal_window(tot_window_FP, tot_window_TN)
 
     return {
         "window": list(window),
@@ -151,9 +150,7 @@ def get_crashes_frames_list(uncertainties_windows, crashes_per_frame):
     return crashes_frames
 
 
-def _on_anomalous_alternative(
-        uncertainties_windows, crashes_per_frame, threshold
-):
+def _on_anomalous_alternative(uncertainties_windows, crashes_per_frame, threshold):
     (
         tot_windows_TP,
         tot_windows_FN,
@@ -167,9 +164,7 @@ def _on_anomalous_alternative(
     crashes_frames = get_crashes_frames_list(uncertainties_windows, crashes_per_frame)
 
     for frame in crashes_frames:
-        window_before_crash = get_window_before_crash(
-            uncertainties_windows, frame, threshold
-        )
+        window_before_crash = get_window_before_crash(uncertainties_windows, frame, threshold)
 
         windows.append(window_before_crash)
 
