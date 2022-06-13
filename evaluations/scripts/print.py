@@ -11,9 +11,19 @@ from tqdm import tqdm
 
 from selforacle.vae import VAE, normalize_and_reshape
 from utils import utils
+from utils.model import RESIZED_IMAGE_HEIGHT, IMAGE_CHANNELS, RESIZED_IMAGE_WIDTH
 from utils.utils import *
+from utils.vae import load_all_images
 
 WHAT = "-latent16-centerimg-nocrop"
+
+
+def laplacian_variance(images):
+    """
+    Computes the Laplacian variance for the given list of images
+    """
+    return [cv2.Laplacian(image, cv2.CV_32F).var() for image in images]
+
 
 if __name__ == "__main__":
     os.chdir(os.getcwd().replace("scripts", ""))

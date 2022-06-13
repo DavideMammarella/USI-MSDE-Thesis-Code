@@ -12,6 +12,44 @@ from pathlib import Path
 import numpy
 from scipy.stats import gamma
 
+header_original_simulator = [
+    "center",
+    "left",
+    "right",
+    "steering",
+    "throttle",
+    "brake",
+    "speed",
+]
+header_improved_simulator = [
+    "frame_id",
+    "model",
+    "anomaly_detector",
+    "threshold",
+    "sim_name",
+    "lap",
+    "waypoint",
+    "loss",
+    "uncertainty",  # newly added
+    "cte",
+    "steering_angle",
+    "throttle",
+    "speed",
+    "brake",
+    "crashed",
+    "distance",
+    "time",
+    "ang_diff",  # newly added
+    "center",
+    "tot_OBEs",
+    "tot_crashes",
+]
+
+
+########################################################################################################################
+# SIMULATIONS VISITOR
+########################################################################################################################
+
 
 def visit_nominal_simulation(sim_path):
     csv_file = sim_path / "driving_log_normalized.csv"
@@ -38,7 +76,7 @@ def visit_simulation(sim_path):
         images_dict.append(
             {
                 "frame_id": d.get("frame_id"),
-                "center": Path(sim_path, d.get("center")),
+                "center": Path(sim_path, "IMG", d.get("center")),
             }
         )
     f.close()
@@ -46,7 +84,12 @@ def visit_simulation(sim_path):
     return driving_log_normalized, images_dict
 
 
-def create_driving_log(sim_path, driving_log, predictions_dict):
+########################################################################################################################
+# SIMULATIONS EVALUATION
+########################################################################################################################
+
+
+def create_driving_log_norm(sim_path, driving_log, predictions_dict):
     final_output = []
 
     for d in driving_log:
@@ -83,39 +126,105 @@ def create_driving_log(sim_path, driving_log, predictions_dict):
     folder = Path(str(sim_path) + "-uncertainty-evaluated")
     folder.mkdir(parents=True, exist_ok=True)
 
-    write_driving_log(final_output, folder)
+    write_driving_log_norm(final_output, folder)
 
 
-def write_driving_log(dict, sim_path):
+def write_driving_log_norm(dict, sim_path):
     csv_file_normalized = sim_path / "driving_log_normalized.csv"
 
     with csv_file_normalized.open(mode="w") as f_normalized:
-        headers = [
-            "frame_id",
-            "model",
-            "anomaly_detector",
-            "threshold",
-            "sim_name",
-            "lap",
-            "waypoint",
-            "loss",
-            "uncertainty",
-            "cte",
-            "steering_angle",
-            "throttle",
-            "speed",
-            "brake",
-            "crashed",
-            "distance",
-            "time",
-            "ang_diff",
-            "center",
-            "tot_OBEs",
-            "tot_crashes",
-        ]
-        writer = csv.DictWriter(f_normalized, fieldnames=headers)
+        writer = csv.DictWriter(f_normalized, fieldnames=header_improved_simulator)
         writer.writeheader()
         for data in dict:
             writer.writerow(data)
 
     f_normalized.close()
+
+
+########################################################################################################################
+# SIMULATIONS RECORDING
+########################################################################################################################
+
+
+def write_row_simulation_csv(
+    simulation_csv,
+    frame_id,
+    model,
+    anomaly_detector,
+    threshold,
+    sim_name,
+    lap,
+    waypoint,
+    loss,
+    uncertainty,
+    cte,
+    steering_angle,
+    throttle,
+    speed,
+    brake,
+    crashed,
+    distance,
+    time,
+    ang_diff,
+    center,
+    tot_OBEs,
+    tot_crashes,
+):
+    # TODO: window can be used to add additional information on windows inside csv
+
+    with simulation_csv.open(mode="a") as f:
+        f.write(
+            str(frame_id)
+            + ","
+            + str(model)
+            + ","
+            + str(anomaly_detector)
+            + ","
+            + str(threshold)
+            + ","
+            + str(sim_name)
+            + ","
+            + str(lap)
+            + ","
+            + str(waypoint)
+            + ","
+            + str(loss)
+            + ","
+            + str(uncertainty)
+            + ","
+            + str(cte)
+            + ","
+            + str(steering_angle)
+            + ","
+            + str(throttle)
+            + ","
+            + str(speed)
+            + ","
+            + str(brake)
+            + ","
+            + str(crashed)
+            + ","
+            + str(distance)
+            + ","
+            + str(time)
+            + ","
+            + str(ang_diff)
+            + ","
+            + str(center.rsplit("/", 1)[-1])
+            + ","
+            + str(tot_OBEs)
+            + ","
+            + str(tot_crashes)
+            + ","
+            + "\n"
+        )
+
+    f.close()
+
+
+def create_simulation_csv(csv_file):
+    with csv_file.open(mode="w") as f:
+        writer = csv.DictWriter(f, fieldnames=header_improved_simulator)
+        writer.writeheader()
+
+    f.close()

@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 
 from configurations.config import Config
@@ -6,6 +7,7 @@ from configurations.config import Config
 ########################################################################################################################
 # SIMULATIONS
 ########################################################################################################################
+from utils.ultracsv import create_simulation_csv
 
 
 def collect_simulations_evaluated(simulations_path):
@@ -20,7 +22,7 @@ def collect_simulations_evaluated(simulations_path):
 def collect_simulations_to_normalize(simulations_path):
     sims = []
     for sim_path in simulations_path.iterdir():
-        if sim_path.is_dir() and sim_path.name.endswith("-uncertainty-evaluated"):
+        if sim_path.is_dir() and sim_path.name != "__pycache__":
             sims.append(str(sim_path.name).replace("-uncertainty-evaluated", ""))
 
     return sims
@@ -33,7 +35,7 @@ def collect_simulations_to_evaluate(simulations_path):
     )  # list all folders in simulations_path (only top level)
 
     # Second iteration: collect all simulations to exclude -------------------------------------------------------------
-    exclude = []
+    exclude = ["__pycache__"]
     for d in dirs:
         if "-uncertainty-evaluated" in d:
             exclude.append(d)
@@ -63,6 +65,12 @@ def get_nominal_simulation(simulations_path):
 ########################################################################################################################
 # PATHS
 ########################################################################################################################
+
+
+def delete_dir(dir_path):
+    if dir_path.exists() and dir_path.is_dir():
+        print("Deleting folder at {}".format(dir_path))
+        shutil.rmtree(dir_path)
 
 
 def root_dir() -> Path:
@@ -102,6 +110,12 @@ def models_dir() -> Path:
     return p
 
 
+def model_path() -> Path:
+    p = Path(models_dir(), config().SDC_MODEL_NAME)
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
 def sao_dir() -> Path:
     p = Path(models_dir(), config().SAO_MODELS_DIR)
     p.mkdir(parents=True, exist_ok=True)
@@ -118,6 +132,22 @@ def simulator_dir() -> Path:
     p = Path(root_dir(), config().SIMULATOR_DIR)
     p.mkdir(parents=True, exist_ok=True)
     return p
+
+
+def training_simulation_dir() -> Path:
+    simulation_path, img_path = None, None
+    if config().TESTING_DATA_DIR:
+        simulation_name = str(config().SDC_MODEL_TYPE + "-" + config().SIMULATION_NAME)
+        simulation_path = Path(simulations_dir(), simulation_name)
+        img_path = Path(simulation_path, "IMG")
+        delete_dir(img_path)
+        img_path.mkdir(parents=True, exist_ok=True)
+        create_simulation_csv(Path(simulation_path, "driving_log.csv"))
+        print("RECORDING THIS RUN ...")
+
+    else:
+        print("NOT RECORDING THIS RUN ...")
+    return simulation_path, img_path
 
 
 ########################################################################################################################

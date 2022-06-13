@@ -3,25 +3,22 @@ import os
 import signal
 from datetime import datetime
 from io import BytesIO
-from sys import exit
+from pathlib import Path
 
 import eventlet.wsgi
 import numpy as np
 import socketio
-import tensorflow
-import uncertainty_wizard as uwiz
+
 from flask import Flask
 from PIL import Image
-from tensorflow import keras
 
-from selforacle.vae import VAE, normalize_and_reshape
-from utils import utils
-from utils.utils import resize, rmse
+from selfdrivingcar import models
+from selforacle.vae import normalize_and_reshape
+from utils import navigate
+from utils.augmentation import preprocess, resize
+from utils.ultracsv import write_row_simulation_csv
 
-model = None
 prev_image_array = None
-anomaly_detection = None
-autoencoder_model = None
 frame_id = 0
 batch_size = 1
 uncertainty = -1
@@ -29,53 +26,16 @@ uncertainty = -1
 sio = socketio.Server(async_mode=None, logger=False)
 app = Flask(__name__)
 
-root_dir, cfg = utils.load_config()
+cfg = navigate.config()
 speed_limit = cfg.MAX_SPEED
 
-# Load the self-driving car model ----------------------------------------------------------------------------------
-model_path = os.path.join(cfg.SDC_MODELS_DIR, cfg.SDC_MODEL_NAME)
+sim_path, img_path = navigate.training_simulation_dir()
 
-if cfg.SDC_MODEL_TYPE == "uwiz":
-    model = uwiz.models.load_model(model_path)
-elif cfg.SDC_MODEL_TYPE == "chauffeur":
-    model = tensorflow.keras.models.load_model(
-        model_path, custom_objects={"rmse": rmse}
-    )
-elif (
-    cfg.SDC_MODEL_TYPE == "dave2"
-    or cfg.SDC_MODEL_TYPE == "epoch"
-    or cfg.SDC_MODEL_TYPE == "commaai"
-):
-    model = tensorflow.keras.models.load_model(model_path)
-else:
-    print("cfg.SDC_MODEL_TYPE option unknown. Exiting...")
-    exit()
+model_path = str(navigate.model_path())
+model = models.load_sdc_model(cfg, model_path)  # load CAR model
 
-# Load self-assessment oracle model --------------------------------------------------------------------------------
-encoder = tensorflow.keras.models.load_model(
-    cfg.SAO_MODELS_DIR + os.path.sep + "encoder-" + cfg.ANOMALY_DETECTOR_NAME
-)
-decoder = tensorflow.keras.models.load_model(
-    cfg.SAO_MODELS_DIR + os.path.sep + "decoder-" + cfg.ANOMALY_DETECTOR_NAME
-)
-
-anomaly_detection = VAE(
-    model_name=cfg.ANOMALY_DETECTOR_NAME,
-    loss=cfg.LOSS_SAO_MODEL,
-    latent_dim=cfg.SAO_LATENT_DIM,
-    encoder=encoder,
-    decoder=decoder,
-)
-anomaly_detection.compile(
-    optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE)
-)
-
-# Create output dir ------------------------------------------------------------------------------------------------
-if cfg.TESTING_DATA_DIR != "":
-    utils.create_output_dir(cfg, utils.csv_fieldnames_improved_simulator)
-    print("RECORDING THIS RUN ...")
-else:
-    print("NOT RECORDING THIS RUN ...")
+sao_path = str(navigate.sao_dir())
+anomaly_detection = models.load_sao_models(cfg, sao_path)  # load AUTOENCODER model
 
 
 def send_control(
@@ -136,11 +96,9 @@ def telemetry(sid, data):
 
         # Save frame ----------------------------------------------------------------------------------------------------
         image_path = ""
-        if cfg.TESTING_DATA_DIR != "":
+        if cfg.TESTING_DATA_DIR:
             timestamp = datetime.utcnow().strftime("%Y_%m_%d_%H_%M_%S_%f")[:-3]
-            image_filename = os.path.join(
-                cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME, "IMG", timestamp
-            )
+            image_filename = Path(img_path, timestamp)
             image_path = "{}.jpg".format(image_filename)
             image.save(image_path)
 
@@ -160,7 +118,7 @@ def telemetry(sid, data):
             loss = anomaly_detection.test_on_batch(image_copy)[2]
 
             # Process image for prediction -----------------------------------------------------------------------------
-            image = utils.preprocess(image)  # apply pre-processing
+            image = preprocess(image)  # apply pre-processing
             image = np.array([image])  # model expects 4D array
 
             # Predict steering angle and uncertainty -------------------------------------------------------------------
@@ -226,32 +184,30 @@ def telemetry(sid, data):
             )
 
             if cfg.TESTING_DATA_DIR:
-                csv_path = os.path.join(cfg.TESTING_DATA_DIR, cfg.SIMULATION_NAME)
-                utils.write_csv_line(
-                    csv_path,
-                    [
-                        frame_id,
-                        cfg.SDC_MODEL_NAME,
-                        cfg.ANOMALY_DETECTOR_NAME,
-                        cfg.SAO_THRESHOLD,
-                        cfg.SIMULATION_NAME,
-                        lapNumber,
-                        wayPoint,
-                        loss,
-                        uncertainty,
-                        cte,
-                        steering_angle,
-                        throttle,
-                        speed,
-                        brake,
-                        isCrash,
-                        distance,
-                        sim_time,
-                        ang_diff,
-                        image_path,
-                        number_obe,
-                        number_crashes,
-                    ],
+                print(str(Path(sim_path, "driving_log.csv")))
+                write_row_simulation_csv(
+                    Path(sim_path, "driving_log.csv"),
+                    frame_id,
+                    cfg.SDC_MODEL_NAME,
+                    cfg.ANOMALY_DETECTOR_NAME,
+                    cfg.SAO_THRESHOLD,
+                    cfg.SIMULATION_NAME,
+                    lapNumber,
+                    wayPoint,
+                    loss,
+                    uncertainty,
+                    cte,
+                    steering_angle,
+                    throttle,
+                    speed,
+                    brake,
+                    isCrash,
+                    distance,
+                    sim_time,
+                    ang_diff,
+                    image_path,
+                    number_obe,
+                    number_crashes,
                 )
 
                 frame_id = frame_id + 1

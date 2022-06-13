@@ -54,7 +54,7 @@ USE_PREDICTIVE_UNCERTAINTY = True  # use MC-Dropout model
 # Udacity simulation settings
 ANOMALY_DETECTOR_NAME = "track1-MSEloss-latent2"
 SIMULATION_NAME = "track1-sunny"
-TESTING_DATA_DIR = ""  # Udacity simulations logs
+TESTING_DATA_DIR = SIMULATIONS_DIR  # Udacity simulations logs (write simulations if you want to record them)
 MAX_SPEED = 35  # car's max speed, capped at 35 mph (default)
 MIN_SPEED = 10  # car's min speed, capped at 10 mph (default)
 SAO_THRESHOLD = 180  # the SAO threshold

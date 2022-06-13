@@ -9,7 +9,9 @@ from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, Lambda
 from tensorflow.keras.regularizers import l2
 
-from utils.utils import INPUT_SHAPE
+RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH = 80, 160
+IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 160, 320, 3
+INPUT_SHAPE = (RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS)
 
 
 def build_model(model_name, use_dropout=False):

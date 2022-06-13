@@ -6,6 +6,8 @@
 
 import os
 
+from utils.augmentation import preprocess
+
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow warnings
 
 from pathlib import Path
@@ -16,15 +18,7 @@ from PIL import Image
 from tqdm import tqdm
 
 from data.simulations.simulations_normalizer import normalize_img_path
-from utils import navigate, ultracsv, utils
-
-model = None
-prev_image_array = None
-anomaly_detection = None
-autoencoder_model = None
-frame_id = 0
-batch_size = 1
-uncertainty = -1
+from utils import navigate, ultracsv
 
 
 def uwiz_prediction(image):
@@ -38,7 +32,7 @@ def uwiz_prediction(image):
 
     # Process image for prediction -------------------------------------------------------------------------------------
     image = np.asarray(image)  # from PIL image to numpy array
-    image = utils.preprocess(image)  # apply pre-processing
+    image = preprocess(image)  # apply pre-processing
     image = np.array([image])  # model expects 4D array
 
     # Predict steering angle and uncertainty ---------------------------------------------------------------------------
@@ -69,7 +63,7 @@ def predict_on_IMG(images_dict):
                 "frame_id": d.get("frame_id"),
                 "uncertainty": uncertainty,
                 "steering_angle": steering_angle,
-                "center": normalize_img_path(str(d.get("center"))),
+                "center": str(d.get("center")).rsplit("/", 1)[-1],
             }
         )
     return predictions_dict
@@ -77,8 +71,7 @@ def predict_on_IMG(images_dict):
 
 def main():
     cfg = navigate.config()
-    model_path = Path(navigate.models_dir(), cfg.SDC_MODEL_NAME)
-
+    model_path = navigate.model_path()
     sims_path = navigate.simulations_dir()
     simulations = navigate.collect_simulations_to_evaluate(sims_path)
 
@@ -95,7 +88,7 @@ def main():
         print(">> Predictions done:", len(predictions_dict))
 
         print("Writing CSV...")
-        ultracsv.create_driving_log(sim_path, driving_log, predictions_dict)
+        ultracsv.create_driving_log_norm(sim_path, driving_log, predictions_dict)
         print(">> CSV written to:\t" + str(sim_path) + "-uncertainty-evaluated")
 
         # print("Check CSV integrity (Original Normalized vs Predicted)...")

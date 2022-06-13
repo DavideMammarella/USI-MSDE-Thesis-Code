@@ -1,10 +1,3 @@
-# Copyright 2021 Testing Automated @ Università della Svizzera italiana (USI)
-# Code adapted from https://github.com/naokishibuya/car-behavioral-cloning
-# All rights reserved.
-# This file is part of the project SelfOracle, a misbehaviour predictor for autonomous vehicles,
-# developed within the ERC project PRECRIME
-# and is released under the "MIT License Agreement". Please see the LICENSE
-# file that should have been included as part of this package.
 import datetime
 import os
 import time
@@ -12,17 +5,33 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from tensorflow import keras
+
 from batch_generator import Generator
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
-from src.config import Config
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
+from utils import navigate
 from utils.model import *
-from utils.utils import get_driving_styles
 
 np.random.seed(0)
+
+
+def get_driving_styles(cfg):
+    """
+    Retrieves the driving styles to compose the training set
+    """
+    if cfg.TRACK == "track1":
+        return cfg.TRACK1_DRIVING_STYLES
+    elif cfg.TRACK == "track2":
+        return cfg.TRACK2_DRIVING_STYLES
+    elif cfg.TRACK == "track3":
+        return cfg.TRACK3_DRIVING_STYLES
+    else:
+        print("Invalid TRACK option within the config file")
+        exit(1)
 
 
 # TODO: a bit redundant w/ load_data_for_vae but this one loads y as well
@@ -159,8 +168,7 @@ def main():
     """
     Load train/validation data_nominal set and train the model
     """
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     x_train, x_test, y_train, y_test = load_data(cfg)
 

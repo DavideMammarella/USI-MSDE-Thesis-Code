@@ -22,7 +22,7 @@ THRESHOLDS = {
 }
 
 NORMAL_WINDOW_LENGTH, ANOMALY_WINDOW_LENGTH = 39, 39
-ANALYSIS = 1  # 1: normal (calculate nominal separately), 2: alternative (calculation based on crashes)
+ANALYSIS = 2  # 1: normal (calculate nominal separately), 2: alternative (calculation based on crashes)
 
 
 def perform_analysis_2(uncertainties_windows, crashes_per_frame, threshold):

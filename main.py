@@ -6,12 +6,12 @@ import os
 import subprocess
 from pathlib import Path
 
-from utils import utils
+from utils import navigate
 
 
 def start_simulator():  # DO NOT CHANGE THIS
-    root_dir, cfg = utils.load_config()
-    simulator_path = Path(root_dir, cfg.SIMULATOR_DIR)
+    cfg = navigate.config()
+    simulator_path = navigate.simulator_dir()
 
     for file in os.listdir(simulator_path):
         if file.endswith(".app") or file.endswith(".exe"):
