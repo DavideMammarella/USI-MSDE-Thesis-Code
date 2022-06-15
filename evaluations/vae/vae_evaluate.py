@@ -24,8 +24,8 @@ from sklearn.metrics import (
 )
 from tqdm import tqdm
 
-from selforacle.utils_vae import load_vae
-from selforacle.vae import (
+from evaluations.selforacle.utils_vae import load_vae
+from evaluations.selforacle.vae import (
     IMAGE_CHANNELS,
     RESIZED_IMAGE_HEIGHT,
     RESIZED_IMAGE_WIDTH,

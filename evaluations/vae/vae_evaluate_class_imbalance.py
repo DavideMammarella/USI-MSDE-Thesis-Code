@@ -13,9 +13,9 @@ from keras import backend as K
 from sklearn.model_selection import train_test_split
 from vae_evaluate import get_scores, get_threshold, load_or_compute_losses
 
-from selforacle import utils_vae
-from selforacle.utils_vae import load_data_for_vae_training, load_vae
-from selforacle.vae_train import train_vae_model
+from evaluations.selforacle import utils_vae
+from evaluations.selforacle.utils_vae import load_data_for_vae_training, load_vae
+from evaluations.selforacle.vae_train import train_vae_model
 from utils import navigate
 from utils.vae import load_all_images, load_improvement_set, plot_reconstruction_losses
 

@@ -11,7 +11,7 @@ import pandas as pd
 from keras import backend as K
 from vae_evaluate import get_results_mispredictions, load_or_compute_losses
 
-from selforacle import utils_vae
+from evaluations.selforacle import utils_vae
 from utils import navigate
 from utils.vae import load_all_images
 

@@ -13,7 +13,7 @@ from scipy.stats import ttest_rel
 from tqdm import tqdm
 
 from selfdrivingcar.train import get_driving_styles
-from selforacle.vae import VAE, normalize_and_reshape
+from evaluations.selforacle.vae import VAE, normalize_and_reshape
 from utils import navigate
 from utils.augmentation import resize
 from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH

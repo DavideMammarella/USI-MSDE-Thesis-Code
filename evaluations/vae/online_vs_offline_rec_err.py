@@ -14,7 +14,7 @@ from matplotlib import image as mpimg
 from matplotlib import pyplot as plt
 from scipy.stats import stats
 
-from selforacle.vae import VAE, normalize_and_reshape
+from evaluations.selforacle.vae import VAE, normalize_and_reshape
 from utils import navigate
 from utils.augmentation import resize
 
