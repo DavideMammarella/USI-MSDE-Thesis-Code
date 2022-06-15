@@ -6,17 +6,15 @@
 # file that should have been included as part of this package.
 import os
 
-from src.config import Config
-
 from selforacle.utils_vae import load_data_for_vae_training, load_vae
 from selforacle.vae_train import train_vae_model
+from utils import navigate
 
 if __name__ == "__main__":
-    os.chdir(os.getcwd().replace("scripts", ""))
+    os.chdir(os.getcwd().replace("vae", ""))
     print(os.getcwd())
 
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     tracks = ["track1", "track2", "track3"]
 

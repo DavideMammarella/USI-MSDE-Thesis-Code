@@ -15,10 +15,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from keras import backend as K
 from sklearn.utils import shuffle
-from src.config import Config
 
 from selforacle.utils_vae import load_data_for_vae_training, load_vae
 from selforacle.vae_batch_generator import Generator
+from utils import navigate
 
 
 def train_vae_model(
@@ -110,8 +110,7 @@ def main():
     os.chdir(os.getcwd().replace("selforacle", ""))
     print(os.getcwd())
 
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     x_train, x_test = load_data_for_vae_training(cfg)
     vae, name = load_vae(cfg, load_vae_from_disk=False)

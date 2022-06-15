@@ -5,9 +5,9 @@
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
 import numpy as np
-from src.config import Config
 
 from selfdrivingcar.train import load_data, train_model
+from utils import navigate
 from utils.model import *
 
 np.random.seed(0)
@@ -17,8 +17,7 @@ def main():
     """
     Load train/validation data_nominal set and train the model
     """
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     x_train, x_test, y_train, y_test = load_data(cfg)
 

@@ -9,11 +9,11 @@ import os
 
 import pandas as pd
 from keras import backend as K
-from src.config import Config
 from vae_evaluate import get_results_mispredictions, load_or_compute_losses
 
 from selforacle import utils_vae
-from utils.utils import load_all_images
+from utils import navigate
+from utils.vae import load_all_images
 
 
 def evaluate_novelty_detection(cfg, track, condition, metric, technique):
@@ -83,11 +83,10 @@ def evaluate_novelty_detection(cfg, track, condition, metric, technique):
 
 
 def main():
-    os.chdir(os.getcwd().replace("scripts", ""))
+    os.chdir(os.getcwd().replace("vae", ""))
     print(os.getcwd())
 
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     # condition = '-rain'
     # metric = "-UNC"

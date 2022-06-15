@@ -4,22 +4,27 @@
 # developed within the ERC project PRECRIME
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
+import os
+import time
+
+import numpy as np
+import pandas as pd
 import tensorflow
+from matplotlib import image as mpimg
+from matplotlib import pyplot as plt
 from scipy.stats import stats
-from src.config import Config
 
 from selforacle.vae import VAE, normalize_and_reshape
-from utils import utils
-from utils.utils import *
+from utils import navigate
+from utils.augmentation import resize
 
 ANOMALY_DETECTOR = "track1-MSEloss-latent2-centerimg-nocrop"
 
 if __name__ == "__main__":
-    os.chdir(os.getcwd().replace("scripts", ""))
+    os.chdir(os.getcwd().replace("vae", ""))
     print(os.getcwd())
 
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     print(
         "Script to compare offline vs online (within Udacity's) reconstruction errors"
@@ -58,7 +63,7 @@ if __name__ == "__main__":
 
         start = time.time()
 
-        x = utils.resize(x)
+        x = resize(x)
         x = normalize_and_reshape(x)
         err = vae.test_on_batch(x)[2]
         duration = time.time() - start

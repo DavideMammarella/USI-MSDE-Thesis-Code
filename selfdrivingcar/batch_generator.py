@@ -9,14 +9,8 @@ import os
 import numpy as np
 from tensorflow.keras.utils import Sequence
 
-from utils.utils import (
-    IMAGE_CHANNELS,
-    RESIZED_IMAGE_HEIGHT,
-    RESIZED_IMAGE_WIDTH,
-    augment,
-    load_image,
-    preprocess,
-)
+from utils.augmentation import augment, load_image, preprocess
+from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
 
 
 class Generator(Sequence):

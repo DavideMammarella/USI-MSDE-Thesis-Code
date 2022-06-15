@@ -11,12 +11,8 @@ import numpy as np
 from tensorflow.keras.utils import Sequence
 
 from selforacle.vae import normalize_and_reshape
-from utils.utils import (
-    IMAGE_CHANNELS,
-    RESIZED_IMAGE_HEIGHT,
-    RESIZED_IMAGE_WIDTH,
-    resize,
-)
+from utils.augmentation import resize
+from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
 
 
 class Generator(Sequence):

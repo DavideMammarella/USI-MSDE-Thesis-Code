@@ -1,12 +1,13 @@
-import os
 import datetime
+import os
 import time
 
 import numpy as np
 import pandas as pd
-from matplotlib import image as mpimg, pyplot as plt
+from matplotlib import image as mpimg
+from matplotlib import pyplot as plt
 
-from utils.model import IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS
+from utils.model import IMAGE_CHANNELS, IMAGE_HEIGHT, IMAGE_WIDTH
 
 
 def load_improvement_set(cfg, ids):

@@ -4,17 +4,20 @@
 # developed within the ERC project PRECRIME
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
-from scipy.stats import gamma
-from src.config import Config
+import os
 
-from utils.utils import *
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+from scipy.stats import gamma
+
+from utils import navigate
 
 if __name__ == "__main__":
-    os.chdir(os.getcwd().replace("scripts", ""))
+    os.chdir(os.getcwd().replace("vae", ""))
     print(os.getcwd())
 
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     plt.figure(figsize=(30, 8))
 

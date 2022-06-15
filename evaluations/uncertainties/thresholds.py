@@ -14,7 +14,7 @@ import numpy
 from scipy.stats import gamma
 
 import utils.ultracsv
-from utils import utils
+from utils import navigate, utils
 
 
 def calc_and_store_thresholds(uncertainties: numpy.array, thresholds_location) -> dict:
@@ -78,13 +78,11 @@ def get_nominal_simulation(sims_path):
 
 
 def main():
-    root_dir, cfg = utils.load_config()
-
-    # Analyse all simulations ------------------------------------------------------------------------------------------
-    sims_path = Path(root_dir, cfg.SIMULATIONS_DIR)
+    sims_path = navigate.simulations_dir()
+    data_path = navigate.data_dir()
     nominal_sim = get_nominal_simulation(sims_path)
     uncertainties = visit_nominal_simulation(sims_path / nominal_sim)
-    calc_and_store_thresholds(uncertainties, Path(root_dir, "data"))
+    calc_and_store_thresholds(uncertainties, data_path)
 
 
 if __name__ == "__main__":

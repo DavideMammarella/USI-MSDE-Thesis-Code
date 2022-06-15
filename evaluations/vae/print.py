@@ -4,15 +4,19 @@
 # developed within the ERC project PRECRIME
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
+import os
+
+import cv2
 import tensorflow
+from matplotlib import pyplot as plt
 from scipy.stats import ttest_rel
-from src.config import Config
 from tqdm import tqdm
 
+from selfdrivingcar.train import get_driving_styles
 from selforacle.vae import VAE, normalize_and_reshape
-from utils import utils
-from utils.model import RESIZED_IMAGE_HEIGHT, IMAGE_CHANNELS, RESIZED_IMAGE_WIDTH
-from utils.utils import *
+from utils import navigate
+from utils.augmentation import resize
+from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
 from utils.vae import load_all_images
 
 WHAT = "-latent16-centerimg-nocrop"
@@ -26,13 +30,12 @@ def laplacian_variance(images):
 
 
 if __name__ == "__main__":
-    os.chdir(os.getcwd().replace("scripts", ""))
+    os.chdir(os.getcwd().replace("vae", ""))
     print(os.getcwd())
 
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
-    drive = utils.get_driving_styles(cfg)
+    drive = get_driving_styles(cfg)
 
     cfg.SIMULATION_NAME = "gauss-journal-track3-nominal"
     data_nominal = load_all_images(cfg)
@@ -75,7 +78,7 @@ if __name__ == "__main__":
     for x in tqdm(data_nominal):
         i += 1
 
-        x = utils.resize(x)
+        x = resize(x)
         x = normalize_and_reshape(x)
 
         list_original.append(
@@ -136,7 +139,7 @@ if __name__ == "__main__":
     for x in tqdm(data_unseen):
         i += 1
 
-        x = utils.resize(x)
+        x = resize(x)
         x = normalize_and_reshape(x)
 
         list_original_unseen.append(

@@ -5,11 +5,10 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from tensorflow import keras
-
 from batch_generator import Generator
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
+from tensorflow import keras
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 

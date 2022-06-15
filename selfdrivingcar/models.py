@@ -1,10 +1,11 @@
 from pathlib import Path
 
 import tensorflow
-from tensorflow import keras
-from selforacle.vae import VAE
-from tensorflow.keras import backend as K
 import uncertainty_wizard as uwiz
+from tensorflow import keras
+from tensorflow.keras import backend as K
+
+from selforacle.vae import VAE
 
 
 def rmse(y_true, y_pred):

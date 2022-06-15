@@ -3,11 +3,11 @@ import numpy as np
 from matplotlib import image as mpimg
 
 from utils.model import (
-    RESIZED_IMAGE_WIDTH,
-    RESIZED_IMAGE_HEIGHT,
-    IMAGE_WIDTH,
     IMAGE_HEIGHT,
+    IMAGE_WIDTH,
     INPUT_SHAPE,
+    RESIZED_IMAGE_HEIGHT,
+    RESIZED_IMAGE_WIDTH,
 )
 
 

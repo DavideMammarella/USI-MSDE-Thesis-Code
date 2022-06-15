@@ -15,13 +15,9 @@ from sklearn.model_selection import train_test_split
 from src.config import Config
 from tensorflow import keras
 
+from selfdrivingcar.train import get_driving_styles
 from selforacle.vae import VAE, Decoder, Encoder
-from utils.utils import (
-    IMAGE_CHANNELS,
-    RESIZED_IMAGE_HEIGHT,
-    RESIZED_IMAGE_WIDTH,
-    get_driving_styles,
-)
+from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
 
 
 def load_vae(cfg, load_vae_from_disk):

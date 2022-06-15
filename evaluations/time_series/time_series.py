@@ -1,8 +1,7 @@
 import random
 import warnings
 
-from evaluations import performance_metrics
-from utils import navigate
+from utils import navigate, performance_metrics
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 

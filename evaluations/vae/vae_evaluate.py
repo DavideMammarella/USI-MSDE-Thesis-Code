@@ -22,7 +22,6 @@ from sklearn.metrics import (
     roc_auc_score,
     roc_curve,
 )
-from src.config import Config
 from tqdm import tqdm
 
 from selforacle.utils_vae import load_vae
@@ -32,8 +31,9 @@ from selforacle.vae import (
     RESIZED_IMAGE_WIDTH,
     normalize_and_reshape,
 )
-from utils import utils
-from utils.utils import load_all_images, plot_reconstruction_losses
+from utils import navigate
+from utils.augmentation import resize
+from utils.vae import load_all_images, plot_reconstruction_losses
 
 np.random.seed(0)
 
@@ -60,7 +60,7 @@ def load_or_compute_losses(anomaly_detector, dataset, cached_file_name, delete_c
         )
 
         for x in tqdm(dataset):
-            x = utils.resize(x)
+            x = resize(x)
             x = normalize_and_reshape(x)
 
             # sanity check
@@ -621,8 +621,7 @@ def main():
     os.chdir(os.getcwd().replace("script", ""))
     print(os.getcwd())
 
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     dataset = load_all_images(cfg)
     load_and_eval_vae(cfg, dataset, delete_cache=True)

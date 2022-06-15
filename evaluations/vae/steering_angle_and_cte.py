@@ -4,17 +4,21 @@
 # developed within the ERC project PRECRIME
 # and is released under the "MIT License Agreement". Please see the LICENSE
 # file that should have been included as part of this package.
+import os
 
-from src.config import Config
+import numpy as np
+import pandas as pd
+from matplotlib import image as mpimg
+from matplotlib import pyplot as plt
 
-from utils.utils import *
+from utils import navigate
+from utils.model import IMAGE_CHANNELS, IMAGE_HEIGHT, IMAGE_WIDTH
 
 if __name__ == "__main__":
-    os.chdir(os.getcwd().replace("scripts", ""))
+    os.chdir(os.getcwd().replace("vae", ""))
     print(os.getcwd())
 
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     cfg.SIMULATION_NAME = "gauss-journal-track1-nominal"
 

@@ -8,7 +8,6 @@ from pathlib import Path
 import eventlet.wsgi
 import numpy as np
 import socketio
-
 from flask import Flask
 from PIL import Image
 

@@ -6,15 +6,15 @@
 # file that should have been included as part of this package.
 import os
 
-from src.config import Config
 from vae_evaluate_novelty_detection import evaluate_novelty_detection
 
+from utils import navigate
+
 if __name__ == "__main__":
-    os.chdir(os.getcwd().replace("scripts", ""))
+    os.chdir(os.getcwd().replace("vae", ""))
     print(os.getcwd())
 
-    cfg = Config()
-    cfg.from_pyfile("config_my.py")
+    cfg = navigate.config()
 
     tracks = ["track1", "track2", "track3"]
     conditions = ["-rain"]
