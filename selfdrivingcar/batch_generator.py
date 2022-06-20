@@ -9,6 +9,7 @@ import os
 import numpy as np
 from tensorflow.keras.utils import Sequence
 
+from utils import navigate
 from utils.augmentation import augment, load_image, preprocess
 from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
 
@@ -42,9 +43,7 @@ class Generator(Sequence):
             # augmentation
             if self.is_training and np.random.rand() < 0.6:
                 image, steering_angle = augment(
-                    self.cfg.TRAINING_DATA_DIR
-                    + os.path.sep
-                    + self.cfg.TRAINING_SET_DIR,
+                    navigate.training_set_dir(),
                     center,
                     left,
                     right,
@@ -52,9 +51,6 @@ class Generator(Sequence):
                 )
             else:
                 image = load_image(
-                    self.cfg.TRAINING_DATA_DIR
-                    + os.path.sep
-                    + self.cfg.TRAINING_SET_DIR,
                     center,
                 )
 

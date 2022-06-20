@@ -30,7 +30,7 @@ speed_limit = cfg.MAX_SPEED
 
 sim_path, img_path = navigate.training_simulation_dir()
 
-model_path = str(navigate.model_path())
+model_path = str(Path(navigate.models_dir(), cfg.SDC_MODEL_NAME))
 model = models.load_sdc_model(cfg, model_path)  # load CAR model
 
 sao_path = str(navigate.sao_dir())
@@ -183,7 +183,6 @@ def telemetry(sid, data):
             )
 
             if cfg.TESTING_DATA_DIR:
-                print(str(Path(sim_path, "driving_log.csv")))
                 write_row_simulation_csv(
                     Path(sim_path, "driving_log.csv"),
                     frame_id,

@@ -14,7 +14,7 @@ import numpy
 from scipy.stats import gamma
 
 import utils.ultracsv
-from utils import navigate, utils
+from utils import navigate
 
 
 def calc_and_store_thresholds(uncertainties: numpy.array, thresholds_location) -> dict:

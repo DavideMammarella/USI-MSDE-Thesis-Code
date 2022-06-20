@@ -16,7 +16,7 @@ SIMULATOR_DIR = "simulator"  # name of the simulator to use
 PERFORMANCE_METRICS_DIR = "metrics"
 
 # simulations settings
-TRACK = "track1"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
+TRACK = "track2"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
 TRACK1_DRIVING_STYLES = ["normal", "recovery", "reverse"]
 TRACK2_DRIVING_STYLES = [
     "normal",
@@ -41,7 +41,7 @@ TRACK3_IMG_PER_LAP = 1375
 # self-driving car model settings
 TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
 SDC_MODEL_TYPE = "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
-SDC_MODEL_NAME = "track1-uwiz-mc-final"
+SDC_MODEL_NAME = "track1-uwiz-final"
 # SDC_MODEL_TYPE = "dave2"
 # SDC_MODEL_NAME = "dave2-mc-053.h5"
 NUM_EPOCHS_SDC_MODEL = 500  # training epochs for the self-driving car model
@@ -54,7 +54,7 @@ USE_PREDICTIVE_UNCERTAINTY = True  # use MC-Dropout model
 # Udacity simulation settings
 ANOMALY_DETECTOR_NAME = "track1-MSEloss-latent2"
 SIMULATION_NAME = "track1-sunny"
-TESTING_DATA_DIR = SIMULATIONS_DIR  # Udacity simulations logs (write simulations if you want to record them)
+TESTING_DATA_DIR = None  # Udacity simulations logs (write simulations if you want to record them)
 MAX_SPEED = 35  # car's max speed, capped at 35 mph (default)
 MIN_SPEED = 10  # car's min speed, capped at 10 mph (default)
 SAO_THRESHOLD = 180  # the SAO threshold

@@ -1,6 +1,7 @@
 import datetime
 import os
 import time
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -54,14 +55,17 @@ def load_data(cfg):
 
     for drive_style in drive:
         try:
-            path = os.path.join(
-                cfg.TRAINING_DATA_DIR,
-                cfg.TRAINING_SET_DIR,
+            training_path = navigate.training_set_dir()
+            path = Path(
+                training_path,
                 cfg.TRACK,
                 drive_style,
                 "driving_log.csv",
             )
             data_df = pd.read_csv(path)
+            data_df["center"]= str(training_path) + data_df["center"].astype(str)
+            data_df["left"] = str(training_path) + data_df["left"].astype(str)
+            data_df["right"] = str(training_path) + data_df["right"].astype(str)
             if x is None:
                 x = data_df[["center", "left", "right"]].values
                 y = data_df["steering"].values
@@ -101,22 +105,19 @@ def load_data(cfg):
 
 
 def train_model(model, cfg, x_train, x_test, y_train, y_test):
+    models_path = navigate.models_dir()
     """
     Train the self-driving car model
     """
     if cfg.USE_PREDICTIVE_UNCERTAINTY:
-        name = os.path.join(
-            cfg.SDC_MODELS_DIR,
-            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-{epoch:03d}",
-        )
+        model_name = cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-{epoch:03d}"
+        model_path = Path(models_path, model_name)
     else:
-        name = os.path.join(
-            cfg.SDC_MODELS_DIR,
-            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE.replace(".h5", "") + "-{epoch:03d}.h5",
-        )
+        model_name = cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE.replace(".h5", "") + "-{epoch:03d}.h5"
+        model_path = Path(models_path, model_name)
 
     checkpoint = ModelCheckpoint(
-        name, monitor="val_loss", verbose=0, save_best_only=True, mode="auto"
+        str(model_path), monitor="val_loss", verbose=0, save_best_only=True, mode="auto"
     )
 
     early_stop = keras.callbacks.EarlyStopping(
@@ -149,18 +150,14 @@ def train_model(model, cfg, x_train, x_test, y_train, y_test):
     plt.show()
 
     if cfg.USE_PREDICTIVE_UNCERTAINTY:
-        name = os.path.join(
-            cfg.SDC_MODELS_DIR,
-            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-final",
-        )
+        model_name = cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE + "-final"
+        model_path = Path(models_path, model_name)
     else:
-        name = os.path.join(
-            cfg.SDC_MODELS_DIR,
-            cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE.replace(".h5", "") + "-final.h5",
-        )
+        model_name = cfg.TRACK + "-" + cfg.SDC_MODEL_TYPE.replace(".h5", "") + "-final.h5"
+        model_path = Path(models_path, model_name)
 
     # save the last model anyway (might not be the best)
-    model.save(name)
+    model.save(str(model_path))
 
 
 def main():

@@ -11,15 +11,11 @@ from utils.model import (
 )
 
 
-def load_image(data_dir, image_file):
+def load_image(image_file):
     """
     Load RGB images from a file
     """
-    image_dir = data_dir
-    local_path = (
-        "/".join(image_file.split("/")[-4:-1]) + "/" + image_file.split("/")[-1]
-    )
-    img_path = "{0}/{1}".format(image_dir, local_path)
+    img_path = image_file
     try:
         return mpimg.imread(img_path)
     except FileNotFoundError:
@@ -68,10 +64,10 @@ def choose_image(data_dir, center, left, right, steering_angle):
     """
     choice = np.random.choice(3)
     if choice == 0:
-        return load_image(data_dir, left), steering_angle + 0.2
+        return load_image(left), steering_angle + 0.2
     elif choice == 1:
-        return load_image(data_dir, right), steering_angle - 0.2
-    return load_image(data_dir, center), steering_angle
+        return load_image(right), steering_angle - 0.2
+    return load_image(center), steering_angle
 
 
 def random_flip(image, steering_angle):

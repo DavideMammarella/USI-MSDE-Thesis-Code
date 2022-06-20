@@ -110,12 +110,6 @@ def models_dir() -> Path:
     return p
 
 
-def model_path() -> Path:
-    p = Path(models_dir(), config().SDC_MODEL_NAME)
-    p.mkdir(parents=True, exist_ok=True)
-    return p
-
-
 def sao_dir() -> Path:
     p = Path(models_dir(), config().SAO_MODELS_DIR)
     p.mkdir(parents=True, exist_ok=True)
@@ -123,7 +117,7 @@ def sao_dir() -> Path:
 
 
 def training_set_dir() -> Path:
-    p = Path(data_dir(), config().TRAINING_SET_DIR)
+    p = Path(data_dir(), config().TRAINING_DATA_DIR, config().TRAINING_SET_DIR)
     p.mkdir(parents=True, exist_ok=True)
     return p
 
