@@ -16,7 +16,7 @@ SIMULATOR_DIR = "simulator"  # name of the simulator to use
 PERFORMANCE_METRICS_DIR = "metrics"
 
 # simulations settings
-TRACK = "track2"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
+TRACK = "trackall"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
 TRACK1_DRIVING_STYLES = ["normal", "recovery", "reverse"]
 TRACK2_DRIVING_STYLES = [
     "normal",

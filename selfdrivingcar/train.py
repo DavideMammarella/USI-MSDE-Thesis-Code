@@ -30,8 +30,17 @@ def get_driving_styles(cfg):
     elif cfg.TRACK == "track3":
         return cfg.TRACK3_DRIVING_STYLES
     else:
-        print("Invalid TRACK option within the config file")
-        exit(1)
+        return [
+            "normal", "normal1",
+            "recovery", "recovery1",
+            "recovery2",
+            "recovery3", "recovery4", "recovery5",
+            "reverse", "reverse1", "reverse2",
+            "sport_normal", "sport_normal1",
+                            "sport_reverse",
+        ]
+        #print("Invalid TRACK option within the config file")
+        #exit(1)
 
 
 # TODO: a bit redundant w/ load_data_for_vae but this one loads y as well
@@ -63,7 +72,7 @@ def load_data(cfg):
                 "driving_log.csv",
             )
             data_df = pd.read_csv(path)
-            data_df["center"]= str(training_path) + data_df["center"].astype(str)
+            data_df["center"] = str(training_path) + data_df["center"].astype(str)
             data_df["left"] = str(training_path) + data_df["left"].astype(str)
             data_df["right"] = str(training_path) + data_df["right"].astype(str)
             if x is None:
