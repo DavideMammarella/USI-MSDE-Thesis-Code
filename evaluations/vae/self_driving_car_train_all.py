@@ -6,7 +6,7 @@
 # file that should have been included as part of this package.
 import numpy as np
 
-from selfdrivingcar.train import load_data, train_model
+from client.train import load_data, train_model
 from utils import navigate
 from utils.model import *
 

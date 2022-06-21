@@ -12,7 +12,7 @@ SIMULATIONS_DIR = "simulations"  # folder where to store the simulations
 SDC_MODELS_DIR = "models"  # self-driving car models
 SAO_MODELS_DIR = "sao"  # trained autoencoder-based self-assessment oracle models
 TRAINING_SET_DIR = "dataset5"  # the driving training set to use
-SIMULATOR_DIR = "simulator"  # name of the simulator to use
+SIMULATOR_DIR = "server"  # name of the server to use
 PERFORMANCE_METRICS_DIR = "metrics"
 
 # simulations settings

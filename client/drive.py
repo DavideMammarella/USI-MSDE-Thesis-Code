@@ -11,7 +11,7 @@ import socketio
 from flask import Flask
 from PIL import Image
 
-from selfdrivingcar import models
+from client import models
 from evaluations.selforacle.vae import normalize_and_reshape
 from utils import navigate
 from utils.augmentation import preprocess, resize
@@ -71,11 +71,11 @@ def disconnect(sid):
 def telemetry(sid, data):
     if data:
 
-        # Shutdown input to the simulator after certain lapNumber ------------------------------------------------------
+        # Shutdown input to the server after certain lapNumber ------------------------------------------------------
         if int(data["lapNumber"]) > cfg.MAX_LAPS:
             sio.emit("shutdown", data={}, skip_sid=True)
 
-        # Data from the simulator --------------------------------------------------------------------------------------
+        # Data from the server --------------------------------------------------------------------------------------
         speed = float(data["speed"])  # current speed of the car
         wayPoint = int(data["currentWayPoint"])  # current waypoint of the car
         lapNumber = int(data["lapNumber"])  # current lap of the car
@@ -172,7 +172,7 @@ def telemetry(sid, data):
 
             throttle = 1.0 - steering_angle**2 - (speed / speed_limit) ** 2
 
-            # Send control commands to the simulator -------------------------------------------------------------------
+            # Send control commands to the server -------------------------------------------------------------------
             send_control(
                 steering_angle,
                 throttle,

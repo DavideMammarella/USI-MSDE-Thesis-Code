@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 from scipy.stats import ttest_rel
 from tqdm import tqdm
 
-from selfdrivingcar.train import get_driving_styles
+from client.train import get_driving_styles
 from evaluations.selforacle.vae import VAE, normalize_and_reshape
 from utils import navigate
 from utils.augmentation import resize
