@@ -16,7 +16,7 @@ SIMULATOR_DIR = "server"  # name of the server to use
 PERFORMANCE_METRICS_DIR = "metrics"
 
 # simulations settings
-TRACK = "trackall"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
+TRACK = "track1"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
 TRACK1_DRIVING_STYLES = ["normal", "recovery", "reverse"]
 TRACK2_DRIVING_STYLES = [
     "normal",
@@ -42,10 +42,7 @@ TRACK3_IMG_PER_LAP = 1375
 TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
 SDC_MODEL_TYPE = "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
 SDC_MODEL_NAME = "track1-uwiz-final"
-# SDC_MODEL_TYPE = "dave2"
-# SDC_MODEL_NAME = "dave2-mc-053.h5"
 NUM_EPOCHS_SDC_MODEL = 500  # training epochs for the self-driving car model
-# SAMPLES_PER_EPOCH = 100  # number of samples to process before going to the next epoch
 BATCH_SIZE = 128  # number of samples per gradient update
 SAVE_BEST_ONLY = True  # only saves when the model is considered the "best" according to the quantity monitored
 LEARNING_RATE = 1.0e-4  # amount that the weights are updated during training
