@@ -1,8 +1,8 @@
-# Documentation
+# Predicting Safety-Critical Misbehaviours in Autonomous Driving Systems using Uncertainty Quantification
 
 A **client-server** architecture to control an **autonomous driving vehicle** within the **Udacity simulator** including two monitors (**black-box** and **white-box**) to predict **misbehaviours**.
 
-## Contents
+# Contents
 
 <!--ts-->
    * [Repository Structure](#repository-structure)
@@ -19,7 +19,7 @@ A **client-server** architecture to control an **autonomous driving vehicle** wi
      * [Time Series Analysis](#time-series-analysis)
 <!--te-->
 
-## Repository Structure
+# Repository Structure
 
     .
     ├── client                  # Self-Driving Car scripts (train and drive).
@@ -42,9 +42,9 @@ Folders not in the repository are automatically created as needed by the code, e
 
 [Back to top ↑](#contents)
 
-## Development Environment
+# Development Environment
 
-### System Requirements
+## System Requirements
 
 The client requires [Python 3.6](https://www.python.org/downloads/release/python-360/). Development with [PyCharm](https://www.jetbrains.com/pycharm/) IDE is recommended. <br>
 The use of [anaconda](https://www.continuum.io/downloads) or [miniconda](https://conda.io/miniconda.html) is also recommended for installing dependencies in a dedicated virtual environment. Alternatively, the libraries can be installed using ``pip``.
@@ -60,21 +60,21 @@ conda env create -f configurations/win-minenv.yml   # Windows
 
 [Back to top ↑](#contents)
 
-### Simulator
+## Simulator
 
 The simulator is made available as binary file here. <br>
 The binary must be downloaded and placed in the ``server`` folder.
 
 [Back to top ↑](#contents)
 
-## Usage
+# Usage
 The client allows different configurations (both for training and driving). <br>
 Firstly, the ``configurations/config_my.py.sample`` file must be duplicated and renamed to ``config_my.py``.<br>
 Next, one's own configuration can be created by modifying the variables within the file. <br>
 
 [Back to top ↑](#contents)
 
-### Train
+## Train
 Datasets obtained by driving manually in the simulator are required. <br>
 They can be collected using the simulator in Training Mode. <br>
 Alternatively, datasets used in experiments are available on request.
@@ -89,7 +89,7 @@ For example, the first epoch within the first track will generate a file called 
 
 [Back to top ↑](#contents)
 
-### Drive
+## Drive
 
 Autoencoder are required and must be placed in the ``models/sao`` folder. <br>
 They can be trained, without using the simulator but the datasets collected in the [Train](#train) section, by running ``selforacle/vae_train.py``. <br>
@@ -104,9 +104,9 @@ The workflow for autonomous driving is as follows:
 
 [Back to top ↑](#contents)
 
-## Replicate Experiments
+# Replicate Experiments
 
-### Collect Simulations
+## Collect Simulations
 Experiments are performed offline. <br>
 The simulations are necessary, they are data collected by the simulator during autonomous driving. <br>
 The simulations used in the experiments are available on request. <br>
@@ -117,7 +117,9 @@ Alternatively, they can be collected as follows:
 This will generate a folder within ``data/simulations`` containing the simulation data. <br>
 The process can be repeated by inserting various Track / Time / Weather Effect / Emission Rate, thus obtaining different types of simulations.
 
-### Calculate Uncertainties
+[Back to top ↑](#contents)
+
+## Calculate Uncertainties
 
 The simulations to be analysed are necessary (See [Collect Simulations](#collect-simulations)). <br>
 The workflow for uncertainties calculation is as follows:
@@ -128,7 +130,9 @@ The workflow for uncertainties calculation is as follows:
 This will generate for each simulation a folder with the name of the simulation ending with ``-uncertainty-evaluated``. <br>
 Each folder contains a CSV file with all the original telemetry data and the uncertainties calculated by the model for each frame.
 
-### Calculate Thresholds
+[Back to top ↑](#contents)
+
+## Calculate Thresholds
 
 The simulations to be analysed are necessary (See [Collect Simulations](#collect-simulations)). <br>
 The workflow for thresholds calculation is as follows:
@@ -139,7 +143,9 @@ The workflow for thresholds calculation is as follows:
 This will generate a JSON file under ``data/`` containing thresholds divided by confidence intervals. <br>
 The thresholds are calculated by fitting the gamma distribution to the uncertainties.
 
-### Time Series Analysis
+[Back to top ↑](#contents)
+
+## Time Series Analysis
 
 Two different types of analysis are performed and performance metrics are calculated for each. <br>
 The uncertainties to be analysed are necessary (See [Collect Uncertainties](#collect-uncertainties)). <br>
