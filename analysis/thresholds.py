@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy
 from scipy.stats import gamma
 
-import utils.ultracsv
+import utils.custom_csv
 from utils import navigate
 
 
@@ -21,7 +21,7 @@ def calc_and_store_thresholds(uncertainties: numpy.array, thresholds_location) -
     """
     Calculates all thresholds stores them on a file system
     :param losses: array of shape (n,),
-                    where n is the number of training data points, containing the uncertainties calculated for these points
+                    where n is the number of training data points, containing the white_box calculated for these points
     :return: a dictionary of where key = threshold_identifier and value = threshold_value
     """
     Path(thresholds_location).mkdir(parents=True, exist_ok=True)

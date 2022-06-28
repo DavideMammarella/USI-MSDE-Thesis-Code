@@ -27,7 +27,7 @@ import tensorflow
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 
-from utils.train import get_driving_styles
+from utils.models_train import get_driving_styles
 from abc import ABC
 
 import tensorflow as tf

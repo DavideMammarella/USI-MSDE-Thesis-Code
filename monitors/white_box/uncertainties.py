@@ -7,6 +7,7 @@
 import os
 
 from utils.augmentation import preprocess
+from utils.custom_csv import visit_simulation, create_driving_log_norm
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow warnings
 
@@ -17,7 +18,7 @@ import uncertainty_wizard as uwiz
 from PIL import Image
 from tqdm import tqdm
 
-from utils import navigate, ultracsv
+from utils import navigate, custom_csv
 
 
 def uwiz_prediction(image):
@@ -80,14 +81,14 @@ def main():
 
     for sim in simulations:
         sim_path = Path(sims_path, sim)
-        driving_log, images_dict = ultracsv.visit_simulation(sim_path)
+        driving_log, images_dict = visit_simulation(sim_path)
 
-        print("Calculating uncertainties using UWIZ on IMGs...")
+        print("Calculating white_box using UWIZ on IMGs...")
         predictions_dict = predict_on_IMG(images_dict)
         print(">> Predictions done:", len(predictions_dict))
 
         print("Writing CSV...")
-        ultracsv.create_driving_log_norm(sim_path, driving_log, predictions_dict)
+        create_driving_log_norm(sim_path, driving_log, predictions_dict)
         print(">> CSV written to:\t" + str(sim_path) + "-uncertainty-evaluated")
 
         # print("Check CSV integrity (Original Normalized vs Predicted)...")

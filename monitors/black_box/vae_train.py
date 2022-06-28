@@ -16,9 +16,9 @@ import numpy as np
 from keras import backend as K
 from sklearn.utils import shuffle
 
-from monitors.selforacle.vae_batch_generator import Generator
+from monitors.black_box.vae_batch_generator import Generator
 from utils import navigate
-from utils.train import load_training_data
+from utils.models_train import load_training_data
 from utils.vae import load_vae
 
 

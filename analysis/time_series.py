@@ -7,8 +7,8 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 from pathlib import Path
 
-import monitors.time_series.windows_analysis as windows_analysis
-import utils.timeseries as utils_ts
+import analysis.windows as windows_analysis
+import utils.time_series as utils_ts
 
 THRESHOLDS = {
     "0.68": 0.019586066769424662,
@@ -84,7 +84,7 @@ def main():
             csv_file = Path(sims_path, nominal_sim, "driving_log_normalized.csv")
             uncertainties = utils_ts.get_uncertainties(
                 csv_file
-            )  # np array of uncertainties (index is frame_id)
+            )  # np array of white_box (index is frame_id)
 
             # WINDOWS SPLITTING
             uncertainties_windows = windows_analysis.window_stack(uncertainties)
@@ -102,7 +102,7 @@ def main():
                 csv_file = Path(sims_path, sim, "driving_log_normalized.csv")
                 uncertainties = utils_ts.get_uncertainties(
                     csv_file
-                )  # np array of uncertainties (index is frame_id)
+                )  # np array of white_box (index is frame_id)
 
                 print("SIMULATION: " + sim)
 

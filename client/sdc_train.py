@@ -15,7 +15,7 @@ from tensorflow.keras.optimizers import Adam
 
 from utils import navigate
 from utils.sdc import *
-from utils.train import load_training_data
+from utils.models_train import load_training_data
 
 np.random.seed(0)
 

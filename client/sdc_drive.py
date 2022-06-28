@@ -15,7 +15,7 @@ from utils import navigate
 from utils.sdc import load_sdc_model
 from utils.vae import load_vae
 from utils.augmentation import preprocess, resize
-from utils.ultracsv import write_row_simulation_csv
+from utils.custom_csv import write_row_simulation_csv
 from utils.vae import normalize_and_reshape
 
 prev_image_array = None

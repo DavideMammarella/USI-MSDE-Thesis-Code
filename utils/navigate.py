@@ -7,7 +7,7 @@ from configurations.config import Config
 ########################################################################################################################
 # SIMULATIONS
 ########################################################################################################################
-from utils.ultracsv import create_simulation_csv
+from utils.custom_csv import create_simulation_csv
 
 
 def collect_simulations_evaluated(simulations_path):

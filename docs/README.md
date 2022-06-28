@@ -22,18 +22,18 @@ A **client-server** architecture to control an **autonomous driving vehicle** wi
 # Repository Structure
 
     .
+    ├── analysis                # Analysis scripts (Thresholds, Time Series Analysis).
     ├── client                  # Self-Driving Car scripts (train and drive).
-    ├── configurations          # Configurations files (requirements, conda, client).
+    ├── configurations          # Configurations files (conda, client).
     ├── data                    
     │   ├── datasets            # Training datasets.
-    │   ├── metrics             # Generated analysis (as CSV).
+    │   ├── metrics             # Generated metrics from analysis (as CSV).
     │   └── simulations         # Evaluation datasets.
     ├── docs                    # Documentation files.
-    ├── monitors
-    │   ├── selforacle          # Black-Box monitor scripts.
-    │   ├── time_series         # Time series analysis scripts.
-    │   └── uncertainties       # White-Box monitor scripts.
     ├── models                  # Trained and serialized models (Autoencoders, Self-Driving Car)
+    ├── monitors
+    │   ├── black_box           # SelfOracle (Black-Box monitor) scripts.
+    │   └── white_box           # White-Box monitor scripts.
     ├── server                  # Simulator binaries.
     ├── utils                   # Utils files.
     └── main.py
@@ -125,7 +125,7 @@ The simulations to be analysed are necessary (See [Collect Simulations](#collect
 The workflow for uncertainties calculation is as follows:
 * Make sure the stochastic model (i.e. MC-Dropout) is in the ``models`` folder
 * Edit the variable ``SDC_MODEL_NAME`` within ``configurations/config_my.py`` according to the self-driving car model
-* Run the script ``monitors/uncertainties/uncertainties.py``
+* Run the script ``monitors/white_box/uncertainties.py``
 
 This will generate for each simulation a folder with the name of the simulation ending with ``-uncertainty-evaluated``. <br>
 Each folder contains a CSV file with all the original telemetry data and the uncertainties calculated by the model for each frame.
