@@ -226,11 +226,3 @@ def _on_windows_nominal(uncertainties_windows, crashes_per_frame, threshold):
         windows.append(window)  # based on windows DB-schema columns
 
     return windows
-
-
-def main():
-    print("This script is not intended to be run directly.")
-
-
-if __name__ == "__main__":
-    main()

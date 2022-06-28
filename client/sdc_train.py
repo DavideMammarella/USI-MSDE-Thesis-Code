@@ -1,19 +1,10 @@
-import datetime
-import os
-import time
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from client.sdc_batch_generator import Generator
-from sklearn.model_selection import train_test_split
+from utils.sdc_batch_generator import Generator
 from sklearn.utils import shuffle
-from tensorflow import keras
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
-from utils import navigate
 from utils.sdc import *
 from utils.models_train import load_training_data
 
