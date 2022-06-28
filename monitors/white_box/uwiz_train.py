@@ -22,13 +22,8 @@ np.random.seed(0)
 
 def train_sdc_model(model_type, model, cfg, x_train, x_test, y_train, y_test):
     models_path = navigate.models_dir()
-
-    if cfg.USE_PREDICTIVE_UNCERTAINTY:
-        model_name = cfg.TRACK + "-" + model_type + "-{epoch:03d}"
-        model_path = Path(models_path, model_name)
-    else:
-        model_name = cfg.TRACK + "-" + model_type + "-{epoch:03d}.h5"
-        model_path = Path(models_path, model_name)
+    model_name = cfg.TRACK + "-" + model_type + "-{epoch:03d}"
+    model_path = Path(models_path, model_name)
 
     checkpoint = ModelCheckpoint(
         str(model_path), monitor="val_loss", verbose=0, save_best_only=True, mode="auto"
@@ -65,9 +60,6 @@ def train_sdc_model(model_type, model, cfg, x_train, x_test, y_train, y_test):
 
     if cfg.USE_PREDICTIVE_UNCERTAINTY:
         model_name = cfg.TRACK + "-" + model_type + "-final"
-        model_path = Path(models_path, model_name)
-    else:
-        model_name = cfg.TRACK + "-" + model_type + "-final.h5"
         model_path = Path(models_path, model_name)
 
     # save the last model anyway (might not be the best)
