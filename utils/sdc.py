@@ -3,9 +3,8 @@ from pathlib import Path
 import tensorflow
 import uncertainty_wizard as uwiz
 from tensorflow import keras
-from tensorflow.keras import backend as K
-
 from tensorflow.keras import Sequential
+from tensorflow.keras import backend as K
 from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, Lambda
 from tensorflow.keras.regularizers import l2
 
@@ -15,11 +14,13 @@ RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH = 80, 160
 IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS = 160, 320, 3
 INPUT_SHAPE = (RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_CHANNELS)
 
+
 def rmse(y_true, y_pred):
     """
     Calculates RMSE
     """
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
+
 
 def load_sdc_model():
     cfg = navigate.config()
@@ -32,9 +33,9 @@ def load_sdc_model():
             model_path, custom_objects={"rmse": rmse}
         )
     elif (
-            "dave2" in cfg.SDC_MODEL_NAME
-            or "epoch" in cfg.SDC_MODEL_NAME
-            or "commaai" in cfg.SDC_MODEL_NAME
+        "dave2" in cfg.SDC_MODEL_NAME
+        or "epoch" in cfg.SDC_MODEL_NAME
+        or "commaai" in cfg.SDC_MODEL_NAME
     ):
         model = tensorflow.keras.models.load_model(model_path)
     else:
@@ -92,9 +93,13 @@ def build_sdc_model(model_type, use_dropout):
                 )
             )
             model.add(Dropout(rate=0.05))
-            model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
+            model.add(
+                Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6))
+            )
             model.add(Dropout(rate=0.05))
-            model.add(Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6)))
+            model.add(
+                Conv2D(64, (3, 3), activation="relu", kernel_regularizer=l2(1.0e-6))
+            )
             model.add(Dropout(rate=0.05))
             model.add(Flatten())
             model.add(Dense(100, activation="relu", kernel_regularizer=l2(1.0e-6)))

@@ -5,9 +5,10 @@
 # This script must be used only with UWIZ models
 
 import os
+from pprint import pprint
 
 from utils.augmentation import preprocess
-from utils.custom_csv import visit_simulation, create_driving_log_norm
+from utils.custom_csv import visit_simulation, write_driving_log_evaluated
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow warnings
 
@@ -18,7 +19,7 @@ import uncertainty_wizard as uwiz
 from PIL import Image
 from tqdm import tqdm
 
-from utils import navigate, custom_csv
+from utils import custom_csv, navigate, simulations_normalizer
 
 
 def uwiz_prediction(image):
@@ -71,35 +72,32 @@ def predict_on_IMG(images_dict):
 
 def main():
     cfg = navigate.config()
-    model_path = Path(navigate.models_dir(), cfg.SDC_MODEL_NAME)
     sims_path = navigate.simulations_dir()
-    simulations = navigate.collect_simulations_to_evaluate_unc(sims_path)
+    # simulations_normalizer.main()
+    metric_to_eval = "unc"
+    simulations = navigate.collect_simulations_to_evaluate(sims_path, metric_to_eval)
 
     # Load the self-driving car model ----------------------------------------------------------------------------------
     global model
+    model_path = Path(navigate.models_dir(), cfg.SDC_MODEL_NAME)
     model = uwiz.models.load_model(str(model_path))
 
     for sim in simulations:
-        sim_path = Path(sims_path, sim)
-        driving_log, images_dict = visit_simulation(sim_path)
+        driving_log, images_dict = visit_simulation(sim)
 
         print("Calculating UNCERTAINTIES using UWIZ on IMGs...")
         predictions_dict = predict_on_IMG(images_dict)
         print(">> Predictions done:", len(predictions_dict))
 
         print("Writing CSV...")
-        create_driving_log_norm(sim_path, driving_log, predictions_dict, "-uncertainty-evaluated")
-        print(">> CSV written to:\t" + str(sim_path) + "-uncertainty-evaluated")
-
-        # print("Check CSV integrity (Original Normalized vs Predicted)...")
-        # check_driving_log(
-        #     Path(sim_path / "driving_log_normalized.csv"),
-        #     Path(
-        #         str(sim_path)
-        #         + "-uncertainty-evaluated/driving_log_normalized.csv"
-        #     ),
-        # )
-        # print(">> CSV is OK!")
+        write_driving_log_evaluated(sim, driving_log, predictions_dict, metric_to_eval)
+        print(
+            ">> CSV written to:\t"
+            + str(sim)
+            + "/driving_log_"
+            + metric_to_eval
+            + ".csv"
+        )
 
 
 if __name__ == "__main__":

@@ -12,11 +12,10 @@ from flask import Flask
 from PIL import Image
 
 from utils import navigate
-from utils.sdc import load_sdc_model
-from utils.vae import load_vae
 from utils.augmentation import preprocess, resize
 from utils.custom_csv import write_row_simulation_csv
-from utils.vae import normalize_and_reshape
+from utils.sdc import load_sdc_model
+from utils.vae import load_vae, normalize_and_reshape
 
 prev_image_array = None
 frame_id = 0

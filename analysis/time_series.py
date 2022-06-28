@@ -7,8 +7,8 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 from pathlib import Path
 
-import utils.windows as windows_analysis
 import utils.time_series as utils_ts
+import utils.windows as windows_analysis
 
 THRESHOLDS = {
     "0.68": 0.019586066769424662,
@@ -63,9 +63,10 @@ def main():
     cfg = navigate.config()
     data_path = navigate.data_dir()
     metrics_path = navigate.performance_metrics_dir()
+    metric_eval = "unc"
 
     sims_path = navigate.simulations_dir()
-    sims = navigate.collect_simulations_evaluated(sims_path)
+    sims = navigate.collect_simulations_evaluated(sims_path, metric_eval)
     nominal_sim = navigate.get_nominal_simulation(sims_path)
 
     print(">> Collected simulations: " + str(len(sims)))
@@ -99,7 +100,7 @@ def main():
 
         for i, sim in enumerate(sims, start=1):
             if sim != nominal_sim:
-                csv_file = Path(sims_path, sim, "driving_log_normalized.csv")
+                csv_file = Path(sim, "driving_log_normalized.csv")
                 uncertainties = utils_ts.get_uncertainties(
                     csv_file
                 )  # np array of white_box (index is frame_id)
@@ -157,7 +158,7 @@ def main():
 
                 utils_ts.write_positive_negative(
                     Path(metrics_path, prec_recall_filename),
-                    sim,
+                    str(sim).rsplit("/", 1)[-1],
                     threshold_type,
                     threshold,
                     windows_TP,

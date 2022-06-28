@@ -64,15 +64,15 @@ def visit_nominal_simulation(sim_path):
 
 
 def visit_simulation(sim_path):
-    csv_file = sim_path / "driving_log_normalized.csv"
+    csv_file = sim_path / "driving_log.csv"
     print("\nReading simulation:\t", str(sim_path))
     images_dict = []
     with open(csv_file) as f:
-        driving_log_normalized = [
+        driving_log = [
             {k: v for k, v in row.items()}
             for row in csv.DictReader(f, skipinitialspace=True)
         ]
-    for d in driving_log_normalized:
+    for d in driving_log:
         images_dict.append(
             {
                 "frame_id": d.get("frame_id"),
@@ -81,7 +81,7 @@ def visit_simulation(sim_path):
         )
     f.close()
 
-    return driving_log_normalized, images_dict
+    return driving_log, images_dict
 
 
 ########################################################################################################################
@@ -89,7 +89,9 @@ def visit_simulation(sim_path):
 ########################################################################################################################
 
 
-def create_driving_log_norm(sim_path, driving_log, predictions_dict, folder_name_to_append):
+def write_driving_log_evaluated(
+    sim_path, driving_log, predictions_dict, metric_to_evaluate
+):
     final_output = []
 
     for d in driving_log:
@@ -123,22 +125,18 @@ def create_driving_log_norm(sim_path, driving_log, predictions_dict, folder_name
                     }
                 )
 
-    folder = Path(str(sim_path) + folder_name_to_append)
-    folder.mkdir(parents=True, exist_ok=True)
-
-    write_driving_log_norm(final_output, folder)
+    csv_file_name = "driving_log_" + metric_to_evaluate + ".csv"
+    write_driving_log(final_output, Path(sim_path, csv_file_name))
 
 
-def write_driving_log_norm(dict, sim_path):
-    csv_file_normalized = sim_path / "driving_log.csv"
-
-    with csv_file_normalized.open(mode="w") as f_normalized:
-        writer = csv.DictWriter(f_normalized, fieldnames=header_improved_simulator)
+def write_driving_log(dict, csv_path):
+    with csv_path.open(mode="w") as file:
+        writer = csv.DictWriter(file, fieldnames=header_improved_simulator)
         writer.writeheader()
         for data in dict:
             writer.writerow(data)
 
-    f_normalized.close()
+    file.close()
 
 
 ########################################################################################################################

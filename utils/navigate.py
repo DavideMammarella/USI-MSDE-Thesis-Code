@@ -1,6 +1,7 @@
 import os
 import shutil
 from pathlib import Path
+from pprint import pprint
 
 from configurations.config import Config
 
@@ -10,13 +11,18 @@ from configurations.config import Config
 from utils.custom_csv import create_simulation_csv
 
 
-def collect_simulations_evaluated(simulations_path):
-    sims = []
-    for sim_path in simulations_path.iterdir():
-        if sim_path.is_dir() and sim_path.name.endswith("-uncertainty-evaluated"):
-            sims.append(sim_path.name)
+def collect_simulations_evaluated(simulations_path, metric_evaluated):
+    sims = collect_simulations(simulations_path)
+    sims_evaluated = []
 
-    return sims
+    for sim in sims:
+        sim_path = Path(simulations_path, sim)
+        files = [f for f in os.listdir(sim_path) if os.path.isfile(os.path.join(sim_path, f)) and f.endswith(".csv")]
+        if any(metric_evaluated in f for f in files):
+            sims_evaluated.append(sim_path)
+
+    print(">> Simulations evaluated:\t", len(sims_evaluated))
+    return sims_evaluated
 
 
 def collect_simulations(simulations_path):
@@ -25,61 +31,21 @@ def collect_simulations(simulations_path):
         if sim_path.is_dir() and sim_path.name != "__pycache__":
             sims.append(sim_path.name)
     print(">> Total simulations:\t", len(sims))
-
     return sims
+
 
 def collect_simulations_to_evaluate(simulations_path, metric_to_evaluate):
-    sims = []
-    for sim_path in simulations_path.iterdir():
-        if sim_path.is_dir() and sim_path.name.endswith("-uncertainty-evaluated"):
-            sims.append(sim_path.name)
+    sims = collect_simulations(simulations_path)
+    sims_to_evaluate = []
 
-def collect_simulations_to_evaluate_loss(simulations_path):
-    # First Iteration: collect all simulations -------------------------------------------------------------------------
-    _, dirs, _ = next(
-        os.walk(simulations_path)
-    )  # list all folders in simulations_path (only top level)
+    for sim in sims:
+        sim_path = Path(simulations_path, sim)
+        files = [f for f in os.listdir(sim_path) if os.path.isfile(os.path.join(sim_path, f)) and f.endswith(".csv")]
+        if not any(metric_to_evaluate in f for f in files):
+            sims_to_evaluate.append(sim_path)
 
-    # Second iteration: collect all simulations to exclude -------------------------------------------------------------
-    exclude = ["__pycache__"]
-    for d in dirs:
-        if "-loss-evaluated" in d:
-            exclude.append(d)
-            exclude.append(d[: -len("-loss-evaluated")])
-
-    sims_evaluated = int(len(exclude) / 2)
-    print(">> Total simulations:\t", len(dirs) - sims_evaluated)
-    print(">> Simulations already evaluated:\t", sims_evaluated)
-
-    # Third iteration: collect all simulations to evaluate (excluding those already evaluated) -------------------------
-    sims = [d for d in dirs if d not in exclude]
-    print(">> Simulations to evaluate:\t", len(sims))
-
-    return sims[1]
-
-
-def collect_simulations_to_evaluate_unc(simulations_path):
-    # First Iteration: collect all simulations -------------------------------------------------------------------------
-    _, dirs, _ = next(
-        os.walk(simulations_path)
-    )  # list all folders in simulations_path (only top level)
-
-    # Second iteration: collect all simulations to exclude -------------------------------------------------------------
-    exclude = ["__pycache__"]
-    for d in dirs:
-        if "-uncertainty-evaluated" in d:
-            exclude.append(d)
-            exclude.append(d[: -len("-uncertainty-evaluated")])
-
-    sims_evaluated = int(len(exclude) / 2)
-    print(">> Total simulations:\t", len(dirs) - sims_evaluated)
-    print(">> Simulations already evaluated:\t", sims_evaluated)
-
-    # Third iteration: collect all simulations to evaluate (excluding those already evaluated) -------------------------
-    sims = [d for d in dirs if d not in exclude]
-    print(">> Simulations to evaluate:\t", len(sims))
-
-    return sims
+    print(">> Simulations already evaluated:\t", len(sims) - len(sims_to_evaluate))
+    return sims_to_evaluate
 
 
 def get_nominal_simulation(simulations_path):

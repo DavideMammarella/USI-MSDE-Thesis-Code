@@ -41,7 +41,7 @@ TRACK3_IMG_PER_LAP = 1375
 # self-driving car model settings
 TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
 SDC_MODEL_NAME = "track1-uwiz-final"
-#SDC_MODEL_NAME = "dave2-mc-053.h5"
+# SDC_MODEL_NAME = "dave2-mc-053.h5"
 NUM_EPOCHS_SDC_MODEL = 500  # training epochs for the self-driving car model
 BATCH_SIZE = 128  # number of samples per gradient update
 SAVE_BEST_ONLY = True  # only saves when the model is considered the "best" according to the quantity monitored
@@ -51,7 +51,9 @@ USE_PREDICTIVE_UNCERTAINTY = True  # use MC-Dropout model
 # Udacity simulation settings
 ANOMALY_DETECTOR_NAME = "track1-MSEloss-latent2"
 SIMULATION_NAME = "track1-sunny"
-TESTING_DATA_DIR = None  # Udacity simulations logs (write simulations if you want to record them)
+TESTING_DATA_DIR = (
+    None  # Udacity simulations logs (write simulations if you want to record them)
+)
 MAX_SPEED = 35  # car's max speed, capped at 35 mph (default)
 MIN_SPEED = 10  # car's min speed, capped at 10 mph (default)
 SAO_THRESHOLD = 180  # the SAO threshold

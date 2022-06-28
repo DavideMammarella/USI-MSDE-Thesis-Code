@@ -64,14 +64,14 @@ def load_training_data(model_type, sampling=None):
             data_df["left"] = str(training_path) + data_df["left"].astype(str)
             data_df["right"] = str(training_path) + data_df["right"].astype(str)
 
-            if model_type=="autoencoder": # autoencoder use only center images
+            if model_type == "autoencoder":  # autoencoder use only center images
                 if sampling is not None:
                     print("sampling every " + str(sampling) + "th frame")
                     data_df = data_df[data_df.index % sampling == 0]
                 if x is None:
-                    x = data_df[['center']].values
+                    x = data_df[["center"]].values
                 else:
-                    x = np.concatenate((x, data_df[['center']].values), axis=0)
+                    x = np.concatenate((x, data_df[["center"]].values), axis=0)
 
             else:
                 if x is None:
@@ -92,7 +92,7 @@ def load_training_data(model_type, sampling=None):
         )
         exit()
 
-    if model_type=="autoencoder":
+    if model_type == "autoencoder":
         if cfg.TRACK == "track1":
             print(
                 "\nFor %s, we use only the first %d images (~1 lap)"
@@ -116,7 +116,9 @@ def load_training_data(model_type, sampling=None):
             exit()
 
         try:
-            x_train, x_test = train_test_split(x, test_size=cfg.TEST_SIZE, random_state=0)
+            x_train, x_test = train_test_split(
+                x, test_size=cfg.TEST_SIZE, random_state=0
+            )
             y_train, y_test = None, None
         except TypeError:
             print("\nMissing header to csv files")

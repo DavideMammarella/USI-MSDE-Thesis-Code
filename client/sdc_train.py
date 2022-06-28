@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from utils.sdc_batch_generator import Generator
 from sklearn.utils import shuffle
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
-from utils.sdc import *
 from utils.models_train import load_training_data
+from utils.sdc import *
+from utils.sdc_batch_generator import Generator
 
 np.random.seed(0)
 

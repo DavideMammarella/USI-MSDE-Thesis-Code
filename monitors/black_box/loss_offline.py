@@ -5,9 +5,10 @@
 # This script must be used only with UWIZ models
 
 import os
+from pprint import pprint
 
 from utils.augmentation import preprocess, resize
-from utils.custom_csv import visit_simulation, create_driving_log_norm
+from utils.custom_csv import create_driving_log_norm, visit_simulation, write_driving_log_evaluated
 from utils.sdc import load_sdc_model
 from utils.vae import load_vae, normalize_and_reshape
 
@@ -20,7 +21,7 @@ import uncertainty_wizard as uwiz
 from PIL import Image
 from tqdm import tqdm
 
-from utils import navigate, custom_csv
+from utils import custom_csv, navigate, simulations_normalizer
 
 
 def sao_prediction(image):
@@ -44,9 +45,7 @@ def sao_prediction(image):
     x = np.concatenate(
         [image for idx in range(batch_size)]
     )  # take batch of data_nominal
-    outputs = sdc_model.predict_on_batch(
-        x
-    )  # save predictions from a sample pass
+    outputs = sdc_model.predict_on_batch(x)  # save predictions from a sample pass
     steering_angle = outputs.mean(axis=0)[
         0
     ]  # average over all passes is the final steering angle
@@ -75,26 +74,33 @@ def predict_on_IMG(images_dict):
 def main():
     cfg = navigate.config()
     sims_path = navigate.simulations_dir()
-    simulations = navigate.collect_simulations_to_evaluate_loss(sims_path)
-    print(simulations)
+    # simulations_normalizer.main()
+    metric_to_eval = "loss"
+    simulations = navigate.collect_simulations_to_evaluate(sims_path, metric_to_eval)
 
-    # Load the self-driving car model ----------------------------------------------------------------------------------
+    sims = simulations[0:1]
+
     global anomaly_detector
     global sdc_model
     sdc_model = load_sdc_model()  # load CAR model
     anomaly_detector, _ = load_vae(cfg.ANOMALY_DETECTOR_NAME)  # load AUTOENCODER model
-
-    for sim in simulations:
-        sim_path = Path(sims_path, sim)
-        driving_log, images_dict = visit_simulation(sim_path)
+    #
+    for sim in sims:
+        driving_log, images_dict = visit_simulation(sim)
 
         print("Calculating LOSS using SAO on IMGs...")
         predictions_dict = predict_on_IMG(images_dict)
         print(">> Predictions done:", len(predictions_dict))
 
         print("Writing CSV...")
-        create_driving_log_norm(sim_path, driving_log, predictions_dict, "-loss-evaluated")
-        print(">> CSV written to:\t" + str(sim_path) + "-loss-evaluated")
+        write_driving_log_evaluated(sim, driving_log, predictions_dict, metric_to_eval)
+        print(
+            ">> CSV written to:\t"
+            + str(sim)
+            + "/driving_log_"
+            + metric_to_eval
+            + ".csv"
+        )
 
 
 if __name__ == "__main__":

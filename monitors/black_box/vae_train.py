@@ -13,14 +13,16 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from tensorflow.keras import backend as K
 from sklearn.utils import shuffle
+from tensorflow.keras import backend as K
 
-from utils.vae_batch_generator import Generator
 from utils import navigate
 from utils.models_train import load_training_data
 from utils.vae import load_vae
+from utils.vae_batch_generator import Generator
+
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow warnings
+
 
 def train_vae_model(
     cfg, vae, name, x_train, x_test, delete_model, retraining, sample_weights

@@ -8,34 +8,29 @@
 import datetime
 import os
 import time
+from abc import ABC
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import tensorflow
+import tensorflow as tf
 from matplotlib import image as mpimg
 from matplotlib import pyplot as plt
-
-from utils import navigate
-
-import datetime
-import os
-import time
-
-import numpy as np
-import pandas as pd
-import tensorflow
 from sklearn.model_selection import train_test_split
-from tensorflow import keras
-
-from utils.models_train import get_driving_styles
-from abc import ABC
-
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.layers import Dense
 
-from utils.sdc import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_WIDTH
+from utils import navigate
+from utils.models_train import get_driving_styles
+from utils.sdc import (
+    IMAGE_CHANNELS,
+    IMAGE_HEIGHT,
+    IMAGE_WIDTH,
+    RESIZED_IMAGE_HEIGHT,
+    RESIZED_IMAGE_WIDTH,
+)
 
 original_dim = RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS
 
@@ -197,7 +192,9 @@ def load_vae(name=None):
         )
         print(">> Loaded trained VAE from disk")
     else:
-        name = cfg.TRACK + "-" + cfg.LOSS_SAO_MODEL + "-latent" + str(cfg.SAO_LATENT_DIM)
+        name = (
+            cfg.TRACK + "-" + cfg.LOSS_SAO_MODEL + "-latent" + str(cfg.SAO_LATENT_DIM)
+        )
         encoder = Encoder().call(
             cfg.SAO_LATENT_DIM,
             RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS,
@@ -300,7 +297,7 @@ def load_all_images():
 
 
 def plot_reconstruction_losses(
-        losses, new_losses, name, threshold, new_threshold, data_df
+    losses, new_losses, name, threshold, new_threshold, data_df
 ):
     """
     Plots the reconstruction errors for one or two sets of losses, along with given thresholds.

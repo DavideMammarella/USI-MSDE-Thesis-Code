@@ -7,8 +7,8 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from utils import navigate
 from utils import custom_csv as csv_utils
+from utils import navigate
 
 
 class MyDictReader(csv.DictReader):
@@ -51,9 +51,9 @@ def normalize_simulation(sim_path):
             {
                 "frame_id": str(i),
                 "model": str(d.get("model", "")).rsplit("/", 1)[-1],
-                "anomaly_detector": str(d.get("anomaly_detector", "")).rsplit(
-                    "/", 1
-                )[-1],
+                "anomaly_detector": str(d.get("anomaly_detector", "")).rsplit("/", 1)[
+                    -1
+                ],
                 "threshold": d.get("threshold", ""),
                 "sim_name": d.get("sim_name", ""),
                 "lap": d.get("lap", ""),
@@ -94,13 +94,12 @@ def main():
         dict_to_print = normalize_simulation(sim_path)
         print(">> CSV Normalized!")
 
-        if os.path.exists(csv_file_normalized) and os.path.isfile(
-            csv_file_normalized
-        ):
+        if os.path.exists(csv_file_normalized) and os.path.isfile(csv_file_normalized):
             os.remove(csv_file_normalized)
 
         print("Writing CSV for simulation: " + str(sim_path))
-        csv_utils.write_driving_log_norm(dict_to_print, sim_path)
+        csv_path = Path(sim_path, "driving_log.csv")
+        csv_utils.write_driving_log(dict_to_print, csv_path)
         print(">> CSV written!")
 
     print("\n>> Simulations normalized: ", i)
