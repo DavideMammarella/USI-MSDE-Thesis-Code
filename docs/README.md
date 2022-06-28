@@ -81,7 +81,7 @@ Alternatively, datasets used in experiments are available on request.
 
 The workflow for training is as follows:
 * Insert the datasets into the ``data/datasets`` folder
-* Run the script ``client/train.py``
+* Run the script ``client/sdc_train.py``
 
 This will generate a model ``<track>-<model>-final`` inside ``models`` folder. <br>
 Together with the final model, ``<track>-<model>-<epoch>`` models will be generated whenever the performance in the epoch is better than the previous best. <br>
@@ -92,7 +92,7 @@ For example, the first epoch within the first track will generate a file called 
 ## Drive
 
 Autoencoder are required and must be placed in the ``models/sao`` folder. <br>
-They can be trained, without using the simulator but the datasets collected in the [Train](#train) section, by running ``selforacle/vae_train.py``. <br>
+They can be trained, without using the simulator but the datasets collected in the [Train](#train) section, by running ``monitors/black_box/vae_train.py``. <br>
 Alternatively, autoencoder used in experiments are available on request.
 
 The workflow for autonomous driving is as follows:
@@ -138,7 +138,7 @@ The simulations to be analysed are necessary (See [Collect Simulations](#collect
 The workflow for thresholds calculation is as follows:
 * Make sure the stochastic model (i.e. MC-Dropout) is in the ``models`` folder
 * Make sure there is a **nominal simulation** within the ``data/simulations`` and that it contains the word "**normal**" in the folder name
-* Run the script ``monitors/uncertainties/thresholds.py``
+* Run the script ``analysis/thresholds.py``
 
 This will generate a JSON file under ``data/`` containing thresholds divided by confidence intervals. <br>
 The thresholds are calculated by fitting the gamma distribution to the uncertainties.
@@ -152,9 +152,9 @@ The uncertainties to be analysed are necessary (See [Collect Uncertainties](#col
 The thresholds are also necessary (See [Collect Thresholds](#collect-thresholds)).
 
 The workflow for the analysis is as follows:
-* Edit the script ``monitors/time_series/time_series.py`` by adding the thresholds under ``THRESHOLDS`` variable
+* Edit the script ``analysis/time_series.py`` by adding the thresholds under ``THRESHOLDS`` variable
 * Run the script 
 
-This will generate time series analysis results in the form of performance metrics to the ``data/metric`` folder.
+This will generate time series analysis results in the form of performance metrics to the ``data/metrics`` folder.
 
 [Back to top ↑](#contents)
