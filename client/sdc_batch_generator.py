@@ -11,7 +11,7 @@ from tensorflow.keras.utils import Sequence
 
 from utils import navigate
 from utils.augmentation import augment, load_image, preprocess
-from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
+from utils.sdc import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
 
 
 class Generator(Sequence):

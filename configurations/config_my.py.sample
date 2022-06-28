@@ -40,7 +40,6 @@ TRACK3_IMG_PER_LAP = 1375
 
 # self-driving car model settings
 TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
-SDC_MODEL_TYPE = "uwiz"  # self-driving car model "dave2"|"chauffeur"|"epoch"|"commaai"
 SDC_MODEL_NAME = "track1-uwiz-final"
 NUM_EPOCHS_SDC_MODEL = 500  # training epochs for the self-driving car model
 BATCH_SIZE = 128  # number of samples per gradient update

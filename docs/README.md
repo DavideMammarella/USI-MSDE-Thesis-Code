@@ -97,7 +97,7 @@ Alternatively, autoencoder used in experiments are available on request.
 
 The workflow for autonomous driving is as follows:
 * Make sure the models (Autoencoders, Self-Driving Car) are in the ``models`` folder
-* * Edit the variable ``SDC_MODEL_TYPE`` and ``SDC_MODEL_NAME`` within ``configurations/config_my.py`` according to the self-driving car model
+* * Edit the variable ``SDC_MODEL_NAME`` within ``configurations/config_my.py`` according to the self-driving car model
 * Run the script ``main.py``
 * Select Track / Time / Weather Effect / Emission Rate from the simulator main menu
 * Click on **Autonomous Mode**
@@ -124,7 +124,7 @@ The process can be repeated by inserting various Track / Time / Weather Effect /
 The simulations to be analysed are necessary (See [Collect Simulations](#collect-simulations)). <br>
 The workflow for uncertainties calculation is as follows:
 * Make sure the stochastic model (i.e. MC-Dropout) is in the ``models`` folder
-* Edit the variable ``SDC_MODEL_TYPE`` and ``SDC_MODEL_NAME`` within ``configurations/config_my.py`` according to the self-driving car model
+* Edit the variable ``SDC_MODEL_NAME`` within ``configurations/config_my.py`` according to the self-driving car model
 * Run the script ``monitors/uncertainties/uncertainties.py``
 
 This will generate for each simulation a folder with the name of the simulation ending with ``-uncertainty-evaluated``. <br>

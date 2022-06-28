@@ -131,7 +131,7 @@ def simulator_dir() -> Path:
 def training_simulation_dir() -> Path:
     simulation_path, img_path = None, None
     if config().TESTING_DATA_DIR:
-        simulation_name = str(config().SDC_MODEL_TYPE + "-" + config().SIMULATION_NAME)
+        simulation_name = str(config().SDC_MODEL_NAME + "-" + config().SIMULATION_NAME)
         simulation_path = Path(simulations_dir(), simulation_name)
         img_path = Path(simulation_path, "IMG")
         delete_dir(img_path)

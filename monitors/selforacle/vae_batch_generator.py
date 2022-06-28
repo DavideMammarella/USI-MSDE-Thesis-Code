@@ -10,9 +10,9 @@ import matplotlib.image as mpimg
 import numpy as np
 from tensorflow.keras.utils import Sequence
 
-from monitors.selforacle.vae import normalize_and_reshape
 from utils.augmentation import resize
-from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
+from utils.sdc import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
+from utils.vae import normalize_and_reshape
 
 
 class Generator(Sequence):

@@ -26,6 +26,6 @@ def start_simulator():  # DO NOT CHANGE THIS
 
 if __name__ == "__main__":
     start_simulator()
-    from client.drive import app
+    from client.sdc_drive import app
 
     app()

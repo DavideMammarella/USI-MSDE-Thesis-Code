@@ -11,11 +11,12 @@ import socketio
 from flask import Flask
 from PIL import Image
 
-from client import models
-from monitors.selforacle.vae import normalize_and_reshape
 from utils import navigate
+from utils.sdc import load_sdc_model
+from utils.vae import load_vae
 from utils.augmentation import preprocess, resize
 from utils.ultracsv import write_row_simulation_csv
+from utils.vae import normalize_and_reshape
 
 prev_image_array = None
 frame_id = 0
@@ -30,11 +31,8 @@ speed_limit = cfg.MAX_SPEED
 
 sim_path, img_path = navigate.training_simulation_dir()
 
-model_path = str(Path(navigate.models_dir(), cfg.SDC_MODEL_NAME))
-model = models.load_sdc_model(cfg, model_path)  # load CAR model
-
-sao_path = str(navigate.sao_dir())
-anomaly_detection = models.load_sao_models(cfg, sao_path)  # load AUTOENCODER model
+sdc_model = load_sdc_model()  # load CAR model
+anomaly_detection, _ = load_vae(cfg.ANOMALY_DETECTOR_NAME)  # load AUTOENCODER model
 
 
 def send_control(
@@ -123,8 +121,8 @@ def telemetry(sid, data):
             # Predict steering angle and uncertainty -------------------------------------------------------------------
             if cfg.USE_PREDICTIVE_UNCERTAINTY:
 
-                if cfg.SDC_MODEL_TYPE == "uwiz":
-                    outputs, unc = model.predict_quantified(
+                if "uwiz" in cfg.SDC_MODEL_NAME:
+                    outputs, unc = sdc_model.predict_quantified(
                         image,
                         quantifier="std_dev",
                         sample_size=20,
@@ -138,7 +136,7 @@ def telemetry(sid, data):
                     x = np.concatenate(
                         [image for idx in range(batch_size)]
                     )  # take batch of data_nominal
-                    outputs = model.predict_on_batch(
+                    outputs = sdc_model.predict_on_batch(
                         x
                     )  # save predictions from a sample pass
                     steering_angle = outputs.mean(axis=0)[
@@ -151,7 +149,7 @@ def telemetry(sid, data):
                     # outputs = model.predict(image, batch_size = 1)
                     # steering_angle = outputs[0][0]
             else:
-                steering_angle = float(model.predict(image, batch_size=1))
+                steering_angle = float(sdc_model.predict(image, batch_size=1))
 
             # Manage driving -------------------------------------------------------------------------------------------
             # lower the throttle as the speed increases

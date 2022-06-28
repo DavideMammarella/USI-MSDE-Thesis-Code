@@ -1,6 +1,14 @@
+# Copyright 2021 Testing Automated @ Università della Svizzera italiana (USI)
+# All rights reserved.
+# This file is part of the project SelfOracle, a misbehaviour predictor for autonomous vehicles,
+# developed within the ERC project PRECRIME
+# and is released under the "MIT License Agreement". Please see the LICENSE
+# file that should have been included as part of this package.
+
 import datetime
 import os
 import time
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -8,7 +16,6 @@ from matplotlib import image as mpimg
 from matplotlib import pyplot as plt
 
 from utils import navigate
-from utils.model import IMAGE_CHANNELS, IMAGE_HEIGHT, IMAGE_WIDTH
 
 import datetime
 import os
@@ -20,27 +27,177 @@ import tensorflow
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
 
-from client.train import get_driving_styles
-from monitors.selforacle.vae import VAE, Decoder, Encoder
-from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
+from utils.train import get_driving_styles
+from abc import ABC
+
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.layers import Dense
+
+from utils.sdc import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_WIDTH
+
+original_dim = RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS
 
 
-def load_vae(load_vae_from_disk):
+class Sampling(layers.Layer):
+    def call(self, inputs, **kwargs):
+        z_mean, z_log_var = inputs
+        batch = tf.shape(z_mean)[0]
+        dim = tf.shape(z_mean)[1]
+        epsilon = tf.keras.backend.random_normal(
+            shape=(batch, dim), mean=0.0, stddev=1.0
+        )
+        return z_mean + tf.exp(0.5 * z_log_var) * epsilon
+
+
+class Encoder(layers.Layer):
+    def call(self, latent_dim, inputs, **kwargs):
+        inputs = keras.Input(shape=(original_dim,))
+        x = Dense(512, activation="relu")(inputs)
+        z_mean = layers.Dense(latent_dim, name="z_mean")(x)
+        z_log_var = layers.Dense(latent_dim, name="z_log_var")(x)
+        z = Sampling()([z_mean, z_log_var])
+        encoder = keras.Model(
+            inputs=inputs, outputs=[z_mean, z_log_var, z], name="encoder"
+        )
+        # encoder.summary()
+
+        return encoder
+
+
+class Decoder(layers.Layer):
+    def call(self, latent_dim, latent_inputs, **kwargs):
+        latent_inputs = keras.Input(shape=(latent_dim,), name="z_sampling")
+        x = Dense(
+            512,
+            activation="relu",
+            kernel_regularizer=tf.keras.regularizers.l1(0.001),
+        )(latent_inputs)
+        decoder_outputs = Dense(original_dim, activation="sigmoid")(x)
+
+        decoder = keras.Model(
+            inputs=latent_inputs, outputs=decoder_outputs, name="decoder"
+        )
+        # decoder.summary()
+
+        return decoder
+
+
+class VAE(keras.Model, ABC):
+    """
+    Define the VAE as a `Model` with a custom `train_step`
+    """
+
+    def __init__(self, model_name, loss, latent_dim, encoder, decoder, **kwargs):
+        super(VAE, self).__init__(**kwargs)
+        self.model_name = model_name
+        self.intermediate_dim = 512
+        self.latent_dim = latent_dim
+        self.lossFunc = loss
+        self.encoder = encoder
+        self.decoder = decoder
+
+    def train_step(self, data):
+        if isinstance(data, tuple):
+            data = data[0]
+        with tf.GradientTape() as tape:
+            z_mean, z_log_var, z = self.encoder(data)
+            reconstruction = self.decoder(z)
+            reconstruction_loss = tf.reduce_mean(
+                keras.losses.mean_squared_error(data, reconstruction)
+            )
+            reconstruction_loss *= RESIZED_IMAGE_WIDTH * RESIZED_IMAGE_HEIGHT
+
+            if self.lossFunc == "VAE":
+                kl_loss = 1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)
+                kl_loss = tf.reduce_mean(kl_loss)
+                kl_loss *= -0.5
+                total_loss = reconstruction_loss + kl_loss
+                grads = tape.gradient(total_loss, self.trainable_weights)
+                self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
+                return {
+                    "loss": total_loss,
+                    "reconstruction_loss": reconstruction_loss,
+                    "kl_loss": kl_loss,
+                }
+            else:
+                total_loss = reconstruction_loss
+                grads = tape.gradient(total_loss, self.trainable_weights)
+                self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
+                return {
+                    "loss": total_loss,
+                    "reconstruction_loss": reconstruction_loss,
+                }
+
+    def call(self, inputs, **kwargs):
+        z_mean, z_log_var, z = self.encoder(inputs)
+        reconstruction = self.decoder(z)
+        reconstruction_loss = tf.reduce_mean(
+            keras.losses.mean_squared_error(inputs, reconstruction)
+        )
+        reconstruction_loss *= RESIZED_IMAGE_WIDTH * RESIZED_IMAGE_HEIGHT
+
+        if self.lossFunc[0] == "VAE":
+            kl_loss = 1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)
+            kl_loss = tf.reduce_mean(kl_loss)
+            kl_loss *= -0.5
+            total_loss = reconstruction_loss + kl_loss
+            self.add_metric(kl_loss, name="kl_loss", aggregation="mean")
+            self.add_metric(total_loss, name="total_loss", aggregation="mean")
+            self.add_metric(
+                reconstruction_loss,
+                name="reconstruction_loss",
+                aggregation="mean",
+            )
+            return reconstruction
+        else:
+            total_loss = reconstruction_loss
+            self.add_metric(total_loss, name="total_loss", aggregation="mean")
+            self.add_metric(
+                reconstruction_loss,
+                name="reconstruction_loss",
+                aggregation="mean",
+            )
+            return reconstruction
+
+
+def get_input_shape():
+    return (original_dim,)
+
+
+def get_image_dim():
+    return RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS
+
+
+def normalize_and_reshape(x):
+    x = x.astype("float32") / 255.0
+    x = x.reshape(-1, RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS)
+    return x
+
+
+def reshape(x):
+    x = x.reshape(-1, RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS)
+    return x
+
+
+def load_vae(name):
     """
     Load a trained VAE from disk and compile it, or creates a new one to be trained.
     """
     cfg = navigate.config()
-    name = cfg.TRACK + "-" + cfg.LOSS_SAO_MODEL + "-latent" + str(cfg.SAO_LATENT_DIM)
+    sao_path = str(navigate.sao_dir())
 
-    if load_vae_from_disk:
+    if name:
         encoder = tensorflow.keras.models.load_model(
-            cfg.SAO_MODELS_DIR + os.path.sep + "encoder-" + name
+            str(Path(sao_path, "encoder-" + name))
         )
         decoder = tensorflow.keras.models.load_model(
-            cfg.SAO_MODELS_DIR + os.path.sep + "decoder-" + name
+            str(Path(sao_path, "decoder-" + name))
         )
         print("loaded trained VAE from disk")
     else:
+        name = cfg.TRACK + "-" + cfg.LOSS_SAO_MODEL + "-latent" + str(cfg.SAO_LATENT_DIM)
         encoder = Encoder().call(
             cfg.SAO_LATENT_DIM,
             RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS,
@@ -58,117 +215,6 @@ def load_vae(load_vae_from_disk):
     vae.compile(optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE))
 
     return vae, name
-
-
-def load_data_for_vae_training(sampling=None):
-    """
-    Load training data_nominal and split it into training and validation set
-    Load only the first lap for each track
-    """
-    cfg = navigate.config()
-    drive = get_driving_styles(cfg)
-
-    print("Loading training set " + str(cfg.TRACK) + str(drive))
-
-    start = time.time()
-
-    x = None
-    path = None
-    x_train = None
-    x_test = None
-
-    for drive_style in drive:
-        try:
-            path = os.path.join(
-                cfg.TRAINING_DATA_DIR,
-                cfg.TRAINING_SET_DIR,
-                cfg.TRACK,
-                drive_style,
-                "driving_log.csv",
-            )
-            data_df = pd.read_csv(path)
-
-            if sampling is not None:
-                print("sampling every " + str(sampling) + "th frame")
-                data_df = data_df[data_df.index % sampling == 0]
-
-            if x is None:
-                x = data_df[["center"]].values
-            else:
-                x = np.concatenate((x, data_df[["center"]].values), axis=0)
-        except FileNotFoundError:
-            print("Unable to read file %s" % path)
-            continue
-
-    if x is None:
-        print(
-            "No driving data_nominal were provided for training. Provide correct paths to the driving_log.csv files"
-        )
-        exit()
-
-    if cfg.TRACK == "track1":
-        print(
-            "For %s, we use only the first %d images (~1 lap)"
-            % (cfg.TRACK, cfg.TRACK1_IMG_PER_LAP)
-        )
-        x = x[: cfg.TRACK1_IMG_PER_LAP]
-    elif cfg.TRACK == "track2":
-        print(
-            "For %s, we use only the first %d images (~1 lap)"
-            % (cfg.TRACK, cfg.TRACK2_IMG_PER_LAP)
-        )
-        x = x[: cfg.TRACK2_IMG_PER_LAP]
-    elif cfg.TRACK == "track3":
-        print(
-            "For %s, we use only the first %d images (~1 lap)"
-            % (cfg.TRACK, cfg.TRACK3_IMG_PER_LAP)
-        )
-        x = x[: cfg.TRACK3_IMG_PER_LAP]
-    else:
-        print("Incorrect cfg.TRACK option provided")
-        exit()
-
-    try:
-        x_train, x_test = train_test_split(x, test_size=cfg.TEST_SIZE, random_state=0)
-    except TypeError:
-        print("Missing header to csv files")
-        exit()
-
-    duration_train = time.time() - start
-    print(
-        "Loading training set completed in %s."
-        % str(datetime.timedelta(seconds=round(duration_train)))
-    )
-
-    print("Data set: " + str(len(x)) + " elements")
-    print("Training set: " + str(len(x_train)) + " elements")
-    print("Test set: " + str(len(x_test)) + " elements")
-    return x_train, x_test
-
-
-def load_vae_by_name(name):
-    """
-    Load a trained VAE from disk by name
-    """
-    cfg = navigate.config()
-
-    encoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR + os.path.sep + "encoder-" + name
-    )
-    decoder = tensorflow.keras.models.load_model(
-        cfg.SAO_MODELS_DIR + os.path.sep + "decoder-" + name
-    )
-
-    vae = VAE(
-        model_name=name,
-        loss=cfg.LOSS_SAO_MODEL,
-        latent_dim=cfg.SAO_LATENT_DIM,
-        encoder=encoder,
-        decoder=decoder,
-    )
-    vae.compile(optimizer=keras.optimizers.Adam(learning_rate=cfg.SAO_LEARNING_RATE))
-
-    return vae
 
 
 def load_improvement_set(ids):
@@ -254,7 +300,7 @@ def load_all_images():
 
 
 def plot_reconstruction_losses(
-    losses, new_losses, name, threshold, new_threshold, data_df
+        losses, new_losses, name, threshold, new_threshold, data_df
 ):
     """
     Plots the reconstruction errors for one or two sets of losses, along with given thresholds.

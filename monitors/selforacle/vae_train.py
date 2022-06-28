@@ -18,7 +18,8 @@ from sklearn.utils import shuffle
 
 from monitors.selforacle.vae_batch_generator import Generator
 from utils import navigate
-from utils.vae import load_data_for_vae_training, load_vae
+from utils.train import load_training_data
+from utils.vae import load_vae
 
 
 def train_vae_model(
@@ -108,9 +109,10 @@ def train_vae_model(
 
 def main():
     cfg = navigate.config()
+    model_type = "autoencoder"
 
-    x_train, x_test = load_data_for_vae_training()
-    vae, name = load_vae(load_vae_from_disk=False)
+    x_train, x_test, _, _ = load_training_data(model_type)
+    vae, name = load_vae()
     train_vae_model(
         cfg,
         vae,
