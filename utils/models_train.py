@@ -38,7 +38,7 @@ def load_training_data(model_type, sampling=None):
     cfg = navigate.config()
     drive = get_driving_styles()
 
-    print("Loading training set " + str(cfg.TRACK) + str(drive))
+    print(">> Loading training set " + str(cfg.TRACK) + str(drive))
 
     start = time.time()
 
@@ -63,17 +63,25 @@ def load_training_data(model_type, sampling=None):
             data_df["center"] = str(training_path) + data_df["center"].astype(str)
             data_df["left"] = str(training_path) + data_df["left"].astype(str)
             data_df["right"] = str(training_path) + data_df["right"].astype(str)
-            if model_type=="autoencoder" and sampling is not None:
-                print("sampling every " + str(sampling) + "th frame")
-                data_df = data_df[data_df.index % sampling == 0]
-            if x is None:
-                x = data_df[["center", "left", "right"]].values
-                y = data_df["steering"].values
+
+            if model_type=="autoencoder": # autoencoder use only center images
+                if sampling is not None:
+                    print("sampling every " + str(sampling) + "th frame")
+                    data_df = data_df[data_df.index % sampling == 0]
+                if x is None:
+                    x = data_df[['center']].values
+                else:
+                    x = np.concatenate((x, data_df[['center']].values), axis=0)
+
             else:
-                x = np.concatenate(
-                    (x, data_df[["center", "left", "right"]].values), axis=0
-                )
-                y = np.concatenate((y, data_df["steering"].values), axis=0)
+                if x is None:
+                    x = data_df[["center", "left", "right"]].values
+                    y = data_df["steering"].values
+                else:
+                    x = np.concatenate(
+                        (x, data_df[["center", "left", "right"]].values), axis=0
+                    )
+                    y = np.concatenate((y, data_df["steering"].values), axis=0)
         except FileNotFoundError:
             print("Unable to read file %s" % path)
             continue
@@ -87,33 +95,41 @@ def load_training_data(model_type, sampling=None):
     if model_type=="autoencoder":
         if cfg.TRACK == "track1":
             print(
-                "For %s, we use only the first %d images (~1 lap)"
+                "\nFor %s, we use only the first %d images (~1 lap)"
                 % (cfg.TRACK, cfg.TRACK1_IMG_PER_LAP)
             )
             x = x[: cfg.TRACK1_IMG_PER_LAP]
         elif cfg.TRACK == "track2":
             print(
-                "For %s, we use only the first %d images (~1 lap)"
+                "\nFor %s, we use only the first %d images (~1 lap)"
                 % (cfg.TRACK, cfg.TRACK2_IMG_PER_LAP)
             )
             x = x[: cfg.TRACK2_IMG_PER_LAP]
         elif cfg.TRACK == "track3":
             print(
-                "For %s, we use only the first %d images (~1 lap)"
+                "\nFor %s, we use only the first %d images (~1 lap)"
                 % (cfg.TRACK, cfg.TRACK3_IMG_PER_LAP)
             )
             x = x[: cfg.TRACK3_IMG_PER_LAP]
         else:
-            print("Incorrect cfg.TRACK option provided")
+            print("\nIncorrect cfg.TRACK option provided")
             exit()
 
-    try:
-        x_train, x_test, y_train, y_test = train_test_split(
-            x, y, test_size=cfg.TEST_SIZE, random_state=0
-        )
-    except TypeError:
-        print("Missing header to csv files")
-        exit()
+        try:
+            x_train, x_test = train_test_split(x, test_size=cfg.TEST_SIZE, random_state=0)
+            y_train, y_test = None, None
+        except TypeError:
+            print("\nMissing header to csv files")
+            exit()
+
+    else:
+        try:
+            x_train, x_test, y_train, y_test = train_test_split(
+                x, y, test_size=cfg.TEST_SIZE, random_state=0
+            )
+        except TypeError:
+            print("\nMissing header to csv files")
+            exit()
 
     duration_train = time.time() - start
     print(
@@ -121,7 +137,7 @@ def load_training_data(model_type, sampling=None):
         % str(datetime.timedelta(seconds=round(duration_train)))
     )
 
-    print("Data set: " + str(len(x)) + " elements")
+    print("\nData set: " + str(len(x)) + " elements")
     print("Training set: " + str(len(x_train)) + " elements")
     print("Test set: " + str(len(x_test)) + " elements")
     return x_train, x_test, y_train, y_test

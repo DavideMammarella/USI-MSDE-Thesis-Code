@@ -181,7 +181,7 @@ def reshape(x):
     return x
 
 
-def load_vae(name):
+def load_vae(name=None):
     """
     Load a trained VAE from disk and compile it, or creates a new one to be trained.
     """
@@ -195,7 +195,7 @@ def load_vae(name):
         decoder = tensorflow.keras.models.load_model(
             str(Path(sao_path, "decoder-" + name))
         )
-        print("loaded trained VAE from disk")
+        print(">> Loaded trained VAE from disk")
     else:
         name = cfg.TRACK + "-" + cfg.LOSS_SAO_MODEL + "-latent" + str(cfg.SAO_LATENT_DIM)
         encoder = Encoder().call(
@@ -203,7 +203,7 @@ def load_vae(name):
             RESIZED_IMAGE_HEIGHT * RESIZED_IMAGE_WIDTH * IMAGE_CHANNELS,
         )
         decoder = Decoder().call(cfg.SAO_LATENT_DIM, (cfg.SAO_LATENT_DIM,))
-        print("created new VAE model to be trained")
+        print("\n>> Created new VAE model to be trained")
 
     vae = VAE(
         model_name=name,
