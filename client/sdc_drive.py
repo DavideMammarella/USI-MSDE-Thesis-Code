@@ -20,7 +20,7 @@ from utils.vae import normalize_and_reshape
 
 prev_image_array = None
 frame_id = 0
-batch_size = 1
+batch_size = 128
 uncertainty = -1
 
 sio = socketio.Server(async_mode=None, logger=False)
@@ -32,7 +32,7 @@ speed_limit = cfg.MAX_SPEED
 sim_path, img_path = navigate.training_simulation_dir()
 
 sdc_model = load_sdc_model()  # load CAR model
-anomaly_detection, _ = load_vae(cfg.ANOMALY_DETECTOR_NAME)  # load AUTOENCODER model
+anomaly_detector, _ = load_vae(cfg.ANOMALY_DETECTOR_NAME)  # load AUTOENCODER model
 
 
 def send_control(
@@ -112,7 +112,7 @@ def telemetry(sid, data):
             image_copy = np.copy(image)
             image_copy = resize(image_copy)
             image_copy = normalize_and_reshape(image_copy)
-            loss = anomaly_detection.test_on_batch(image_copy)[2]
+            loss = anomaly_detector.test_on_batch(image_copy)[2]
 
             # Process image for prediction -----------------------------------------------------------------------------
             image = preprocess(image)  # apply pre-processing

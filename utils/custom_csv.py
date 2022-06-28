@@ -89,7 +89,7 @@ def visit_simulation(sim_path):
 ########################################################################################################################
 
 
-def create_driving_log_norm(sim_path, driving_log, predictions_dict):
+def create_driving_log_norm(sim_path, driving_log, predictions_dict, folder_name_to_append):
     final_output = []
 
     for d in driving_log:
@@ -106,7 +106,7 @@ def create_driving_log_norm(sim_path, driving_log, predictions_dict):
                         "sim_name": d.get("sim_name"),
                         "lap": d.get("lap"),
                         "waypoint": d.get("waypoint"),
-                        "loss": d.get("loss"),
+                        "loss": prediction.get("loss"),
                         "uncertainty": prediction.get("uncertainty"),
                         "cte": d.get("cte"),
                         "steering_angle": prediction.get("steering_angle"),
@@ -123,14 +123,14 @@ def create_driving_log_norm(sim_path, driving_log, predictions_dict):
                     }
                 )
 
-    folder = Path(str(sim_path) + "-uncertainty-evaluated")
+    folder = Path(str(sim_path) + folder_name_to_append)
     folder.mkdir(parents=True, exist_ok=True)
 
     write_driving_log_norm(final_output, folder)
 
 
 def write_driving_log_norm(dict, sim_path):
-    csv_file_normalized = sim_path / "driving_log_normalized.csv"
+    csv_file_normalized = sim_path / "driving_log.csv"
 
     with csv_file_normalized.open(mode="w") as f_normalized:
         writer = csv.DictWriter(f_normalized, fieldnames=header_improved_simulator)
@@ -170,7 +170,6 @@ def write_row_simulation_csv(
     tot_OBEs,
     tot_crashes,
 ):
-    # TODO: window can be used to add additional information on windows inside csv
 
     with simulation_csv.open(mode="a") as f:
         f.write(
