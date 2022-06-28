@@ -10,7 +10,7 @@ import matplotlib.image as mpimg
 import numpy as np
 from tensorflow.keras.utils import Sequence
 
-from evaluations.selforacle.vae import normalize_and_reshape
+from monitors.selforacle.vae import normalize_and_reshape
 from utils.augmentation import resize
 from utils.model import IMAGE_CHANNELS, RESIZED_IMAGE_HEIGHT, RESIZED_IMAGE_WIDTH
 

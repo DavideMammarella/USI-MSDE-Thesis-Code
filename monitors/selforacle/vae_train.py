@@ -16,9 +16,9 @@ import numpy as np
 from keras import backend as K
 from sklearn.utils import shuffle
 
-from evaluations.selforacle.utils_vae import load_data_for_vae_training, load_vae
-from evaluations.selforacle.vae_batch_generator import Generator
+from monitors.selforacle.vae_batch_generator import Generator
 from utils import navigate
+from utils.vae import load_data_for_vae_training, load_vae
 
 
 def train_vae_model(
@@ -107,13 +107,10 @@ def train_vae_model(
 
 
 def main():
-    os.chdir(os.getcwd().replace("selforacle", ""))
-    print(os.getcwd())
-
     cfg = navigate.config()
 
-    x_train, x_test = load_data_for_vae_training(cfg)
-    vae, name = load_vae(cfg, load_vae_from_disk=False)
+    x_train, x_test = load_data_for_vae_training()
+    vae, name = load_vae(load_vae_from_disk=False)
     train_vae_model(
         cfg,
         vae,

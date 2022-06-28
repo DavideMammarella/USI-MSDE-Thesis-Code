@@ -30,17 +30,8 @@ def get_driving_styles(cfg):
     elif cfg.TRACK == "track3":
         return cfg.TRACK3_DRIVING_STYLES
     else:
-        return [
-            "normal", "normal1",
-            "recovery", "recovery1",
-            "recovery2",
-            "recovery3", "recovery4", "recovery5",
-            "reverse", "reverse1", "reverse2",
-            "sport_normal", "sport_normal1",
-                            "sport_reverse",
-        ]
-        #print("Invalid TRACK option within the config file")
-        #exit(1)
+        print("Invalid TRACK option within the config file")
+        exit(1)
 
 
 # TODO: a bit redundant w/ load_data_for_vae but this one loads y as well

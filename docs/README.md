@@ -29,7 +29,7 @@ A **client-server** architecture to control an **autonomous driving vehicle** wi
     │   ├── metrics             # Generated analysis (as CSV).
     │   └── simulations         # Evaluation datasets.
     ├── docs                    # Documentation files.
-    ├── evaluations
+    ├── monitors
     │   ├── selforacle          # Black-Box monitor scripts.
     │   ├── time_series         # Time series analysis scripts.
     │   └── uncertainties       # White-Box monitor scripts.
@@ -125,7 +125,7 @@ The simulations to be analysed are necessary (See [Collect Simulations](#collect
 The workflow for uncertainties calculation is as follows:
 * Make sure the stochastic model (i.e. MC-Dropout) is in the ``models`` folder
 * Edit the variable ``SDC_MODEL_TYPE`` and ``SDC_MODEL_NAME`` within ``configurations/config_my.py`` according to the self-driving car model
-* Run the script ``evaluations/uncertainties/uncertainties.py``
+* Run the script ``monitors/uncertainties/uncertainties.py``
 
 This will generate for each simulation a folder with the name of the simulation ending with ``-uncertainty-evaluated``. <br>
 Each folder contains a CSV file with all the original telemetry data and the uncertainties calculated by the model for each frame.
@@ -138,7 +138,7 @@ The simulations to be analysed are necessary (See [Collect Simulations](#collect
 The workflow for thresholds calculation is as follows:
 * Make sure the stochastic model (i.e. MC-Dropout) is in the ``models`` folder
 * Make sure there is a **nominal simulation** within the ``data/simulations`` and that it contains the word "**normal**" in the folder name
-* Run the script ``evaluations/uncertainties/thresholds.py``
+* Run the script ``monitors/uncertainties/thresholds.py``
 
 This will generate a JSON file under ``data/`` containing thresholds divided by confidence intervals. <br>
 The thresholds are calculated by fitting the gamma distribution to the uncertainties.
@@ -152,7 +152,7 @@ The uncertainties to be analysed are necessary (See [Collect Uncertainties](#col
 The thresholds are also necessary (See [Collect Thresholds](#collect-thresholds)).
 
 The workflow for the analysis is as follows:
-* Edit the script ``evaluations/time_series/time_series.py`` by adding the thresholds under ``THRESHOLDS`` variable
+* Edit the script ``monitors/time_series/time_series.py`` by adding the thresholds under ``THRESHOLDS`` variable
 * Run the script 
 
 This will generate time series analysis results in the form of performance metrics to the ``data/metric`` folder.

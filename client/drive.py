@@ -12,7 +12,7 @@ from flask import Flask
 from PIL import Image
 
 from client import models
-from evaluations.selforacle.vae import normalize_and_reshape
+from monitors.selforacle.vae import normalize_and_reshape
 from utils import navigate
 from utils.augmentation import preprocess, resize
 from utils.ultracsv import write_row_simulation_csv

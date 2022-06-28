@@ -7,7 +7,7 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 from pathlib import Path
 
-import evaluations.time_series.windows_analysis as windows_analysis
+import monitors.time_series.windows_analysis as windows_analysis
 import utils.timeseries as utils_ts
 
 THRESHOLDS = {

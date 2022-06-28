@@ -5,7 +5,7 @@ import uncertainty_wizard as uwiz
 from tensorflow import keras
 from tensorflow.keras import backend as K
 
-from evaluations.selforacle.vae import VAE
+from monitors.selforacle.vae import VAE
 
 
 def rmse(y_true, y_pred):
