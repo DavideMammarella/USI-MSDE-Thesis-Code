@@ -35,7 +35,10 @@ def collect_simulations_to_evaluate(simulations_path, metric_to_evaluate):
         if not any(metric_to_evaluate in f for f in files):
             sims_to_evaluate.append(sim_path)
 
-    print(">> Simulations already evaluated (" + metric_to_evaluate + "):\t", len(sims) - len(sims_to_evaluate))
+    print(
+        ">> Simulations already evaluated (" + metric_to_evaluate + "):\t",
+        len(sims) - len(sims_to_evaluate),
+    )
     return sims_to_evaluate
 
 
@@ -154,6 +157,20 @@ def training_simulation_dir() -> Path:
 ########################################################################################################################
 # FILES
 ########################################################################################################################
+
+
+def collect_analysis_results(results_path):
+    analysis_names = []
+
+    for analysis in results_path.iterdir():
+        if (
+            analysis.is_file()
+            and analysis.name.endswith(".csv")
+            and "summary" not in analysis.name
+        ):
+            analysis_names.append(analysis.name)
+
+    return analysis_names
 
 
 def read_json(filename: str):

@@ -17,9 +17,9 @@ def windows_check(len_uncertainties, len_uncertainties_windows):
 
 
 def create_windows_stack(
-        a: np.array, stepsize=NORMAL_WINDOW_LENGTH, width=NORMAL_WINDOW_LENGTH
+    a: np.array, stepsize=NORMAL_WINDOW_LENGTH, width=NORMAL_WINDOW_LENGTH
 ):
-    return np.hstack(a[i: 1 + i - width or None: stepsize] for i in range(0, width))
+    return np.hstack(a[i : 1 + i - width or None : stepsize] for i in range(0, width))
 
 
 def get_window_positive_negative(window, threshold):
@@ -142,7 +142,7 @@ def get_crashes_frames_list(uncertainties_windows, crashes_per_frame):
         for j in range(len(uncertainties_windows[i])):
             current_frame = (i * NORMAL_WINDOW_LENGTH) + j
             if (crashes_per_frame.get(current_frame) == 1) and (
-                    crashes_per_frame.get(current_frame - 1) == 0
+                crashes_per_frame.get(current_frame - 1) == 0
             ):
                 crashes_frames.append(current_frame)
 
