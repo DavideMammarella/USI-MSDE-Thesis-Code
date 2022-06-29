@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 from pathlib import Path
@@ -9,20 +10,6 @@ from configurations.config import Config
 # SIMULATIONS
 ########################################################################################################################
 from utils.custom_csv import create_simulation_csv
-
-
-def collect_simulations_evaluated(simulations_path, metric_evaluated):
-    sims = collect_simulations(simulations_path)
-    sims_evaluated = []
-
-    for sim in sims:
-        sim_path = Path(simulations_path, sim)
-        files = [f for f in os.listdir(sim_path) if os.path.isfile(os.path.join(sim_path, f)) and f.endswith(".csv")]
-        if any(metric_evaluated in f for f in files):
-            sims_evaluated.append(sim_path)
-
-    print(">> Simulations evaluated:\t", len(sims_evaluated))
-    return sims_evaluated
 
 
 def collect_simulations(simulations_path):
@@ -40,7 +27,11 @@ def collect_simulations_to_evaluate(simulations_path, metric_to_evaluate):
 
     for sim in sims:
         sim_path = Path(simulations_path, sim)
-        files = [f for f in os.listdir(sim_path) if os.path.isfile(os.path.join(sim_path, f)) and f.endswith(".csv")]
+        files = [
+            f
+            for f in os.listdir(sim_path)
+            if os.path.isfile(os.path.join(sim_path, f)) and f.endswith(".csv")
+        ]
         if not any(metric_to_evaluate in f for f in files):
             sims_to_evaluate.append(sim_path)
 
@@ -48,13 +39,27 @@ def collect_simulations_to_evaluate(simulations_path, metric_to_evaluate):
     return sims_to_evaluate
 
 
+def collect_simulations_evaluated(simulations_path, metric_evaluated):
+    sims = collect_simulations(simulations_path)
+    sims_evaluated = []
+
+    for sim in sims:
+        sim_path = Path(simulations_path, sim)
+        files = [
+            f
+            for f in os.listdir(sim_path)
+            if os.path.isfile(os.path.join(sim_path, f)) and f.endswith(".csv")
+        ]
+        if any(metric_evaluated in f for f in files):
+            sims_evaluated.append(sim_path)
+
+    print(">> Simulations evaluated:\t", len(sims_evaluated))
+    return sims_evaluated
+
+
 def get_nominal_simulation(simulations_path):
     for sim_path in simulations_path.iterdir():
-        if (
-            sim_path.is_dir()
-            and "normal" in str(sim_path).casefold()
-            and sim_path.name.endswith("-uncertainty-evaluated")
-        ):
+        if sim_path.is_dir() and "normal" in str(sim_path).casefold():
             return sim_path.name
 
 
@@ -94,8 +99,8 @@ def simulations_dir() -> Path:
     return p
 
 
-def performance_metrics_dir() -> Path:
-    p = Path(data_dir(), config().PERFORMANCE_METRICS_DIR)
+def results_dir() -> Path:
+    p = Path(data_dir(), config().RESULTS_DIR)
     p.mkdir(parents=True, exist_ok=True)
     return p
 
@@ -124,6 +129,12 @@ def simulator_dir() -> Path:
     return p
 
 
+def thresholds_dir() -> Path:
+    p = Path(data_dir(), "thresholds")
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
 def training_simulation_dir() -> Path:
     simulation_path, img_path = None, None
     if config().TESTING_DATA_DIR:
@@ -143,6 +154,11 @@ def training_simulation_dir() -> Path:
 ########################################################################################################################
 # FILES
 ########################################################################################################################
+
+
+def read_json(filename: str):
+    with open(filename) as f_in:
+        return json.load(f_in)
 
 
 def config():

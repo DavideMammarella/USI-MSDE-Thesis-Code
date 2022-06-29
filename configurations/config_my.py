@@ -13,7 +13,7 @@ SDC_MODELS_DIR = "models"  # self-driving car models
 SAO_MODELS_DIR = "sao"  # trained autoencoder-based self-assessment oracle models
 TRAINING_SET_DIR = "dataset5"  # the driving training set to use
 SIMULATOR_DIR = "server"  # name of the server to use
-PERFORMANCE_METRICS_DIR = "metrics"
+RESULTS_DIR = "results"  # folder where to store the performance metrics
 
 # simulations settings
 TRACK = "track1"  # ["track1"|"track2"|"track3"|"track1","track2","track3"] the race track to use
@@ -40,8 +40,8 @@ TRACK3_IMG_PER_LAP = 1375
 
 # self-driving car model settings
 TEST_SIZE = 0.2  # split of training data used for the validation set (keep it low)
-SDC_MODEL_NAME = "track1-uwiz-final"
-# SDC_MODEL_NAME = "dave2-mc-053.h5"
+# SDC_MODEL_NAME = "track1-uwiz-final"
+SDC_MODEL_NAME = "dave2-mc-053.h5"
 NUM_EPOCHS_SDC_MODEL = 500  # training epochs for the self-driving car model
 BATCH_SIZE = 128  # number of samples per gradient update
 SAVE_BEST_ONLY = True  # only saves when the model is considered the "best" according to the quantity monitored
@@ -49,7 +49,7 @@ LEARNING_RATE = 1.0e-4  # amount that the weights are updated during training
 USE_PREDICTIVE_UNCERTAINTY = True  # use MC-Dropout model
 
 # Udacity simulation settings
-ANOMALY_DETECTOR_NAME = "track1-MSEloss-latent2"
+ANOMALY_DETECTOR_NAME = "track1-MSE-latent2"
 SIMULATION_NAME = "track1-sunny"
 TESTING_DATA_DIR = (
     None  # Udacity simulations logs (write simulations if you want to record them)

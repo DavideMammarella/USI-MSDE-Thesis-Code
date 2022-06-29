@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 import numpy
+import pandas as pd
 from scipy.stats import gamma
 
 header_original_simulator = [
@@ -49,6 +50,34 @@ header_improved_simulator = [
 ########################################################################################################################
 # SIMULATIONS VISITOR
 ########################################################################################################################
+
+
+def get_crashes(csv_file):
+    columns_to_read = ["crashed"]
+    df = pd.read_csv(csv_file, usecols=columns_to_read)
+
+    return df.to_dict().get("crashed")
+
+
+def get_column(csv_file, metric):
+    if metric == "unc":
+        column_to_read = ["uncertainty"]
+    elif metric == "loss":
+        column_to_read = ["loss"]
+    else:
+        try:
+            column_to_read = [metric]
+        except:
+            print("Error: metric not found")
+            exit()
+
+    df = pd.read_csv(csv_file, usecols=column_to_read)
+    driving_log_2d = df.to_numpy()
+
+    assert driving_log_2d.ndim == 2
+    assert len(driving_log_2d) == len(df)
+
+    return driving_log_2d
 
 
 def visit_nominal_simulation(sim_path):

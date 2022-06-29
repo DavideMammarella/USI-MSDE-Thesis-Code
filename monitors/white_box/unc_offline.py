@@ -77,27 +77,31 @@ def main():
     metric_to_eval = "unc"
     simulations = navigate.collect_simulations_to_evaluate(sims_path, metric_to_eval)
 
-    # Load the self-driving car model ----------------------------------------------------------------------------------
-    global model
-    model_path = Path(navigate.models_dir(), cfg.SDC_MODEL_NAME)
-    model = uwiz.models.load_model(str(model_path))
+    if len(simulations) != 0:
+        global model
+        model_path = Path(navigate.models_dir(), cfg.SDC_MODEL_NAME)
+        model = uwiz.models.load_model(str(model_path))
 
-    for sim in simulations:
-        driving_log, images_dict = visit_simulation(sim)
+        for sim in simulations:
+            driving_log, images_dict = visit_simulation(sim)
 
-        print("Calculating UNCERTAINTIES using UWIZ on IMGs...")
-        predictions_dict = predict_on_IMG(images_dict)
-        print(">> Predictions done:", len(predictions_dict))
+            print("Calculating UNCERTAINTIES using UWIZ on IMGs...")
+            predictions_dict = predict_on_IMG(images_dict)
+            print(">> Predictions done:", len(predictions_dict))
 
-        print("Writing CSV...")
-        write_driving_log_evaluated(sim, driving_log, predictions_dict, metric_to_eval)
-        print(
-            ">> CSV written to:\t"
-            + str(sim)
-            + "/driving_log_"
-            + metric_to_eval
-            + ".csv"
-        )
+            print("Writing CSV...")
+            write_driving_log_evaluated(
+                sim, driving_log, predictions_dict, metric_to_eval
+            )
+            print(
+                ">> CSV written to:\t"
+                + str(sim)
+                + "/driving_log_"
+                + metric_to_eval
+                + ".csv"
+            )
+    else:
+        print("\nNo simulations to evaluate.")
 
 
 if __name__ == "__main__":

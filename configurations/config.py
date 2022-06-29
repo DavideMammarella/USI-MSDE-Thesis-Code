@@ -1,9 +1,3 @@
-# Copyright 2021 Testing Automated @ Università della Svizzera italiana (USI)
-# All rights reserved.
-# This file is part of the project SelfOracle, a misbehaviour predictor for autonomous vehicles,
-# developed within the ERC project PRECRIME
-# and is released under the "MIT License Agreement". Please see the LICENSE
-# file that should have been included as part of this package.
 import os
 import types
 
@@ -37,7 +31,7 @@ class Config:
         self.USE_UWIZ = None
         self.SIMULATIONS_DIR = None
         self.DATA_DIR = None
-        self.PERFORMANCE_METRICS_DIR = None
+        self.RESULTS_DIR = None
 
     def from_pyfile(self, filename, silent=False):
         # filename = os.path.join(self.root_path, filename)

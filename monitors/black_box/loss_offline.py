@@ -8,16 +8,14 @@ import os
 from pprint import pprint
 
 from utils.augmentation import preprocess, resize
-from utils.custom_csv import create_driving_log_norm, visit_simulation, write_driving_log_evaluated
+from utils.custom_csv import visit_simulation, write_driving_log_evaluated
 from utils.sdc import load_sdc_model
 from utils.vae import load_vae, normalize_and_reshape
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow warnings
 
-from pathlib import Path
 
 import numpy as np
-import uncertainty_wizard as uwiz
 from PIL import Image
 from tqdm import tqdm
 
@@ -78,29 +76,34 @@ def main():
     metric_to_eval = "loss"
     simulations = navigate.collect_simulations_to_evaluate(sims_path, metric_to_eval)
 
-    sims = simulations[0:1]
+    if len(simulations) != 0:
+        global anomaly_detector
+        global sdc_model
+        sdc_model = load_sdc_model()  # load CAR model
+        anomaly_detector, _ = load_vae(
+            cfg.ANOMALY_DETECTOR_NAME
+        )  # load AUTOENCODER model
 
-    global anomaly_detector
-    global sdc_model
-    sdc_model = load_sdc_model()  # load CAR model
-    anomaly_detector, _ = load_vae(cfg.ANOMALY_DETECTOR_NAME)  # load AUTOENCODER model
-    #
-    for sim in sims:
-        driving_log, images_dict = visit_simulation(sim)
+        for sim in simulations:
+            driving_log, images_dict = visit_simulation(sim)
 
-        print("Calculating LOSS using SAO on IMGs...")
-        predictions_dict = predict_on_IMG(images_dict)
-        print(">> Predictions done:", len(predictions_dict))
+            print("Calculating LOSS using SAO on IMGs...")
+            predictions_dict = predict_on_IMG(images_dict)
+            print(">> Predictions done:", len(predictions_dict))
 
-        print("Writing CSV...")
-        write_driving_log_evaluated(sim, driving_log, predictions_dict, metric_to_eval)
-        print(
-            ">> CSV written to:\t"
-            + str(sim)
-            + "/driving_log_"
-            + metric_to_eval
-            + ".csv"
-        )
+            print("Writing CSV...")
+            write_driving_log_evaluated(
+                sim, driving_log, predictions_dict, metric_to_eval
+            )
+            print(
+                ">> CSV written to:\t"
+                + str(sim)
+                + "/driving_log_"
+                + metric_to_eval
+                + ".csv"
+            )
+    else:
+        print("\nNo simulations to evaluate.")
 
 
 if __name__ == "__main__":
