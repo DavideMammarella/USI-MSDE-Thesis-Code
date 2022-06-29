@@ -1,4 +1,4 @@
-def _calculate_all(windows_TP, windows_FN, windows_FP, windows_TN):
+def calculate_performance_metrics(windows_TP, windows_FN, windows_FP, windows_TN):
     TP_FN = windows_TP + windows_FN
     TP_FP = windows_TP + windows_FP
 
@@ -28,11 +28,3 @@ def _calculate_all(windows_TP, windows_FN, windows_FP, windows_TN):
     else:
         fpr = windows_FP / FP_TN
     return precision, recall, f1_score, fpr
-
-
-def main():
-    print("This script is not intended to be run directly.")
-
-
-if __name__ == "__main__":
-    main()

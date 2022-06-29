@@ -35,7 +35,7 @@ def collect_simulations_to_evaluate(simulations_path, metric_to_evaluate):
         if not any(metric_to_evaluate in f for f in files):
             sims_to_evaluate.append(sim_path)
 
-    print(">> Simulations already evaluated:\t", len(sims) - len(sims_to_evaluate))
+    print(">> Simulations already evaluated (" + metric_to_evaluate + "):\t", len(sims) - len(sims_to_evaluate))
     return sims_to_evaluate
 
 
@@ -53,7 +53,7 @@ def collect_simulations_evaluated(simulations_path, metric_evaluated):
         if any(metric_evaluated in f for f in files):
             sims_evaluated.append(sim_path)
 
-    print(">> Simulations evaluated:\t", len(sims_evaluated))
+    print(">> Simulations monitored (" + metric_evaluated + "):\t", len(sims_evaluated))
     return sims_evaluated
 
 

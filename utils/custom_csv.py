@@ -46,7 +46,6 @@ header_improved_simulator = [
     "tot_crashes",
 ]
 
-
 ########################################################################################################################
 # SIMULATIONS VISITOR
 ########################################################################################################################
@@ -251,6 +250,83 @@ def write_row_simulation_csv(
 def create_simulation_csv(csv_file):
     with csv_file.open(mode="w") as f:
         writer = csv.DictWriter(f, fieldnames=header_improved_simulator)
+        writer.writeheader()
+
+    f.close()
+
+########################################################################################################################
+# RESULTS VISITOR AND RECORDING
+########################################################################################################################
+
+def write_performance_metrics(
+    prec_recall_csv,
+    sim_name,
+    threshold_type,
+    threshold,
+    windows_TP,
+    windows_FN,
+    windows_FP,
+    windows_TN,
+    crashes,
+    precision,
+    recall,
+    f1,
+    fpr,
+):
+
+    with prec_recall_csv.open(mode="a") as f:
+        f.write(
+            sim_name
+            + ","
+            + str(threshold_type)
+            + ","
+            + str(threshold)
+            + ","
+            + str(windows_TP)
+            + ","
+            + str(windows_FP)
+            + ","
+            + str(windows_TN)
+            + ","
+            + str(windows_FN)
+            + ","
+            + str(precision)
+            + ","
+            + str(recall)
+            + ","
+            + str(f1)
+            + ","
+            + str(crashes)
+            + ",,,"
+            + str(fpr)
+            + ","
+            + "\n"
+        )
+
+    f.close()
+
+
+def create_performance_metrics_csv(csv_file_normalized):
+    with csv_file_normalized.open(mode="w") as f:
+        headers = [
+            "simulation",
+            "threshold_type",
+            "threshold",
+            "true_positives",
+            "false_positives",
+            "true_negatives",
+            "false_negatives",
+            "prec",
+            "recall",
+            "f1",
+            "num_anomalies",
+            "num_normal",
+            "auroc",
+            "false_positive_rate",
+            "pr_auc",
+        ]  # based on prec-recall DB-schema
+
+        writer = csv.DictWriter(f, fieldnames=headers)
         writer.writeheader()
 
     f.close()
