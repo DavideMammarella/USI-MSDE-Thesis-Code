@@ -27,7 +27,7 @@ In summary, the questions the thesis answer are: Can we build an accurate misbeh
 
 ## Documentation
 
-Documentation regarding the installation, usage and replication of experiments can be found in [`docs`](/docs).
+Documentation regarding the installation, usage and replication of experiments can be found in [`docs`](/.github/docs).
 
 <!-- LICENSE -->
 
