@@ -10,7 +10,7 @@ from utils import navigate
 from utils.custom_csv import get_column
 from utils.navigate import get_nominal_simulation
 
-METRIC_TO_EVAL = "loss"
+METRIC_TO_EVAL = "unc"
 
 
 def calc_and_store_thresholds(metrics: numpy.array, thresholds_location) -> dict:
