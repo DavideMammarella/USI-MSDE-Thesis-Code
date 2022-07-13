@@ -27,12 +27,12 @@ A **client-server** architecture to control an **autonomous driving vehicle** wi
     ├── configurations          # Configurations files (conda, client).
     ├── data                    
     │   ├── datasets            # Training datasets.
-    │   ├── metrics             # Generated metrics from analysis (as CSV).
-    │   └── simulations         # Evaluation datasets.
-    ├── docs                    # Documentation files.
+    │   ├── results             # Generated metrics from analysis (as CSV).
+    │   ├── simulations         # Evaluation datasets.
+    │   └── thresholds          # Generated thresholds (as JSON).
     ├── models                  # Trained and serialized models (Autoencoders, Self-Driving Car)
     ├── monitors
-    │   ├── black_box           # SelfOracle (Black-Box monitor) scripts.
+    │   ├── black_box           # Black-Box monitor scripts.
     │   └── white_box           # White-Box monitor scripts.
     ├── server                  # Simulator binaries.
     ├── utils                   # Utils files.
@@ -107,7 +107,7 @@ The workflow for autonomous driving is as follows:
 # Replicate Experiments
 
 ## Collect Simulations
-Experiments are performed offline. <br>
+Experiments can be performed offline. <br>
 The simulations are necessary, they are data collected by the simulator during autonomous driving. <br>
 The simulations used in the experiments are available on request. <br>
 Alternatively, they can be collected as follows:
@@ -125,10 +125,10 @@ The simulations to be analysed are necessary (See [Collect Simulations](#collect
 The workflow for uncertainties calculation is as follows:
 * Make sure the stochastic model (i.e. MC-Dropout) is in the ``models`` folder
 * Edit the variable ``SDC_MODEL_NAME`` within ``configurations/config_my.py`` according to the self-driving car model
-* Run the script ``monitors/white_box/uncertainties.py``
+* Run the script ``monitors/white_box/unc_offline.py``
 
-This will generate for each simulation a folder with the name of the simulation ending with ``-uncertainty-evaluated``. <br>
-Each folder contains a CSV file with all the original telemetry data and the uncertainties calculated by the model for each frame.
+This will generate within each simulation a ``driving_log_unc.csv`` file. <br>
+Each CSV will contain original telemetry data and the uncertainties calculated by the model for each frame.
 
 [Back to top ↑](#contents)
 
@@ -138,9 +138,9 @@ The simulations to be analysed are necessary (See [Collect Simulations](#collect
 The workflow for thresholds calculation is as follows:
 * Make sure the stochastic model (i.e. MC-Dropout) is in the ``models`` folder
 * Make sure there is a **nominal simulation** within the ``data/simulations`` and that it contains the word "**normal**" in the folder name
-* Run the script ``analysis/thresholds.py``
+* Run the script ``analysis/0_thresholds.py``
 
-This will generate a JSON file under ``data/`` containing thresholds divided by confidence intervals. <br>
+This will generate a JSON file under ``data/thresholds`` containing thresholds divided by confidence intervals. <br>
 The thresholds are calculated by fitting the gamma distribution to the uncertainties.
 
 [Back to top ↑](#contents)
@@ -152,9 +152,9 @@ The uncertainties to be analysed are necessary (See [Collect Uncertainties](#col
 The thresholds are also necessary (See [Collect Thresholds](#collect-thresholds)).
 
 The workflow for the analysis is as follows:
-* Edit the script ``analysis/time_series.py`` by adding the thresholds under ``THRESHOLDS`` variable
+* Change within the script ``analysis/1_time_series.py`` the global variable ANALYSIS in accordance with the type of analysis to be performed (1: Corrpution Detection, 2: Failure Detection)
 * Run the script 
 
-This will generate time series analysis results in the form of performance metrics to the ``data/metrics`` folder.
+This will generate time series analysis results in the form of performance metrics to the ``data/results`` folder.
 
 [Back to top ↑](#contents)
